@@ -51,13 +51,6 @@ declare namespace API {
     username: string;
   };
 
-  type loginUserParams = {
-    /** The user name for login */
-    username: string;
-    /** The password for login in clear text */
-    password: string;
-  };
-
   type Order = {
     id?: number;
     petId?: number;

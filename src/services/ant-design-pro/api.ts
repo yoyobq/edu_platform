@@ -1,9 +1,11 @@
 // @ts-ignore
 /* eslint-disable */
 import { request } from '@umijs/max';
+import { gql } from 'graphql-tag';
 
 /** 获取当前的用户 GET /api/currentUser */
 export async function currentUser(options?: { [key: string]: any }) {
+  // 此处用了 mock 数据
   return request<{
     data: API.CurrentUser;
   }>('/api/currentUser', {
@@ -21,14 +23,35 @@ export async function outLogin(options?: { [key: string]: any }) {
 }
 
 /** 登录接口 POST /api/login/account */
-export async function login(body: API.LoginParams, options?: { [key: string]: any }) {
-  return request<API.LoginResult>('/api/login/account', {
+export async function login(body: USER.LoginParams, options?: { [key: string]: any }) {
+  const variables = {
+    params: {
+      loginName: body.loginName,
+      loginPassword: body.loginPassword,
+      type: body.type,
+    },
+  };
+  // console.log(JSON.stringify(params));
+  // 注意这是一个拼接字符串的实例
+  const query = gql`
+    query CheckLogin($params: LoginParams!) {
+      checkLogin(params: $params)
+    }
+  `;
+
+  const data = {
+    query: query.loc?.source.body,
+    operationName: null, // 操作名称，选填，查询文档有多个操作时必填
+    variables, // 对象集合，选填
+  };
+
+  return request<USER.LoginResult>('/graphql', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    data: body,
-    ...(options || {}),
+    data,
+    // ...(options || {}),
   });
 }
 

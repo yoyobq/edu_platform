@@ -7,9 +7,10 @@ import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
-import React from 'react';
+// 23-3-14 此处与官方文档不符，但都是去 api.ts 里拿当前用户数据
 import { AvatarDropdown, AvatarName } from './components/RightContent/AvatarDropdown';
+import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
+
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 
