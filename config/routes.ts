@@ -18,7 +18,9 @@ export default [
       {
         name: 'login',
         path: '/user/login',
-        component: './User/Login',
+        // 参照文档建议，把 group 页面的主文件夹首字母小写
+        // component: './User/Login',
+        component: './user/Login',
       },
     ],
   },
