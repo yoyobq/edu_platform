@@ -23,6 +23,7 @@ export async function outLogin(options?: { [key: string]: any }) {
 }
 
 /** 登录接口 POST /api/login/account */
+/** 目前登录接口是 POST /graphql，上一行是修改器原始注释保留待查 */
 export async function login(body: USER.LoginParams, options?: { [key: string]: any }) {
   const variables = {
     params: {
@@ -32,10 +33,11 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
     },
   };
   // console.log(JSON.stringify(params));
-  // 注意这是一个拼接字符串的实例
+  // 注意这是一个拼接字符串的实例,query 后是 query 的名字
+  // 对象内才是引用 resolver 里的名字
   const query = gql`
-    query CheckLogin($params: LoginParams!) {
-      checkLogin(params: $params)
+    query ($params: LoginParams!) {
+      checkAccount(params: $params)
     }
   `;
 
@@ -45,13 +47,34 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
     variables, // 对象集合，选填
   };
 
-  return request<USER.LoginResult>('/graphql', {
+  /** 这里保留了一些对 useRequest 重新封装 request 返回的 promise 
+  *   的探索，目前代码有 bug 暂时弃用
+  // const { data:any } = useRequest(()=>{
+  //   return request<USER.LoginResult>('/graphql', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     data,
+  //     // ...(options || {}),
+  //   });
+  // });
+
+  // return data;
+  */
+
+  return request<API.ResponseData>('/graphql', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     data,
     // ...(options || {}),
+  }).then((response) => {
+    if (response.success) {
+      return response.data;
+    }
+    throw new Error('Invalid response');
   });
 }
 

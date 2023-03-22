@@ -1,8 +1,12 @@
 declare namespace USER {
-  type LoginResult = {
-    status?: string;
+  type AccountStatus = {
+    id: number;
+    status: number;
     type?: string;
-    currentAuthority?: string;
+  };
+
+  type LoginResult = {
+    checkAccount?: accountStatus | null;
   };
 
   type LoginParams = {

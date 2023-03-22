@@ -84,7 +84,7 @@ const LoginMessage: React.FC<{
 };
 
 const Login: React.FC = () => {
-  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
+  const [userLoginState, setUserLoginState] = useState<USER.LoginResult>({});
   const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
 
@@ -117,8 +117,10 @@ const Login: React.FC = () => {
   const handleSubmit = async (values: USER.LoginParams) => {
     try {
       // 登录
-      const msg = await login({ ...values, type });
-      if (msg.status === 'ok') {
+      const msg: any = await login({ ...values, type });
+      const { id, status } = msg;
+
+      if (id !== null && status === 1) {
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
@@ -129,19 +131,19 @@ const Login: React.FC = () => {
         history.push(urlParams.get('redirect') || '/');
         return;
       }
-      console.log(msg);
+      // console.log(msg);
       setUserLoginState(msg);
-    } catch (error) {
-      // 如果失败去设置用户错误信息
-      const defaultLoginFailureMessage = intl.formatMessage({
-        id: 'pages.login.failure',
-        defaultMessage: '登录失败，请重试！',
-      });
-      console.log(error);
-      message.error(defaultLoginFailureMessage);
+    } catch (error: any) {
+      // 如果失败去设置用户错误信息, 这是利用了 i18n 国际化插件的版本
+      // const defaultLoginFailureMessage = intl.formatMessage({
+      //   id: 'pages.login.failure',
+      //   defaultMessage: error.message,
+      // });
+      message.error(error.message);
     }
   };
-  const { status, type: loginType } = userLoginState;
+
+  const { status, type: loginType } = userLoginState.checkAccount;
 
   return (
     <div className={containerClassName}>
@@ -181,7 +183,7 @@ const Login: React.FC = () => {
             <ActionIcons key="icons" />,
           ]}
           onFinish={async (values) => {
-            await handleSubmit(values as API.LoginParams);
+            await handleSubmit(values as USER.LoginParams);
           }}
         >
           <Tabs
@@ -206,7 +208,7 @@ const Login: React.FC = () => {
             ]}
           />
 
-          {status === 'error' && loginType === 'account' && (
+          {status === null && loginType === 'account' && (
             <LoginMessage
               content={intl.formatMessage({
                 id: 'pages.login.accountLogin.errorMessage',
@@ -263,7 +265,7 @@ const Login: React.FC = () => {
             </>
           )}
 
-          {status === 'error' && loginType === 'mobile' && <LoginMessage content="验证码错误" />}
+          {status === null && loginType === 'mobile' && <LoginMessage content="验证码错误" />}
           {type === 'mobile' && (
             <>
               <ProFormText

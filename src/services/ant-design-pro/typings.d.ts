@@ -2,6 +2,23 @@
 /* eslint-disable */
 
 declare namespace API {
+  type ResponseData = {
+    // 布尔值，表示请求是否成功
+    success: boolean;
+    // 任意类型，表示响应数据
+    data?: any;
+    // 字符串，表示自定义错误类型的代码
+    errorCode?: string;
+    // 字符串，表示向用户显示的错误信息
+    errorMessage?: string;
+    // 数字，表示错误显示类型：0 表示静默，1 表示 message.warn，2 表示 message.error，4 表示 notification，9 表示页面错误
+    showType?: number;
+    // 字符串，方便后端故障排除：唯一的请求 ID
+    traceId?: string;
+    // 字符串，方便后端故障排除：当前访问服务器的主机
+    host?: string;
+  };
+
   type CurrentUser = {
     name?: string;
     avatar?: string;
@@ -24,9 +41,10 @@ declare namespace API {
   };
 
   type LoginResult = {
+    checkAccount?: JSON;
     status?: string;
-    type?: string;
-    currentAuthority?: string;
+    // type?: string;
+    // currentAuthority?: string;
   };
 
   type PageParams = {
