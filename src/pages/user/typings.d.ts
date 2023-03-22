@@ -1,7 +1,7 @@
 declare namespace USER {
   type AccountStatus = {
-    id: number;
-    status: number;
+    id?: number;
+    status?: number;
     type?: string;
   };
 
