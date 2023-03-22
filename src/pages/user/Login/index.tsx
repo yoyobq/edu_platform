@@ -87,12 +87,13 @@ const Login: React.FC = () => {
       flexDirection: 'column',
       height: '100vh',
       overflow: 'auto',
-      backgroundImage:
-        "url('https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/V-_oS6r-i7wAAAAAAAAAAAAAFl94AQBr')",
+      // backgroundImage:
+      //   "url('https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/V-_oS6r-i7wAAAAAAAAAAAAAFl94AQBr')",
       backgroundSize: '100% 100%',
     };
   });
 
+  // 引入 i18n 国际化
   const intl = useIntl();
 
   const fetchUserInfo = async () => {
@@ -111,7 +112,7 @@ const Login: React.FC = () => {
     try {
       // 登录
       const res: any = await login({ ...values, type });
-      const { id, status } = res;
+      const { id, status } = res.checkAccount;
 
       if (id !== null && status === 1) {
         const defaultLoginSuccessMessage = intl.formatMessage({
@@ -124,7 +125,7 @@ const Login: React.FC = () => {
         history.push(urlParams.get('redirect') || '/');
         return;
       }
-      // console.log(msg);
+      console.log(res);
       setUserLoginState(res);
     } catch (error: any) {
       // 如果失败去设置用户错误信息, 这是利用了 i18n 国际化插件的版本
@@ -161,7 +162,7 @@ const Login: React.FC = () => {
             minWidth: 280,
             maxWidth: '75vw',
           }}
-          logo={<img alt="logo" src="/logo.svg" />}
+          // logo={<img alt="logo" src="/logo.svg" />}
           title="智能教辅平台"
           subTitle={intl.formatMessage({ id: 'pages.layouts.userLayout.title' })}
           initialValues={{
@@ -182,13 +183,13 @@ const Login: React.FC = () => {
           <Tabs
             activeKey={type}
             onChange={setType}
-            centered
+            // centered
             items={[
               {
                 key: 'account',
                 label: intl.formatMessage({
                   id: 'pages.login.accountLogin.tab',
-                  defaultMessage: '账户密码登录',
+                  defaultMessage: '邮箱密码登录',
                 }),
               },
               // {
