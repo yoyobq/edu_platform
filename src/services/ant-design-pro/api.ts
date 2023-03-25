@@ -46,7 +46,7 @@ export async function currentUser(options: { [key: string]: any }) {
     // ...(options || {}),
   }).then((response) => {
     if (response.success) {
-      // console.log(response.data.user)
+      console.log(response.data.user);
       return response.data.user;
     }
     throw new Error('获取用户信息失败。');
