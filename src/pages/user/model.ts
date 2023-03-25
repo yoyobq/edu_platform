@@ -1,14 +1,19 @@
 // import { request } from '@umijs/max';
 
-// /**  23-3-16 尝试对登录系统进行改造，以下是区别原始项目的分项记录
-//   * 1. TS 的类型申明原本在 services/xxx/typings.d.ts 中，
-//   *    现将和 user相关定义转移到 pages/src/User/typings.d.ts，
-//   *    且专门申明了一个叫 USER 的 namespace。
-//   * 2. 原本数据源来自 mock 项目，此处新建一个 model 文件处理数据。
-//   *    写到这里我突然意识到 umi 的 model 是一个全局数据流组件，
-//   *    正常的数据处理直接扔到页面里去就可以了。那这个文件就保留后用吧。
+/**  23-3-16 尝试对登录系统进行改造，以下是区别原始项目的分项记录
+ * 1. TS 的类型申明原本在 services/xxx/typings.d.ts 中，
+ *    现将和 user相关定义转移到 pages/src/User/typings.d.ts，
+ *    且专门申明了一个叫 USER 的 namespace。
+ * 2. 原本数据源来自 mock 项目，此处新建一个 model 文件处理数据。
+ *    写到这里我突然意识到 umi 的 model 是一个全局数据流组件，
+ *    正常的数据处理直接扔到页面里去就可以了。那这个文件就保留后用吧。
+ **/
 
-// **/
+// export default () => {
+//   const user:USER.UserInfo = {};
+//   return { user };
+// }
+
 // /** Logs user into the system GET /user/login */
 // export async function loginUser(
 //   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)

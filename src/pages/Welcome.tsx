@@ -86,6 +86,7 @@ const InfoCard: React.FC<{
 const Welcome: React.FC = () => {
   const { token } = theme.useToken();
   const { initialState } = useModel('@@initialState');
+  // console.log(initialState);
   return (
     <PageContainer>
       <Card

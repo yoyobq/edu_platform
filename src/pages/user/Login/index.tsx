@@ -1,5 +1,5 @@
 import Footer from '@/components/Footer';
-import { login } from '@/services/ant-design-pro/api';
+import { login } from '@/services/ant-design-pro/login';
 import {
   // AlipayCircleOutlined,
   LockOutlined,
@@ -77,8 +77,14 @@ const LoginMessage: React.FC<{
 };
 
 const Login: React.FC = () => {
+  // 鉴权流程第 1 步：
+  // 建立了一个名为 userLoginState 的 state，初始值是一个空对象 {}，
+  // 这个 state 的更新函数是 setUsrLoginState()。
   const [userLoginState, setUserLoginState] = useState<USER.AccountStatus>({});
   const [type, setType] = useState<string>('account');
+
+  // 鉴权流程第 2 步：
+  // 就是从 @@initialState 读取默认设置的全局初始数据并存放到 state 变量 initialState 中去。
   const { initialState, setInitialState } = useModel('@@initialState');
 
   const containerClassName = useEmotionCss(() => {
@@ -96,9 +102,12 @@ const Login: React.FC = () => {
   // 引入 i18n 国际化
   const intl = useIntl();
 
-  const fetchUserInfo = async () => {
-    const userInfo = await initialState?.fetchUserInfo?.();
+  const fetchUserInfo = async (accountId: number) => {
+    const userInfo = await initialState?.fetchUserInfo?.(accountId);
+    // console.log('userInfo:');
     if (userInfo) {
+      // flushSync 是 React DOM 中的一个函数，它的作用是在调用它的时候，
+      // 强制同步更新所有的挂起更新，而不是等待浏览器空闲时再执行更新，以提高更新性能
       flushSync(() => {
         setInitialState((s) => ({
           ...s,
@@ -120,13 +129,16 @@ const Login: React.FC = () => {
           defaultMessage: '登录成功！',
         });
         message.success(defaultLoginSuccessMessage);
-        await fetchUserInfo();
+
+        // userAccount 表中的 id 就是 userInfo 表中的 accountId 外键
+        // 根据 id 去获取对应 accountId 的数据
+        await fetchUserInfo(id);
         const urlParams = new URL(window.location.href).searchParams;
         history.push(urlParams.get('redirect') || '/');
         return;
       }
       console.log(res);
-      setUserLoginState(res);
+      setUserLoginState(res.user);
     } catch (error: any) {
       // 如果失败去设置用户错误信息, 这是利用了 i18n 国际化插件的版本
       // const defaultLoginFailureMessage = intl.formatMessage({

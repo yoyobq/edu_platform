@@ -21,14 +21,16 @@ export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
   currentUser?: API.CurrentUser;
   loading?: boolean;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  fetchUserInfo?: (accountId: number) => Promise<API.CurrentUser | undefined>;
 }> {
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = async (accountId: number) => {
     try {
-      const msg = await queryCurrentUser({
+      // queryCurrentUser 其实就是 services 里的 currentUser
+      const res = await queryCurrentUser({
         skipErrorHandler: true,
+        accountId,
       });
-      return msg.data;
+      return res;
     } catch (error) {
       history.push(loginPath);
     }
@@ -37,7 +39,8 @@ export async function getInitialState(): Promise<{
   // 如果不是登录页面，执行
   const { location } = history;
   if (location.pathname !== loginPath) {
-    const currentUser = await fetchUserInfo();
+    console.log('试图读取初始用户信息');
+    const currentUser = await fetchUserInfo(0);
     return {
       fetchUserInfo,
       currentUser,
