@@ -1,0 +1,37 @@
+.chat-bubble {
+  display: flex;
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 1.2em;
+  margin-bottom: 12px;
+  margin-top: 0px;
+}
+
+.chat-bubble-card {
+  padding: 8px 16px;
+  border-radius: 8px;
+  word-wrap: break-word;
+}
+
+.user {
+  justify-content: flex-end;
+  color: #333;
+}
+
+.assistant {
+  color: #fff;
+}
+.system {
+  justify-content: center;
+  color: #fff;
+}
+
+.chat-bubble-card {
+  max-width: 90%;
+}
+
+/* 包含 .chat-bubble 和 .system 两个类名的父元素的后代 .chat-bubble-card 的元素 */
+.chat-bubble.system .chat-bubble-card {
+  max-width: 100%;
+  width: 100%;
+  text-align: center;
+}
