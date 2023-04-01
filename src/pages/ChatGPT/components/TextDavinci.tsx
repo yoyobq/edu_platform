@@ -1,4 +1,4 @@
-import { chat } from '@/services/ant-design-pro/chat';
+import { textGen } from '@/services/ant-design-pro/chat';
 import { Button, Card, Col, Input, message, Row, Space, Tabs } from 'antd';
 import React, { useState } from 'react';
 import { MarkDownArea } from './MarkdownArea';
@@ -26,7 +26,7 @@ export const TextDavinci: React.FC = () => {
       // 可以利用变量的批处理解决，详见我写的 React 教程新手村 4，5两章
       setMarkdownText((markdownText) => markdownText + '\n\nQ:' + inputValue);
       try {
-        const response: any = await chat({ inputValue, API_KEY, mode });
+        const response: any = await textGen({ inputValue, API_KEY, mode });
         setMarkdownText((markdownText) => markdownText + '\n\nA:' + response);
       } catch (error: any) {
         message.error(error.message);

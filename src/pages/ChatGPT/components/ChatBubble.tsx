@@ -8,7 +8,6 @@ interface ChatBubbleProps {
 }
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content }) => {
-  // const isUser = role === 'user';
   let cardStyle;
   switch (role) {
     case 'user':
@@ -21,8 +20,6 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content }) => {
       cardStyle = { backgroundColor: '#2c3e50' };
       break;
   }
-  // ? { backgroundColor: '#10aeff', alignSelf: 'flex-end' }
-  // : { backgroundColor: '#f1f1f1', alignSelf: 'flex-start' };
 
   return (
     <div className={`${role} chat-bubble`}>
