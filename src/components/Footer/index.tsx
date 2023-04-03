@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
   const intl = useIntl();
   const defaultMessage = intl.formatMessage({
     id: 'app.copyright.produced',
-    defaultMessage: '蚂蚁集团体验技术部出品',
+    defaultMessage: '江苏省苏州技师学院 信息工程系',
   });
 
   const currentYear = new Date().getFullYear();
@@ -15,6 +15,8 @@ const Footer: React.FC = () => {
     <DefaultFooter
       style={{
         background: 'none',
+        // marginBlockStart: 0,
+        // marginBlockEnd: 0,
       }}
       copyright={`${currentYear} ${defaultMessage}`}
       // links={[

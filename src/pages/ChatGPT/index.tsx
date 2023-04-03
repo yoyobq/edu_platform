@@ -17,8 +17,9 @@ const ChatGPT: React.FC = () => {
   return (
     <PageContainer>
       <Tabs
+        tabPosition="left"
         size="large"
-        defaultActiveKey="textGen"
+        defaultActiveKey="chatgpt"
         items={[
           {
             label: 'GPT 聊天',

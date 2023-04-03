@@ -1,20 +1,20 @@
 .chat-bubble {
   display: flex;
   font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  font-size: 1.2em;
-  margin-bottom: 12px;
+  font-size: 1.1em;
+  margin-bottom: 6px;
   margin-top: 0px;
 }
 
 .chat-bubble-card {
-  padding: 8px 16px;
+  padding: 0px 8px;
   border-radius: 8px;
   word-wrap: break-word;
 }
 
 .user {
   justify-content: flex-end;
-  color: #d7dde5;
+  color: #fff;
 }
 
 .assistant {
@@ -34,4 +34,9 @@
   max-width: 100%;
   width: 100%;
   text-align: center;
+}
+
+p {
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
