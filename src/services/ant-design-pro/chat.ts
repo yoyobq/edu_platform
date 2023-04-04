@@ -4,7 +4,7 @@ import { request } from '@umijs/max';
 
 /** 退出登录接口 POST /api/login/outLogin */
 export async function chat(options?: { [key: string]: any }) {
-  console.log(options);
+  // console.log(options);
   const body = JSON.stringify(options);
 
   return request<Record<string, any>>('/api/chat', {

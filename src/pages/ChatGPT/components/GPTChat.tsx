@@ -28,26 +28,21 @@ export const GPTChat: React.FC = () => {
     // user?: string // 用户标识符
   };
 
-  const [inputValue, setInputValue] = useState('');
-  // const [messages, setMessages] = useState<ChatGPT.messageObj[]>([...initMessage]);
-  const [chatValue, setChatValue] = useState<ChatGPT.ChatInt>(initChatValue);
-
+  // 输入框内容
+  const [inputValue, setInputValue] = useState<string>('');
+  // 完整的聊天参数
+  const [chatValue, setChatValue] = useState<ChatGPT.ChatInterface>(initChatValue);
+  // 是否加载中
   const [isLoading, setIsLoading] = useState(false);
   const [temperature, setTemperature] = useState<number>(1);
   const [maxTokens, setMaxTokens] = useState<number>(256);
 
   const handleTempChange = (value: number) => {
-    // console.log('Temp value changed:', value);
     setTemperature(value);
   };
 
   const handleMaxTokensChange = (value: number) => {
-    // console.log('MaxTokens value changed:', value);
     setMaxTokens(value);
-  };
-
-  const handleClear = () => {
-    setChatValue(initChatValue);
   };
 
   let API_KEY: string | null = null;
@@ -60,6 +55,53 @@ export const GPTChat: React.FC = () => {
     container!.scrollTop = container!.scrollHeight;
   }, [chatValue.messages, inputValue, temperature, maxTokens]);
 
+  const createNewChatValue = (messages: ChatGPT.messageObj[]) => ({
+    model: 'gpt-3.5-turbo',
+    messages: [...chatValue.messages, ...messages],
+    temperature: temperature, // 默认 1，范围0-2 越高答题思路越宽
+    top_p: 1, // 默认1，范围 0-2，不要和 temperature 一起修改
+    n: 1, //  1 | 最多返回几份答案
+    // stream?: false, // 像官网一样流式传输结果
+    // stop: null, // 终止流式传输的字符
+    max_tokens: maxTokens, // 512 infinite | 最高 2048，太低没用 | 每次最多使用多少 token
+    // presence_penalty: 0, //  0 | -2 to 2 | 正值允许创新，负值防止跑题
+    // frequency_penalty: 0, //  0 | -2 to 2 | 正值防止逐字重复同一行
+    // logit_bias?: any, // map | optional | null 没看懂
+    // user?: string // 用户标识符
+  });
+
+  // 用一个递归函数，删除最后一轮对话，并把最后一轮对话中的提问部分放回 input 框
+  const handleUndo = () => {
+    // = (len : number) => { ... } 这一行是变量的赋值语句，给函数变量 rollback 赋值了一个匿名函数，
+    // 该匿名函数接受一个 len 参数，返回值为 void，实现了 rollback 的功能。
+    // 这一行的意义是声明并赋值了一个函数变量，并且规定了该函数变量可以接受的参数类型和返回值类型。
+    const rollback: (len: number) => void = (len: number) => {
+      const unDoMessage: ChatGPT.messageObj | null = chatValue.messages[len - 1];
+      // 如果对话长度为 0，或者已经回退到系统级 prompt 则终止递归
+      if (len === 0 || unDoMessage.role === 'system') {
+        return;
+      }
+
+      chatValue.messages.pop();
+
+      if (unDoMessage.role === 'user') {
+        return;
+      } else {
+        return rollback(len - 1);
+      }
+    };
+
+    const messagesLen: number = chatValue.messages.length;
+    rollback(messagesLen);
+
+    const newMessages = chatValue.messages;
+    setChatValue((prevChatValue) => ({ ...prevChatValue, newMessages }));
+  };
+
+  const handleClear = () => {
+    setChatValue(initChatValue);
+  };
+
   const handleSubmit = async () => {
     // 用户自定义 API_KEY 功能暂未上线
     // 如果用户未提供自己的 API_KEY 则使用默认提供的 API_KEY
@@ -67,20 +109,8 @@ export const GPTChat: React.FC = () => {
       API_KEY = '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';
     }
 
-    const newChatValue = {
-      model: 'gpt-3.5-turbo',
-      messages: [...chatValue.messages, { role: 'user', content: inputValue }],
-      temperature: temperature, // 默认 1，范围0-2 越高答题思路越宽
-      top_p: 1, // 默认1，范围 0-2，不要和 temperature 一起修改
-      n: 1, //  1 | 最多返回几份答案
-      // stream?: false, // 像官网一样流式传输结果
-      // stop: null, // 终止流式传输的字符
-      max_tokens: maxTokens, // 512 infinite | 最高 2048，太低没用 | 每次最多使用多少 token
-      // presence_penalty: 0, //  0 | -2 to 2 | 正值允许创新，负值防止跑题
-      // frequency_penalty: 0, //  0 | -2 to 2 | 正值防止逐字重复同一行
-      // logit_bias?: any, // map | optional | null 没看懂
-      // user?: string // 用户标识符
-    };
+    const newMessages = [{ role: 'user', content: inputValue }];
+    const newChatValue = createNewChatValue(newMessages);
 
     if (inputValue && API_KEY) {
       setInputValue('');
@@ -92,26 +122,14 @@ export const GPTChat: React.FC = () => {
           chatValue: newChatValue,
           API_KEY,
         });
-        console.log(response);
+        // console.log(response);
         setChatValue(() => {
-          return {
-            model: 'gpt-3.5-turbo',
-            messages: [
-              ...chatValue.messages,
-              { role: 'user', content: inputValue },
-              { role: response.role, content: response.content },
-            ],
-            temperature: temperature, // 默认 1，范围0-2 越高答题思路越宽
-            top_p: 1, // 默认1，范围 0-2，不要和 temperature 一起修改
-            n: 1, //  1 | 最多返回几份答案
-            // stream?: false, // 像官网一样流式传输结果
-            // stop: null, // 终止流式传输的字符
-            max_tokens: maxTokens, // 512 infinite | 最高 2048，太低没用 | 每次最多使用多少 token
-            // presence_penalty: 0, //  0 | -2 to 2 | 正值允许创新，负值防止跑题
-            // frequency_penalty: 0, //  0 | -2 to 2 | 正值防止逐字重复同一行
-            // logit_bias?: any, // map | optional | null 没看懂
-            // user?: string // 用户标识符
-          };
+          const newMessages = [
+            { role: 'user', content: inputValue },
+            { role: response.role, content: response.content },
+          ];
+          const newChatValue = createNewChatValue(newMessages);
+          return newChatValue;
         });
       } catch (error: any) {
         message.error(error.message);
@@ -121,8 +139,8 @@ export const GPTChat: React.FC = () => {
     }
   };
 
-  // 关于这个参数 messages 很有意思，请看文档后部的讨论
-  const ChatCard: React.FC<ChatGPT.ChatCardProps> = ({ messages }) => {
+  // 根据 messages 数组，生成问答式的对话界面
+  const ChatCard: React.FC<ChatGPT.ChatProps> = ({ messages }) => {
     // 这里的 cm + index 做 key 有隐患
     return (
       <div id="card-container" style={{ margin: '0vh 1vh', height: '70vh', overflow: 'auto' }}>
@@ -174,13 +192,7 @@ export const GPTChat: React.FC = () => {
                     >
                       发送
                     </Button>
-                    <Button
-                      disabled
-                      type="primary"
-                      icon={<UndoOutlined />}
-                      style={{ flexShrink: 0 }}
-                      onClick={handleSubmit}
-                    >
+                    <Button icon={<UndoOutlined />} style={{ flexShrink: 0 }} onClick={handleUndo}>
                       回撤
                     </Button>
                   </Space>

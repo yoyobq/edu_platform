@@ -4,14 +4,14 @@ declare namespace ChatGPT {
     content: string;
   };
 
-  type ChatCardProps = {
+  type ChatProps = {
     messages: {
       role: string;
       content: string;
     }[];
   };
 
-  type ChatInt = {
+  type ChatInterface = {
     model: string; // "gpt-3.5-turbo",
     messages: {
       role: string;
