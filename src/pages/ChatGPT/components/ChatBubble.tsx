@@ -11,10 +11,10 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content }) => {
   let cardStyle;
   switch (role) {
     case 'user':
-      cardStyle = { backgroundColor: '#3498db' };
+      cardStyle = { backgroundColor: '#27ae60' };
       break;
     case 'assistant':
-      cardStyle = { backgroundColor: '#27ae60' };
+      cardStyle = { backgroundColor: '#3498db' };
       break;
     case 'system':
       cardStyle = { backgroundColor: '#2c3e50' };

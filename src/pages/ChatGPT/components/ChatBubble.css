@@ -26,12 +26,12 @@
 }
 
 .chat-bubble-card {
-  max-width: 90%;
+  max-width: 95%;
 }
 
 /* 包含 .chat-bubble 和 .system 两个类名的父元素的后代 .chat-bubble-card 的元素 */
 .chat-bubble.system .chat-bubble-card {
-  max-width: 100%;
+  /* max-width: 100%; */
   width: 100%;
   text-align: center;
 }

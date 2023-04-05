@@ -1,8 +1,9 @@
 import { chat } from '@/services/ant-design-pro/chat';
 import { ClearOutlined, HistoryOutlined, SendOutlined, UndoOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Input, message, Row, Space } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ChatBubble from './ChatBubble';
+import './github-dark.css';
 import SliderWithInfo from './SliderWithInfo';
 
 export const GPTChat: React.FC = () => {
@@ -85,6 +86,7 @@ export const GPTChat: React.FC = () => {
       chatValue.messages.pop();
 
       if (unDoMessage.role === 'user') {
+        setInputValue(unDoMessage.content);
         return;
       } else {
         return rollback(len - 1);
@@ -114,7 +116,7 @@ export const GPTChat: React.FC = () => {
 
     if (inputValue && API_KEY) {
       setInputValue('');
-      setChatValue(() => newChatValue);
+      setChatValue(newChatValue);
 
       try {
         setIsLoading(true);
@@ -140,8 +142,9 @@ export const GPTChat: React.FC = () => {
   };
 
   // 根据 messages 数组，生成问答式的对话界面
-  const ChatCard: React.FC<ChatGPT.ChatProps> = ({ messages }) => {
+  const ChatCard: React.FC<ChatGPT.ChatProps> = React.memo(({ messages }) => {
     // 这里的 cm + index 做 key 有隐患
+    // console.log(messages);
     return (
       <div id="card-container" style={{ margin: '0vh 1vh', height: '70vh', overflow: 'auto' }}>
         <Card style={{ height: '70vh', width: 'auto' }}>
@@ -159,7 +162,12 @@ export const GPTChat: React.FC = () => {
         </Card>
       </div>
     );
-  };
+  });
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    // console.log(e);
+    setInputValue(e.target.value);
+  }, []);
 
   return (
     <Row gutter={4}>
@@ -174,7 +182,7 @@ export const GPTChat: React.FC = () => {
             <Col span={19}>
               <Input.TextArea
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={handleInputChange}
                 rows={3}
                 placeholder="问答轮次越多，消耗的 Api tokens 越快，费用越高，测试期间不对回答轮次进行限制，但请在切换主题时按清空按钮，删除无用问答记录。"
               />
