@@ -60,27 +60,34 @@ export const MarkDownArea: React.FC<{ children: string }> = ({ children }) => {
           </ReactMarkdown>,
         );
       } else {
-        if (element.language === 'unknown') {
-          element.language = hljs.highlightAuto(element.content).language;
-          element.language = element.language !== '' ? element.language : 'plaintext';
-          // console.log(element);
-        }
+        // 由于 oepnai 不总是返回标准的代码块字符串
+        // 比如会返回 "```  \n" 字符串的代码块结尾，和正则有些冲突，所以用 try catch 快速处理
+        try {
+          if (element.language === 'unknown') {
+            element.language = hljs.highlightAuto(element.content).language;
+            element.language =
+              element.language !== '' || undefined ? element.language : 'plaintext';
+          }
 
-        const highlightedCode = hljs.highlight(element.content, {
-          language: element.language,
-        }).value;
-        renderedElements.push(
-          <>
-            <header key={`t{i}`} className="codeTitle">
-              {element.language}
-            </header>
-            <pre key={`c{i}`} className="codeBlock">
-              <code className={`language-${element.language}`}>
-                <span dangerouslySetInnerHTML={{ __html: highlightedCode }} />
-              </code>
-            </pre>
-          </>,
-        );
+          const highlightedCode = hljs.highlight(element.content, {
+            language: element.language,
+          }).value;
+          renderedElements.push(
+            <>
+              <header key={`t{i}`} className="codeTitle">
+                {element.language}
+              </header>
+              <pre key={`c{i}`} className="codeBlock">
+                <code className={`language-${element.language}`}>
+                  <span dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+                </code>
+              </pre>
+            </>,
+          );
+        } catch (error) {
+          console.log(element);
+          console.log(error);
+        }
       }
     }
 

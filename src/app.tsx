@@ -39,11 +39,12 @@ export async function getInitialState(): Promise<{
   // 如果不是登录页面，执行
   const { location } = history;
   if (location.pathname !== loginPath) {
-    console.log('试图读取初始用户信息');
-    const currentUser = await fetchUserInfo(0);
+    // console.log('试图读取初始用户信息');
+    // const currentUser = await fetchUserInfo(0);
+    // console.log(currentUser);
     return {
       fetchUserInfo,
-      currentUser,
+      // currentUser,
       settings: defaultSettings as Partial<LayoutSettings>,
     };
   }

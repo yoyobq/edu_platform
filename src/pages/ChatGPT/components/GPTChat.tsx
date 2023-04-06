@@ -1,6 +1,6 @@
 import { chat } from '@/services/ant-design-pro/chat';
 import { ClearOutlined, HistoryOutlined, SendOutlined, UndoOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Input, message, Row, Space } from 'antd';
+import { Button, Card, Col, Input, Row, Space } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import ChatBubble from './ChatBubble';
 import './github-dark.css';
@@ -126,15 +126,18 @@ export const GPTChat: React.FC = () => {
         });
         // console.log(response);
         setChatValue(() => {
+          const resMessage = response.data.message;
+          const resUsage = response.data.usage.total_tokens;
+          console.log('消耗 token：', resUsage);
           const newMessages = [
             { role: 'user', content: inputValue },
-            { role: response.role, content: response.content },
+            { role: resMessage.role, content: resMessage.content },
           ];
           const newChatValue = createNewChatValue(newMessages);
           return newChatValue;
         });
       } catch (error: any) {
-        message.error(error.message);
+        // message.error(error.message);
       } finally {
         setIsLoading(false);
       }
@@ -184,7 +187,7 @@ export const GPTChat: React.FC = () => {
                 value={inputValue}
                 onChange={handleInputChange}
                 rows={3}
-                placeholder="问答轮次越多，消耗的 Api tokens 越快，费用越高，测试期间不对回答轮次进行限制，但请在切换主题时按清空按钮，删除无用问答记录。"
+                placeholder="问答轮次越多，消耗的 Api tokens 越快，费用越高，测试期间对回答轮次限制在 6 轮以内，建议在切换主题时按清空按钮，删除无用问答记录。"
               />
             </Col>
             <Col span={4}>

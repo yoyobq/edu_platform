@@ -12,12 +12,12 @@ code:not([class]):not([id]) {
 
 .codeBlock {
   background-color: black;
-  margin-top: 0;
-  padding:            10px;
+  margin-top:                     0;
+  padding:                        8px;
   border-bottom-left-radius:      8px;
-  border-bottom-left-radius:       8px;
-  overflow:           auto;
-  font-family: "Cascade Code", Consolas, Courier New, monospace;
+  border-bottom-right-radius:     8px;
+  overflow:                       auto;
+  font-family: "Cascade Code", Consolas, "Courier New", monospace;
 }
 
 .codeTitle {
@@ -34,9 +34,9 @@ code:not([class]):not([id]) {
   height: 10px;
 }
 
-::-webkit-scrollbar-track {
+/* ::-webkit-scrollbar-track {
   background-color: #222;
-}
+} */
 
 ::-webkit-scrollbar-thumb {
   background-color: #666;
