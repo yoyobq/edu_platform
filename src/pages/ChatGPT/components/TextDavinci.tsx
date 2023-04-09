@@ -14,13 +14,11 @@ export const TextDavinci: React.FC = () => {
   const handleSubmit = async () => {
     // 此功能暂未上线
     // 如果用户未提供自己的 API_KEY 则使用默认提供的 API_KEY
-    if (!API_KEY) {
-      API_KEY = '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';
-    }
+
     let mode = 'complete';
     // let mode = 'chat';
 
-    if (inputValue && API_KEY && mode) {
+    if (inputValue && mode) {
       setInputValue('');
       // 此处涉及到一个 state 是快照造成的数据更新问题
       // 可以利用变量的批处理解决，详见我写的 React 教程新手村 4，5两章
