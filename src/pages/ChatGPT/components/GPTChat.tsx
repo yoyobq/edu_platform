@@ -8,6 +8,7 @@ import SliderWithInfo from './SliderWithInfo';
 
 export const GPTChat: React.FC = () => {
   const initMessage = [
+    // { role: 'system', content: 'You are a teaching assistant for a python class, and you are currently taking the course, If someone were to ask u about any other programming language, I would inform them that this is a Python course and that I am not equipped to help with questions related to other languages.' },
     { role: 'system', content: 'You are a helpful assistant.' },
     // {"role": "user", "content": "Who won the world series in 2020?"},
     // {"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
@@ -36,7 +37,7 @@ export const GPTChat: React.FC = () => {
   // 是否加载中
   const [isLoading, setIsLoading] = useState(false);
   const [temperature, setTemperature] = useState<number>(1);
-  const [maxTokens, setMaxTokens] = useState<number>(256);
+  const [maxTokens, setMaxTokens] = useState<number>(384);
 
   const handleTempChange = (value: number) => {
     setTemperature(value);
@@ -106,15 +107,12 @@ export const GPTChat: React.FC = () => {
 
   const handleSubmit = async () => {
     // 用户自定义 API_KEY 功能暂未上线
-    // 如果用户未提供自己的 API_KEY 则使用默认提供的 API_KEY
-    if (!API_KEY) {
-      API_KEY = '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';
-    }
+    // 如果用户未提供自己的 API_KEY 则后台会使用默认提供的 API_KEY
 
     const newMessages = [{ role: 'user', content: inputValue }];
     const newChatValue = createNewChatValue(newMessages);
 
-    if (inputValue && API_KEY) {
+    if (inputValue) {
       setInputValue('');
       setChatValue(newChatValue);
 
@@ -187,7 +185,7 @@ export const GPTChat: React.FC = () => {
                 value={inputValue}
                 onChange={handleInputChange}
                 rows={3}
-                placeholder="问答轮次越多，消耗的 Api tokens 越快，费用越高，测试期间对回答轮次限制在 6 轮以内，建议在切换主题时按清空按钮，删除无用问答记录。"
+                placeholder="问答轮次越多，消耗的 Api tokens 越快，费用越高，测试期间对回答轮次限制在 7 轮以内，建议在切换主题时按清空按钮，删除无用问答记录。"
               />
             </Col>
             <Col span={4}>
@@ -251,7 +249,7 @@ export const GPTChat: React.FC = () => {
             min={128}
             max={1024}
             defaultValue={maxTokens}
-            description={'数值越高可能的 API Tokens 消耗越大，对长回答更友好，默认 256'}
+            description={`数值越高可能的 API Tokens 消耗越大，对长回答更友好，默认 384`}
             step={128}
             onChange={handleMaxTokensChange}
           />
