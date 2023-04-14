@@ -5,11 +5,12 @@ import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
+import Cookies from 'js-cookie';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
 // 23-3-14 此处与官方文档不符，但都是去 api.ts 里拿当前用户数据
 import { AvatarDropdown, AvatarName } from './components/RightContent/AvatarDropdown';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
+import { currentUser as queryCurrentUser } from './services/ant-design-pro/login';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -22,9 +23,11 @@ export async function getInitialState(): Promise<{
   currentUser?: API.CurrentUser;
   loading?: boolean;
   fetchUserInfo?: (accountId: number) => Promise<API.CurrentUser | undefined>;
+  // fetchAccountByCookie: (token: string) => Promise<any>;
 }> {
   const fetchUserInfo = async (accountId: number) => {
     try {
+      console.log('fetchUserInfo');
       // queryCurrentUser 其实就是 services 里的 currentUser
       const res = await queryCurrentUser({
         skipErrorHandler: true,
@@ -36,6 +39,20 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
+
+  const fetchAccountByCookie = async (token: string) => {
+    console.log(token);
+    return;
+  };
+
+  // 获取 Cookies，如果已经存在 JWT
+  const token = Cookies.get('token');
+  console.log(token);
+  if (token) {
+    const a = await fetchAccountByCookie(token);
+    console.log(a);
+  }
+
   // 如果不是登录页面，执行
   const { location } = history;
   if (location.pathname !== loginPath) {

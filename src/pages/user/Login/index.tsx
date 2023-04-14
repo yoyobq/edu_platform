@@ -121,8 +121,10 @@ const Login: React.FC = () => {
     try {
       // 登录
       const res: any = await login({ ...values, type });
-      const { id, status } = res.checkAccount;
-
+      // res = {id: 2, status: 1}
+      const { id, status } = res;
+      // const token = res.checkAccount.token;
+      // console.log(token);
       if (id !== null && status === 1) {
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
@@ -137,7 +139,6 @@ const Login: React.FC = () => {
         history.push(urlParams.get('redirect') || '/');
         return;
       }
-      console.log(res);
       setUserLoginState(res.user);
     } catch (error: any) {
       // 如果失败去设置用户错误信息, 这是利用了 i18n 国际化插件的版本
