@@ -55,7 +55,7 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
   }).then((response) => {
     // response 中包含了 account 和 token
     if (response.success) {
-      console.log(response.data.checkAccount.token);
+      // console.log(response.data.checkAccount.token);
       // 只有在账号登陆时，才会生成新的 token
       Cookies.set('token', response.data.checkAccount.token);
       // 把 account 返回
@@ -66,7 +66,9 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
 }
 
 /** (已废弃）获取当前的用户 GET /api/currentUser */
-/** 目前登录接口是 POST /graphql */
+/** 目前登录接口是 POST /graphql
+ * 就是 app.tsx 里调用的 queryCurrentUser
+ */
 export async function currentUser(options: { [key: string]: any }) {
   // 此处是老的示例代码，去 mock 获取数据，仅保留
   // return request<{
@@ -109,7 +111,7 @@ export async function currentUser(options: { [key: string]: any }) {
     // ...(options || {}),
   }).then((response) => {
     if (response.success) {
-      console.log(response.data.user);
+      // console.log(response.data.user);
       return response.data.user;
     }
     throw new Error('获取用户信息失败。');
