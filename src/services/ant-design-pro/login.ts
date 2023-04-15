@@ -4,7 +4,7 @@ import { request } from '@umijs/max';
 import { gql } from 'graphql-tag';
 import Cookies from 'js-cookie';
 
-/** 登录接口 POST /api/login/account */
+/** (已废弃）登录接口 POST /api/login/account */
 /** 目前登录接口是 POST /graphql，上一行是修改器原始注释保留待查 */
 export async function login(body: USER.LoginParams, options?: { [key: string]: any }) {
   const variables = {
@@ -28,22 +28,6 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
     operationName: null, // 操作名称，选填，查询文档有多个操作时必填
     variables, // 对象集合，选填
   };
-
-  /** 这里保留了一些对 useRequest 重新封装 request 返回的 promise 
-  *   的探索，目前代码有 bug 暂时弃用
-  // const { data:any } = useRequest(()=>{
-  //   return request<USER.LoginResult>('/graphql', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     data,
-  //     // ...(options || {}),
-  //   });
-  // });
-
-  // return data;
-  */
 
   return request<API.ResponseData>('/graphql/login', {
     method: 'POST',
@@ -105,7 +89,6 @@ export async function currentUser(options: { [key: string]: any }) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${Cookies.get('token')}`,
     },
     data,
     // ...(options || {}),
@@ -116,6 +99,11 @@ export async function currentUser(options: { [key: string]: any }) {
     }
     throw new Error('获取用户信息失败。');
   });
+}
+
+/** 退出登录接口 POST /api/login/outLogin */
+export async function outLogin() {
+  Cookies.remove('token');
 }
 
 /** 发送验证码 POST /api/login/captcha */

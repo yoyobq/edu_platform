@@ -104,7 +104,6 @@ const Login: React.FC = () => {
 
   const fetchUserInfo = async (accountId: number) => {
     const userInfo = await initialState?.fetchUserInfo?.(accountId);
-    // console.log('userInfo:');
     if (userInfo) {
       // flushSync 是 React DOM 中的一个函数，它的作用是在调用它的时候，
       // 强制同步更新所有的挂起更新，而不是等待浏览器空闲时再执行更新，以提高更新性能
@@ -123,8 +122,6 @@ const Login: React.FC = () => {
       const res: any = await login({ ...values, type });
       // res = {id: 2, status: 1}
       const { id, status } = res;
-      // const token = res.checkAccount.token;
-      // console.log(token);
       if (id !== null && status === 1) {
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
@@ -135,9 +132,10 @@ const Login: React.FC = () => {
         // userAccount 表中的 id 就是 userInfo 表中的 accountId 外键
         // 根据 id 去获取对应 accountId 的数据
         await fetchUserInfo(id);
-        const urlParams = new URL(window.location.href).searchParams;
-        history.push(urlParams.get('redirect') || '/');
-        return;
+        // const urlParams = new URL(window.location.href).searchParams;
+        // console.log(urlParams.get('redirect'));
+        history.push('/');
+        // return;
       }
       setUserLoginState(res.user);
     } catch (error: any) {

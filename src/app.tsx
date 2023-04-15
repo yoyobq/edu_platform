@@ -8,6 +8,7 @@ import { history, Link } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
 // 23-3-14 此处与官方文档不符，但都是去 api.ts 里拿当前用户数据
+import Cookies from 'js-cookie';
 import { AvatarDropdown, AvatarName } from './components/RightContent/AvatarDropdown';
 import { currentUser as queryCurrentUser } from './services/ant-design-pro/login';
 
@@ -38,15 +39,24 @@ export async function getInitialState(): Promise<{
     return undefined;
   };
 
-  const currentUser = await fetchUserInfo(0);
-  if (currentUser) {
-    return {
-      currentUser,
-      settings: defaultSettings as Partial<LayoutSettings>,
-    };
+  const token = Cookies.get('token');
+  if (token) {
+    let loading = true;
+    const currentUser = await fetchUserInfo(0);
+    if (currentUser) {
+      loading = false;
+      return {
+        currentUser,
+        fetchUserInfo,
+        loading,
+        settings: defaultSettings as Partial<LayoutSettings>,
+      };
+    }
   }
 
   return {
+    fetchUserInfo,
+    loading: false,
     settings: defaultSettings as Partial<LayoutSettings>,
   };
 }
@@ -68,7 +78,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
-      // 如果没有登录，重定向到 login
+      // 如果没有登录，且访问页面不是 /user/login 重定向到 /user/login
       if (!initialState?.currentUser && location.pathname !== loginPath) {
         history.push(loginPath);
       }
