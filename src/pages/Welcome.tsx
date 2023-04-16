@@ -13,6 +13,7 @@ const InfoCard: React.FC<{
   index: number;
   desc: string;
   href: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 }> = ({ title, href, index, desc }) => {
   const { useToken } = theme;
 
@@ -76,9 +77,9 @@ const InfoCard: React.FC<{
       >
         {desc}
       </div>
-      <a href={href} target="_blank" rel="noreferrer">
+      {/* <a href={href} target="_blank" rel="noreferrer">
         了解更多 {'>'}
-      </a>
+      </a> */}
     </div>
   );
 };
@@ -115,7 +116,7 @@ const Welcome: React.FC = () => {
               color: token.colorTextHeading,
             }}
           >
-            欢迎使用 Ant Design Pro
+            欢迎使用 Edu Platform
           </div>
           <p
             style={{
@@ -125,10 +126,16 @@ const Welcome: React.FC = () => {
               marginTop: 16,
               marginBottom: 32,
               width: '65%',
+              fontWeight: 500,
             }}
           >
-            Ant Design Pro 是一个整合了 umi，Ant Design 和 ProComponents
-            的脚手架方案。致力于在设计规范和基础组件的基础上，继续向上构建，提炼出典型模板/业务组件/配套设计资源，进一步提升企业级中后台产品设计研发过程中的『用户』和『设计者』的体验。
+            <div style={{ marginBottom: 16 }}>
+              Edu Platform
+              是一个试图整合江苏省苏州技师学院内部信息，展示信息工程系技术实力，并示范如何真正的利用计算机科学实现信息化的综合性智能平台。
+            </div>
+            <div>
+              我们的愿景是致力于提炼出『教学』、『教育』和『教辅』工作中的典型业务场景并采用信息化手段优化工作流程，为『学生』、『教师』和『教工』服务，提升处理和解决各类学校事务过程中的体验。
+            </div>
           </p>
           <div
             style={{
@@ -139,21 +146,21 @@ const Welcome: React.FC = () => {
           >
             <InfoCard
               index={1}
-              href="https://umijs.org/docs/introduce/introduce"
-              title="了解 umi"
-              desc="umi 是一个可扩展的企业级前端应用框架,umi 以路由为基础的，同时支持配置式路由和约定式路由，保证路由的功能完备，并以此进行功能扩展。"
+              href="#"
+              title="如果您是学生"
+              desc="Edu Platform 致力于更好地展示教学过程及教学内容，提供便捷多样的专业问答、知识辅导，并提供方便监测自己的学习进度和学习成果的工具。"
             />
             <InfoCard
               index={2}
-              title="了解 ant design"
-              href="https://ant.design"
-              desc="antd 是基于 Ant Design 设计体系的 React UI 组件库，主要用于研发企业级中后台产品。"
+              title="如果您是教师"
+              href="#"
+              desc="Edu Platform 会帮助您规划、设计、展示您的教学内容，并利用信息化工具将您从重复的无谓劳动中解脱出来，让您有更多的精力为真正的教学服务。"
             />
             <InfoCard
               index={3}
-              title="了解 Pro Components"
-              href="https://procomponents.ant.design"
-              desc="ProComponents 是一个基于 Ant Design 做了更高抽象的模板组件，以 一个组件就是一个页面为开发理念，为中后台开发带来更好的体验。"
+              title="如果您是教工"
+              href="#"
+              desc="Edu Platform 的目标是更好地搜集整合有关学院方方面面的各类信息并作合理的梳理，在此基础上提供便捷地查看、搜索和处理功能。"
             />
           </div>
         </div>

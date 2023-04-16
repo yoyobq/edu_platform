@@ -15,6 +15,9 @@ const Footer: React.FC = () => {
     <DefaultFooter
       style={{
         background: 'none',
+        position: 'fixed',
+        bottom: 0,
+        width: '80vw',
         // marginBlockStart: 0,
         // marginBlockEnd: 0,
       }}

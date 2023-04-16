@@ -4,10 +4,11 @@ code:not([class]):not([id]) {
   padding: .5em;
   border-radius: 8px;
   overflow: auto;
-  line-height: 1.1;
+  line-height: 1;
   display: inline-block;
   font-size: .9em;
   vertical-align: bottom;
+  margin: .1em .2em;
 }
 
 .codeBlock {
