@@ -77,9 +77,9 @@ const InfoCard: React.FC<{
       >
         {desc}
       </div>
-      {/* <a href={href} target="_blank" rel="noreferrer">
+      <a href={href} target="_blank" rel="noreferrer">
         了解更多 {'>'}
-      </a> */}
+      </a>
     </div>
   );
 };
@@ -118,7 +118,7 @@ const Welcome: React.FC = () => {
           >
             欢迎使用 Edu Platform
           </div>
-          <p
+          <div
             style={{
               fontSize: '14px',
               color: token.colorTextSecondary,
@@ -136,7 +136,7 @@ const Welcome: React.FC = () => {
             <div>
               我们的愿景是致力于提炼出『教学』、『教育』和『教辅』工作中的典型业务场景并采用信息化手段优化工作流程，为『学生』、『教师』和『教工』服务，提升处理和解决各类学校事务过程中的体验。
             </div>
-          </p>
+          </div>
           <div
             style={{
               display: 'flex',

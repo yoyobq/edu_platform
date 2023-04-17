@@ -4,6 +4,7 @@ export default {
   'menu.home': '首页',
   'menu.admin': '管理页',
   'menu.admin.sub-page': '二级管理页',
+  'menu.admin.blank-page': '空白页面',
   'menu.ChatGPT': '科学聊天',
   'menu.login': '登录',
   'menu.register': '注册',

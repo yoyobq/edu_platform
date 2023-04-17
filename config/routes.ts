@@ -37,6 +37,7 @@ export default [
     access: 'canAdmin',
     routes: [
       {
+        // 这一条的意义在于 /admin 的默认页
         path: '/admin',
         redirect: '/admin/sub-page',
       },
@@ -44,6 +45,11 @@ export default [
         path: '/admin/sub-page',
         name: 'sub-page',
         component: './Admin',
+      },
+      {
+        path: '/admin/blankComp',
+        name: 'blank-page',
+        component: './BlankComp',
       },
     ],
   },

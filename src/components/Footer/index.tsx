@@ -17,7 +17,8 @@ const Footer: React.FC = () => {
         background: 'none',
         position: 'fixed',
         bottom: 0,
-        width: '80vw',
+        width: '100%',
+        margin: '0 auto',
         // marginBlockStart: 0,
         // marginBlockEnd: 0,
       }}

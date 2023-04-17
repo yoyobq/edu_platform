@@ -1,90 +1,34 @@
 import Footer from '@/components/Footer';
 import { login } from '@/services/ant-design-pro/login';
-import {
-  // AlipayCircleOutlined,
-  LockOutlined,
-  // TaobaoCircleOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import { LoginForm, ProFormCheckbox, ProFormText } from '@ant-design/pro-components';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
-import { FormattedMessage, Helmet, history, SelectLang, useIntl, useModel } from '@umijs/max';
-import { Alert, message, Tabs } from 'antd';
+import { FormattedMessage, Helmet, history, useIntl, useModel } from '@umijs/max';
+import { Button, message, Tabs } from 'antd';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
 import Settings from '../../../../config/defaultSettings';
-
-// // 淘宝、支付宝等第三方登录
-// const ActionIcons = () => {
-//   const langClassName = useEmotionCss(({ token }) => {
-//     return {
-//       marginLeft: '8px',
-//       color: 'rgba(0, 0, 0, 0.2)',
-//       fontSize: '24px',
-//       verticalAlign: 'middle',
-//       cursor: 'pointer',
-//       transition: 'color 0.3s',
-//       '&:hover': {
-//         color: token.colorPrimaryActive,
-//       },
-//     };
-//   });
-
-//   return (
-//     <>
-//       <AlipayCircleOutlined key="AlipayCircleOutlined" className={langClassName} />
-//       <TaobaoCircleOutlined key="TaobaoCircleOutlined" className={langClassName} />
-//       <WeiboCircleOutlined key="WeiboCircleOutlined" className={langClassName} />
-//     </>
-//   );
-// };
-
-const Lang = () => {
-  const langClassName = useEmotionCss(({ token }) => {
-    return {
-      width: 42,
-      height: 42,
-      lineHeight: '42px',
-      position: 'fixed',
-      right: 16,
-      borderRadius: token.borderRadius,
-      ':hover': {
-        backgroundColor: token.colorBgTextHover,
-      },
-    };
-  });
-
-  return (
-    <div className={langClassName} data-lang>
-      {SelectLang && <SelectLang />}
-    </div>
-  );
-};
-
-const LoginMessage: React.FC<{
-  content: string;
-}> = ({ content }) => {
-  return (
-    <Alert
-      style={{
-        marginBottom: 24,
-      }}
-      message={content}
-      type="error"
-      showIcon
-    />
-  );
-};
+import { Lang } from './components/Lang';
+import { LoginMessage } from './components/LoginMessage';
+import { RegisterFrom } from './components/RegisterForm';
 
 const Login: React.FC = () => {
-  // 鉴权流程第 1 步：
-  // 建立了一个名为 userLoginState 的 state，初始值是一个空对象 {}，
-  // 这个 state 的更新函数是 setUsrLoginState()。
+  // 记录登录状态及登录方式，用于切换登录方式或显示错误提示
   const [userLoginState, setUserLoginState] = useState<USER.AccountStatus>({});
   const [type, setType] = useState<string>('account');
 
-  // 鉴权流程第 2 步：
-  // 就是从 @@initialState 读取默认设置的全局初始数据并存放到 state 变量 initialState 中去。
+  // 用于弹出注册表单
+  const [regFormVisible, setRegFormVisible] = useState(false);
+  const showModal = () => {
+    setRegFormVisible(true);
+  };
+
+  const hideModal = () => {
+    setRegFormVisible(false);
+  };
+
+  // 鉴权流程：
+  // 从 @@initialState 读取默认设置的全局初始数据并存放到 state 变量 initialState 中去。
   const { initialState, setInitialState } = useModel('@@initialState');
 
   const containerClassName = useEmotionCss(() => {
@@ -137,14 +81,14 @@ const Login: React.FC = () => {
         history.push('/');
         // return;
       }
-      setUserLoginState(res.user);
     } catch (error: any) {
       // 如果失败去设置用户错误信息, 这是利用了 i18n 国际化插件的版本
       // const defaultLoginFailureMessage = intl.formatMessage({
       //   id: 'pages.login.failure',
       //   defaultMessage: error.message,
       // });
-      message.error(error.message);
+      // message.error(error.message);
+      setUserLoginState({ status: 0, type });
     }
   };
 
@@ -165,28 +109,32 @@ const Login: React.FC = () => {
       <div
         style={{
           flex: '1',
-          padding: '32px 0',
+          padding: '20vh 0',
         }}
       >
         <LoginForm
           contentStyle={{
             minWidth: 280,
-            maxWidth: '75vw',
+            maxWidth: '70vw',
           }}
-          // logo={<img alt="logo" src="/logo.svg" />}
+          logo={<img alt="logo" src="/logo.svg" />}
           title="智能教辅平台"
           subTitle={intl.formatMessage({ id: 'pages.layouts.userLayout.title' })}
+          // submitter={{ searchConfig: { submitText: '登录 / 注册', }, }}
           initialValues={{
             autoLogin: true,
           }}
-          // actions={[
-          //   <FormattedMessage
-          //     key="loginWith"
-          //     id="pages.login.loginWith"
-          //     defaultMessage="其他登录方式"
-          //   />,
-          //   <ActionIcons key="icons" />,
-          // ]}
+          actions={[
+            // <FormattedMessage
+            //   key="loginWith"
+            //   id="pages.login.loginWith"
+            //   defaultMessage="其他登录方式"
+            // />,
+            // <ActionIcons key="icons" />,
+            <Button size="large" key="reg" onClick={showModal} block>
+              注册
+            </Button>,
+          ]}
           onFinish={async (values) => {
             await handleSubmit(values as USER.LoginParams);
           }}
@@ -213,11 +161,11 @@ const Login: React.FC = () => {
             ]}
           />
 
-          {status === null && loginType === 'account' && (
+          {status === 0 && loginType === 'account' && (
             <LoginMessage
               content={intl.formatMessage({
                 id: 'pages.login.accountLogin.errorMessage',
-                defaultMessage: '访客用户名：guest',
+                defaultMessage: '访客可以用 guest / guest 登录试用',
               })}
             />
           )}
@@ -231,7 +179,7 @@ const Login: React.FC = () => {
                 }}
                 placeholder={intl.formatMessage({
                   id: 'pages.login.loginName.placeholder',
-                  defaultMessage: '用户名: admin or user',
+                  defaultMessage: '输入账号或邮箱均可登录',
                 })}
                 rules={[
                   {
@@ -253,7 +201,7 @@ const Login: React.FC = () => {
                 }}
                 placeholder={intl.formatMessage({
                   id: 'pages.login.loginPassword.placeholder',
-                  defaultMessage: '密码: ant.design',
+                  defaultMessage: '请输入密码',
                 })}
                 rules={[
                   {
@@ -352,7 +300,7 @@ const Login: React.FC = () => {
               />
             </>
           )} */}
-          <div
+          {/* <div
             style={{
               marginBottom: 24,
             }}
@@ -365,10 +313,11 @@ const Login: React.FC = () => {
                 float: 'right',
               }}
             >
-              {/* <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" /> */}
+              <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
             </a>
-          </div>
+          </div> */}
         </LoginForm>
+        <RegisterFrom visible={regFormVisible} hideModal={hideModal} />
       </div>
       <Footer />
     </div>
