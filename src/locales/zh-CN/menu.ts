@@ -3,6 +3,7 @@ export default {
   'menu.more-blocks': '更多区块',
   'menu.home': '首页',
   'menu.admin': '管理页',
+  'menu.admin.api-test': '接口测试',
   'menu.admin.sub-page': '二级管理页',
   'menu.admin.blank-page': '空白页面',
   'menu.ChatGPT': '科学聊天',

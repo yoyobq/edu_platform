@@ -3,6 +3,7 @@ export default {
   'menu.more-blocks': 'More Blocks',
   'menu.home': 'Home',
   'menu.admin': 'Admin',
+  'menu.admin.api-test': 'ApiTest',
   'menu.admin.sub-page': 'Sub-Page',
   'menu.admin.blank-page': 'Blank-Page',
   'menu.login': 'Login',

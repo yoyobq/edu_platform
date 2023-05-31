@@ -44,7 +44,12 @@ export default [
       {
         path: '/admin/sub-page',
         name: 'sub-page',
-        component: './Admin',
+        component: './admin/Admin',
+      },
+      {
+        path: '/admin/api-test',
+        name: 'api-test',
+        component: './admin/ApiTest',
       },
       {
         path: '/admin/blankComp',
@@ -66,6 +71,50 @@ export default [
     component: './ChatGPT',
     access: 'canTeacher',
   },
+  // {
+  //   path: '/exercisesIndex',
+  //   name: '练习',
+  //   icon: 'table',
+  //   component: './ExercisesIndex',
+  // },
+  // {
+  //   path: '/exercises',
+  //   // layout: false,
+  //   routes: [
+  //     {
+  //       path: '/exercises',
+  //       routes: [
+  //         {
+  //           path: '/exercises/:sub/sin',
+  //           hideInMenu: true,
+  //           name: '单选题',
+  //           // icon: 'table',
+  //           component: './ExSingleSelection',
+  //         },
+  //         {
+  //           path: '/exercises/:sub/mul',
+  //           hideInMenu: true,
+  //           name: '多选题',
+  //           // icon: 'table',
+  //           component: './ExMultipleSelection',
+  //         },
+  //         {
+  //           path: '/exercises/:sub/jug',
+  //           hideInMenu: true,
+  //           name: '判断题',
+  //           // icon: 'table',
+  //           component: './ExJudge',
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
+  // {
+  //   path: '/selfTest',
+  //   name: '测验',
+  //   icon: 'Form',
+  //   component: './SelfTest',
+  // },
   {
     path: '/',
     redirect: '/welcome',
