@@ -71,12 +71,12 @@ export default [
     component: './ChatGPT',
     access: 'canTeacher',
   },
-  // {
-  //   path: '/exercisesIndex',
-  //   name: '练习',
-  //   icon: 'table',
-  //   component: './ExercisesIndex',
-  // },
+  {
+    path: '/exercisesIndex',
+    name: '练习',
+    icon: 'table',
+    component: './ExercisesIndex',
+  },
   // {
   //   path: '/exercises',
   //   // layout: false,
