@@ -4,35 +4,52 @@ import { request } from '@umijs/max';
 import { gql } from 'graphql-tag';
 import Cookies from 'js-cookie';
 
-/** (已废弃）登录接口 POST /api/login/account */
-/** 目前登录接口是 POST /graphql，上一行是修改器原始注释保留待查 */
-export async function login(body: USER.LoginParams, options?: { [key: string]: any }) {
-  const variables = {
-    params: {
-      loginName: body.loginName,
-      loginPassword: body.loginPassword,
-      type: body.type,
-    },
-  };
+export async function getQuestions(body?: SELFTEST.Question, options?: { [key: string]: any }) {
+  // const variables = {
+  //   params: {
+  //     loginName: body.loginName,
+  //     loginPassword: body.loginPassword,
+  //     type: body.type,
+  //   },
+  // };
   // console.log(JSON.stringify(params));
   // 注意这是一个拼接字符串的实例,query 后是 query 的名字
   // 对象内才是引用 resolver 里的名字
+  // const query = gql`
+  //   query ($params: LoginParams!) {
+  //     checkAccount(params: $params)
+  //   }
+  // `;
+
   const query = gql`
-    query ($params: LoginParams!) {
-      checkAccount(params: $params)
+    query {
+      questions(tableName: "wlgjg_2104", type: "") {
+        id
+        custom_id
+        topic
+        a
+        b
+        c
+        d
+        e
+        f
+        g
+        chapter_no
+        chapter
+        pic_path
+        answer
+        type
+        remark
+      }
     }
   `;
-
-  // console.log(query);
 
   const data = {
     query: query.loc?.source.body,
     operationName: null, // 操作名称，选填，查询文档有多个操作时必填
-    variables, // 对象集合，选填
+    // variables, // 对象集合，选填
   };
-  console.log(data.query);
-
-  return request<API.ResponseData>('/graphql/login', {
+  return request<API.ResponseData>('/graphql', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -42,13 +59,9 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
   }).then((response) => {
     // response 中包含了 account 和 token
     if (response.success) {
-      // console.log(response.data.checkAccount.token);
-      // 只有在账号登陆时，才会生成新的 token
-      Cookies.set('token', response.data.checkAccount.token);
-      // 把 account 返回
-      return response.data.checkAccount.account;
+      return response.data;
     }
-    throw new Error('无效的后台反馈，登录失败');
+    throw new Error('从后台获取试题失败。');
   });
 }
 

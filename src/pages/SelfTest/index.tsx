@@ -1,5 +1,5 @@
 import Footer from '@/components/Footer';
-
+import { getQuestions } from '@/services/ant-design-pro/questions';
 // import {
 //   // AlipayCircleOutlined,
 //   LockOutlined,
@@ -15,10 +15,18 @@ import React from 'react';
 import { flushSync } from 'react-dom';
 // import Settings from '../../../../config/defaultSettings';
 
-const BlankPage: React.FC = () => {
+const SelfTest: React.FC = () => {
   // 从 @@initialState 读取默认设置的全局初始数据并存放到 state 变量 initialState 中去。
   const { initialState, setInitialState } = useModel('@@initialState');
   console.log(initialState);
+
+  const getData = async () => {
+    const res: any = await getQuestions();
+    // 成功获取试题数据
+    console.log(res);
+  };
+
+  getData();
 
   const containerClassName = useEmotionCss(() => {
     return {
@@ -62,4 +70,4 @@ const BlankPage: React.FC = () => {
   );
 };
 
-export default BlankPage;
+export default SelfTest;

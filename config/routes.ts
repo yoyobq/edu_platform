@@ -72,10 +72,10 @@ export default [
     access: 'canTeacher',
   },
   {
-    path: '/exercisesIndex',
-    name: '练习',
+    name: 'self-test',
     icon: 'table',
-    component: './ExercisesIndex',
+    path: '/selfTest',
+    component: './SelfTest',
   },
   // {
   //   path: '/exercises',
