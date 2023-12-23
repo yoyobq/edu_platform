@@ -1,5 +1,5 @@
 import Footer from '@/components/Footer';
-import { getQuestions } from '@/services/ant-design-pro/questions';
+import { buildSelfTest } from './model';
 // import {
 //   // AlipayCircleOutlined,
 //   LockOutlined,
@@ -21,7 +21,7 @@ const SelfTest: React.FC = () => {
   console.log(initialState);
 
   const getData = async () => {
-    const res: any = await getQuestions();
+    const res: any = await buildSelfTest();
     // 成功获取试题数据
     console.log(res);
   };
@@ -58,7 +58,7 @@ const SelfTest: React.FC = () => {
 
   return (
     <div className={containerClassName}>
-      <section>这是一个空白的模板文档，用于快速创建 Edu Platform 的新页面</section>
+      <h1>111</h1>
       <div
         style={{
           flex: '1',

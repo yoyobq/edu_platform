@@ -4,7 +4,7 @@ import styles from '../index.less';
 
 interface resBdProps {
   isCorrect?: boolean;
-  realAnswer: string;
+  realAnswer?: string;
 }
 
 const ResultBoard: React.FC<resBdProps> = ({ isCorrect, realAnswer }) => {

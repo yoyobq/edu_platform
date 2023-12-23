@@ -1,13 +1,11 @@
 import React from 'react';
-// import ResultBoard from '../components/ResultBoard';
-import { QuestionProps } from '../data';
 import styles from '../index.less';
 import QuestionImage from './QuestionImage';
-import OptionList from './SinOptionList';
+import ResultBoard from './ResultBoard';
+import OptionList from './SglOptionList';
 import Topic from './Topic';
 
-// routes 名字与文件名一致
-const Question: React.FC<QuestionProps> = ({
+const Question: React.FC<SelfTest.QuestionProps> = ({
   No,
   topic,
   options,
@@ -32,7 +30,7 @@ const Question: React.FC<QuestionProps> = ({
   return (
     <div className={styles[`question`]}>
       <Topic No={No + 1} content={topic} selectTag={selectTag} />
-      {/* <ResultBoard isCorrect={isCorrect} /> */}
+      <ResultBoard isCorrect={true} />
       <div>
         <QuestionImage picPath={pic_path} />
       </div>
@@ -54,7 +52,7 @@ const Question: React.FC<QuestionProps> = ({
 // 与 class 组件中 shouldComponentUpdate() 方法不同的是，
 // 如果 props 相等，areEqual 会返回 true；如果 props 不相等，则返回 false。
 // 这与 shouldComponentUpdate 方法的返回值相反
-const areEqual = (prevProps: QuestionProps, nextProps: QuestionProps) => {
+const areEqual = (prevProps: SelfTest.QuestionProps, nextProps: SelfTest.QuestionProps) => {
   /*
   如果把 nextProps 传入 render 方法的返回结果与
   将 prevProps 传入 render 方法的返回结果一致则返回 true，

@@ -3,11 +3,11 @@ import React from 'react';
 // import styles from '../index.less';
 
 interface QuestionImageProps {
-  picPath: string | null;
+  picPath?: string;
 }
 
 const QuestionImage: React.FC<QuestionImageProps> = ({ picPath }) => {
-  if (picPath !== null) {
+  if (picPath) {
     return <Image width={400} src={picPath} />;
   }
 

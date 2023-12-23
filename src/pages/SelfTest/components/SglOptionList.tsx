@@ -8,7 +8,7 @@ interface OptionProps extends RadioProps {
   optionContents: string;
 }
 
-interface OptionListProps {
+interface SglOptionListProps {
   No: number;
   optList: Array<string>;
   // realAnswer: string;
@@ -30,7 +30,7 @@ const Option: React.FC<OptionProps> = ({ tag, value, optionContents }) => {
 };
 
 // 利用React List的知识，将option数组重新组合，变成页面上的ABCD选项列表
-const OptionList: React.FC<OptionListProps> = ({
+const SglOptionList: React.FC<SglOptionListProps> = ({
   No,
   onChange,
   optList,
@@ -62,4 +62,4 @@ const OptionList: React.FC<OptionListProps> = ({
   );
 };
 
-export default OptionList;
+export default SglOptionList;
