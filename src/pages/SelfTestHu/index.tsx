@@ -133,7 +133,9 @@ const SelfTest: React.FC = () => {
                   type={item.type}
                   onChange={onAnswerChange}
                 />
-                {/* { testStatus.hasFinished ? <ResultBoard isCorrect={item.isCorrect} realAnswer= {item.answer} /> : null} */}
+                {testStatus.hasFinished ? (
+                  <ResultBoard isCorrect={item.isCorrect} realAnswer={item.answer} />
+                ) : null}
               </section>
             );
           case 'mul':

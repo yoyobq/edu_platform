@@ -2,9 +2,9 @@ import { extractQuestionsList } from '@/services/SelfTest/index';
 
 let generatedTest: { questions: SelfTest.QuestionProps[] }[] = [];
 // 组卷信息第一部分：题库
-// const tableName = 'wlgjg_2104';
+const tableName = 'xxtxzjg_2312';
 // const tableName = 'czxt_2206';
-const tableName = 'web_design_copy';
+// const tableName = 'web_design_copy';
 
 // 组卷信息第二部分： 题库的构成(抽取规则)，是否乱序
 const isSort = false;
@@ -16,33 +16,22 @@ const extractionRules: SelfTest.RuleProp[] = [
     type: 'sgl', // 不同题型，支持单选，多选，判断
     describe: '单选题',
     startQuNo: 1, // 从哪道题
-    endQuNo: 173, // 到那道题
-    quantity: 100, // 抽题数量
+    endQuNo: 39, // 到那道题
+    quantity: 20, // 抽题数量
     scorePreQu: 1, // 每题得分
-    maxNumber: 173,
+    maxNumber: 39,
   },
-  // {
-  //   tableName,
-  //   id: (ruleIdx += 1),
-  //   type: 'mul',
-  //   describe: '多选题',
-  //   startQuNo: 1,
-  //   endQuNo: 15,
-  //   quantity: 10,
-  //   scorePreQu: 5,
-  //   maxNumber: 15,
-  // },
-  // {
-  //   tableName: 'wlgjg_2103',
-  //   id: (ruleIdx += 1),
-  //   type: 'jug',
-  //   describe: '判断题',
-  //   startQuNo: 1,
-  //   endQuNo: 300,
-  //   quantity: 10,
-  //   scorePreQu: 1,
-  //   maxNumber: 400,
-  // },
+  {
+    tableName,
+    id: (ruleIdx += 1),
+    type: 'mul',
+    describe: '多选题',
+    startQuNo: 1,
+    endQuNo: 24,
+    quantity: 10,
+    scorePreQu: 2,
+    maxNumber: 24,
+  },
 ];
 
 // 组卷第三步：分类抽取原始题库中的所有试题

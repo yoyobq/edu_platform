@@ -75,7 +75,7 @@ export default [
     name: 'self-test',
     icon: 'table',
     path: '/selfTest',
-    component: './SelfTest',
+    component: './SelfTestPY',
   },
   // {
   //   path: '/exercises',

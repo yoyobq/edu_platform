@@ -2,13 +2,12 @@
 import { useModel } from '@umijs/max';
 import { buildSelfTest, calScore } from './model';
 // import { Alert, message, Tabs } from 'antd';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, { useEffect, useState } from 'react';
 // import { useRequest } from 'umi';
 import FunctionPanel from './components/FunctionPanel';
 import JugQuestion from './components/JugQuestion';
 import MulQuestion from './components/MulChoice';
-import ResultBoard from './components/ResultBoard';
 import SglChoice from './components/SglChoice';
 import styles from './index.less';
 
@@ -133,7 +132,7 @@ const SelfTest: React.FC = () => {
                   type={item.type}
                   onChange={onAnswerChange}
                 />
-                {/* { testStatus.hasFinished ? <ResultBoard isCorrect={item.isCorrect} realAnswer= {item.answer} /> : null} */}
+                {/* { testStatus.hasFinished ? <ResultBoard isCorrect={item.isCorrect} /> : null} */}
               </section>
             );
           case 'mul':
@@ -153,9 +152,7 @@ const SelfTest: React.FC = () => {
                   onChange={onAnswerChange}
                   // loading = {isLoading}
                 />
-                {testStatus.hasFinished ? (
-                  <ResultBoard isCorrect={item.isCorrect} realAnswer={item.answer} />
-                ) : null}
+                {/* { testStatus.hasFinished ? <ResultBoard isCorrect={item.isCorrect} realAnswer= {item.answer} /> : null} */}
               </section>
             );
           case 'jug':
@@ -174,14 +171,9 @@ const SelfTest: React.FC = () => {
                   No={item.No}
                   type={item.type}
                   onChange={onAnswerChange}
-                  // loading = {isLoading}
+                  // loading = {isLoading}bang'y
                 />
-                {testStatus.hasFinished ? (
-                  <ResultBoard
-                    isCorrect={item.isCorrect}
-                    realAnswer={item.answer === '1' ? '正确' : '错误'}
-                  />
-                ) : null}
+                {/* { testStatus.hasFinished ? <ResultBoard isCorrect={item.isCorrect} /> : null} */}
               </section>
             );
           default:

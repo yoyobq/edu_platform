@@ -2,8 +2,6 @@ import { extractQuestionsList } from '@/services/SelfTest/index';
 
 let generatedTest: { questions: SelfTest.QuestionProps[] }[] = [];
 // 组卷信息第一部分：题库
-// const tableName = 'wlgjg_2104';
-// const tableName = 'czxt_2206';
 const tableName = 'web_design_copy';
 
 // 组卷信息第二部分： 题库的构成(抽取规则)，是否乱序
@@ -21,28 +19,6 @@ const extractionRules: SelfTest.RuleProp[] = [
     scorePreQu: 1, // 每题得分
     maxNumber: 173,
   },
-  // {
-  //   tableName,
-  //   id: (ruleIdx += 1),
-  //   type: 'mul',
-  //   describe: '多选题',
-  //   startQuNo: 1,
-  //   endQuNo: 15,
-  //   quantity: 10,
-  //   scorePreQu: 5,
-  //   maxNumber: 15,
-  // },
-  // {
-  //   tableName: 'wlgjg_2103',
-  //   id: (ruleIdx += 1),
-  //   type: 'jug',
-  //   describe: '判断题',
-  //   startQuNo: 1,
-  //   endQuNo: 300,
-  //   quantity: 10,
-  //   scorePreQu: 1,
-  //   maxNumber: 400,
-  // },
 ];
 
 // 组卷第三步：分类抽取原始题库中的所有试题

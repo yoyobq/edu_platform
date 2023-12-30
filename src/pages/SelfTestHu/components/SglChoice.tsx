@@ -1,13 +1,10 @@
 import React from 'react';
-// import ResultBoard from '../components/ResultBoard';
-import type { QuestionProps } from '../data';
 import styles from '../index.less';
-import OptionList from './MulOptionList';
 import QuestionImage from './QuestionImage';
+import OptionList from './SglOptionList';
 import Topic from './Topic';
 
-// routes 名字与文件名一致
-const Question: React.FC<QuestionProps> = ({
+const Question: React.FC<SelfTest.QuestionProps> = ({
   No,
   topic,
   options,
@@ -16,10 +13,22 @@ const Question: React.FC<QuestionProps> = ({
   onChange,
   pic_path,
 }) => {
-  // 暂不打乱多选题顺序
+  // 由于选项顺序已经打乱，
+  // sigleSelection.currentAnswer / realAnswer 里存的都是数据库里的A,B,C，D
+  // 对应的 value 也是数据库里真实的 A,B,C,D...，与页面上显示的其实不一致
+  // 所以需要转换
+
+  let selectTag = '';
+  if (currentAnswer === '' || currentAnswer === undefined) {
+    selectTag = '';
+  } else {
+    const index = orderedTag!.indexOf(currentAnswer);
+    selectTag = String.fromCharCode(65 + index);
+  }
+
   return (
-    <div className={styles.question}>
-      <Topic No={No + 1} content={topic} selectTag={currentAnswer} />
+    <div className={styles[`question`]}>
+      <Topic No={No + 1} content={topic} selectTag={selectTag} />
       <div>
         <QuestionImage picPath={pic_path} />
       </div>
@@ -41,7 +50,8 @@ const Question: React.FC<QuestionProps> = ({
 // 与 class 组件中 shouldComponentUpdate() 方法不同的是，
 // 如果 props 相等，areEqual 会返回 true；如果 props 不相等，则返回 false。
 // 这与 shouldComponentUpdate 方法的返回值相反
-const areEqual = (prevProps: QuestionProps, nextProps: QuestionProps) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const areEqual = (prevProps: SelfTest.QuestionProps, nextProps: SelfTest.QuestionProps) => {
   /*
   如果把 nextProps 传入 render 方法的返回结果与
   将 prevProps 传入 render 方法的返回结果一致则返回 true，
@@ -63,4 +73,5 @@ const areEqual = (prevProps: QuestionProps, nextProps: QuestionProps) => {
 };
 
 // memo是高阶组件，用于性能优化，详见 areEqual函数
-export default React.memo(Question, areEqual);
+// export default React.memo(Question, areEqual);
+export default Question;
