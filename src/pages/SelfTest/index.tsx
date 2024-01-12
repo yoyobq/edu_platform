@@ -2,7 +2,7 @@
 import { useModel } from '@umijs/max';
 import { buildSelfTest, calScore } from './model';
 // import { Alert, message, Tabs } from 'antd';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, { useEffect, useState } from 'react';
 // import { useRequest } from 'umi';
 import FunctionPanel from './components/FunctionPanel';
@@ -133,7 +133,9 @@ const SelfTest: React.FC = () => {
                   type={item.type}
                   onChange={onAnswerChange}
                 />
-                {/* { testStatus.hasFinished ? <ResultBoard isCorrect={item.isCorrect} realAnswer= {item.answer} /> : null} */}
+                {testStatus.hasFinished ? (
+                  <ResultBoard isCorrect={item.isCorrect} realAnswer={item.answer} />
+                ) : null}
               </section>
             );
           case 'mul':

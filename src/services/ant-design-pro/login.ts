@@ -30,7 +30,7 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
     operationName: null, // 操作名称，选填，查询文档有多个操作时必填
     variables, // 对象集合，选填
   };
-  console.log(data.query);
+  // console.log(data.query);
 
   return request<API.ResponseData>('/graphql/login', {
     method: 'POST',
