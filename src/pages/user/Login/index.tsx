@@ -4,18 +4,22 @@ import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { FormattedMessage, Helmet, history, useIntl, useModel } from '@umijs/max';
-import { Button, message, Tabs } from 'antd';
-import React, { useState } from 'react';
+import { Button, Tabs, message } from 'antd';
+import SliderCaptcha, { ActionType } from 'rc-slider-captcha';
+import React, { useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import Settings from '../../../../config/defaultSettings';
 import { Lang } from './components/Lang';
 import { LoginMessage } from './components/LoginMessage';
 import { RegisterFrom } from './components/RegisterForm';
+import './index.less';
 
 const Login: React.FC = () => {
   // 记录登录状态及登录方式，用于切换登录方式或显示错误提示
   const [userLoginState, setUserLoginState] = useState<USER.AccountStatus>({});
   const [type, setType] = useState<string>('account');
+  // 用于滑块验证
+  const actionRef = useRef<ActionType>();
 
   // 用于弹出注册表单
   const [regFormVisible, setRegFormVisible] = useState(false);
@@ -62,6 +66,7 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (values: USER.LoginParams) => {
     try {
+      // console.log(actionRef.current);
       // 登录
       const res: any = await login({ ...values, type });
       // res = {id: 2, status: 1}
@@ -108,8 +113,10 @@ const Login: React.FC = () => {
       <Lang />
       <div
         style={{
-          flex: '1',
           padding: '20vh 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center', // 让子元素在主轴上居中
         }}
       >
         <LoginForm
@@ -214,6 +221,35 @@ const Login: React.FC = () => {
                     ),
                   },
                 ]}
+              />
+              <SliderCaptcha
+                style={{
+                  // flex: '1',
+                  padding: '2vh 0',
+                  width: '100%',
+                }}
+                bgSize={{
+                  width: 328,
+                  // height: 110
+                }}
+                mode="slider"
+                tipText={{
+                  default: '请按住滑块，拖动到最右边',
+                  moving: '请按住滑块，拖动到最右边',
+                  error: '验证失败，请重新操作',
+                  success: '验证成功',
+                }}
+                errorHoldDuration={1000}
+                onVerify={(data) => {
+                  console.log(data);
+                  // 默认背景图宽度 320 减去默认拼图宽度 60 所以滑轨宽度是 260
+                  // width 被我改成了 328 减去 60
+                  if (data.x === 268) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject();
+                }}
+                actionRef={actionRef}
               />
             </>
           )}

@@ -1,0 +1,21 @@
+// @import '~antd/es/style/themes/default.less';
+:root {
+  --rcsc-primary: #1890ff; // Ant Design 的主题色
+  --rcsc-primary-light: #bae7ff; // 主色-浅
+  --rcsc-error: #f5222d; // Ant Design 的错误色
+  --rcsc-error-light: #ffccc7; // 错误色-浅
+  --rcsc-success: #52c41a; // Ant Design 的成功色
+  --rcsc-success-light: #b7eb8f; // 成功色-浅
+  --rcsc-border-color: #d9d9d9; // Ant Design 的边框色
+  --rcsc-bg-color: #f5f5f5; // Ant Design 的背景色
+  // --rcsc-text-color: #333; // Ant Design 的文本色
+  --rcsc-button-color: #fff; // 按钮颜色
+  --rcsc-button-hover-color: #fee; // 鼠标移入时，按钮颜色
+  --rcsc-button-bg-color: #1890ff; // 按钮背景颜色
+}
+
+// 调整 rc-slider-captcha 的边框为圆角
+.rc-slider-captcha [class^='rc-slider-captcha-control'],
+.rc-slider-captcha-control-button {
+  border-radius: 8px; /* 仿 antd pro */
+}
