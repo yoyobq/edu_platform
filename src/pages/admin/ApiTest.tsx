@@ -7,12 +7,12 @@ import Footer from '@/components/Footer';
 //   UserOutlined,
 // } from '@ant-design/icons';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
+import { request } from '@umijs/max';
 // import { FormattedMessage, Helmet, history, SelectLang, useIntl, useModel } from '@umijs/max';
-// import { Alert, message, Tabs } from 'antd';
+import { Button } from 'antd';
 import React from 'react';
 // import { useState } from 'react';
 // import Settings from '../../../../config/defaultSettings';
-import { request } from '@umijs/max';
 
 const ApiTest: React.FC = () => {
   const containerClassName = useEmotionCss(() => {
@@ -27,24 +27,66 @@ const ApiTest: React.FC = () => {
     };
   });
 
-  async function test() {
-    // console.log(options);
-    // const body = JSON.stringify(options);
+  // 一个通用的前后台通讯触发函数，可以作为新 api 的起手式
+  async function commonTrigger() {
+    console.log('The common trigger is activated.');
+    const body = null;
+    // JSON.stringify({});
 
-    return request<Record<string, any>>('/api/getSession', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // data: body,
-    });
+    try {
+      // let res = await request<any>('/api/chat', {
+      let res = await request<any>('/api/testLogin', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: body,
+      });
+      console.log(res);
+    } catch (error) {
+      console.error('error msg:', error);
+    }
   }
 
-  const showRes = async () => {
-    console.log(await test());
-  };
+  async function testChat() {
+    console.log('The common trigger is activated.');
+    const body = null;
+    // JSON.stringify({});
 
-  showRes();
+    try {
+      let res = await request<any>('/api/chat', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: body,
+      });
+      console.log(res);
+    } catch (error) {
+      console.error('error msg:', error);
+    }
+  }
+
+  async function testLogin() {
+    console.log('The common trigger is activated.');
+    const body = null;
+    // JSON.stringify({});
+
+    try {
+      // let res = await request<any>('/api/chat', {
+      let res = await request<any>('/api/testLogin', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: body,
+      });
+      console.log(res);
+    } catch (error) {
+      console.error('error msg:', error);
+    }
+  }
+
   return (
     <div className={containerClassName}>
       <section>API test</section>
@@ -53,7 +95,15 @@ const ApiTest: React.FC = () => {
           flex: '1',
           padding: '32px 0',
         }}
-      ></div>
+      >
+        {/* commonTrigger 按钮代码开始 */}
+        <Button onClick={commonTrigger} type="primary">
+          我是一个通用扳机（commonTrigger）
+        </Button>
+        {/* commonTrigger 按钮代码结束 */}
+        <Button onClick={testChat}>测试 /chat</Button>
+        <Button onClick={testLogin}>测试 /testLogin</Button>
+      </div>
       <Footer />
     </div>
   );
