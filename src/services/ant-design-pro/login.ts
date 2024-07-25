@@ -39,17 +39,21 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
     },
     data,
     // ...(options || {}),
-  }).then((response) => {
-    // response 中包含了 account 和 token
-    if (response.success) {
-      // console.log(response.data.checkAccount.token);
+  })
+    .then((response) => {
+      // response 中包含了 account 和 token
+      // if (response.success) {
+      console.log(response.data);
       // 只有在账号登陆时，才会生成新的 token
       Cookies.set('token', response.data.checkAccount.token);
       // 把 account 返回
       return response.data.checkAccount.account;
-    }
-    throw new Error('无效的后台反馈，登录失败');
-  });
+      // }
+      // throw new Error('无效的后台反馈，登录失败');
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
 }
 
 /** (已废弃）获取当前的用户 GET /api/currentUser */
@@ -124,5 +128,47 @@ export async function getFakeCaptcha(
       ...params,
     },
     ...(options || {}),
+  });
+}
+
+// 测试代码，利用 mutation 改变数据库
+export async function updateAccount(body: USER.UpdateParams, options?: { [key: string]: any }) {
+  const variables = {
+    params: {
+      id: body.id,
+      loginName: body.loginName,
+      loginEmail: body.loginEmail,
+      loginPassword: body.loginPassword,
+    },
+  };
+
+  const mutation = gql`
+    mutation ($params: UpdateParams!) {
+      updateAccount(params: $params) {
+        id
+        loginName
+        loginEmail
+        loginPassword
+      }
+    }
+  `;
+
+  const data = {
+    query: mutation.loc?.source.body,
+    operationName: null,
+    variables,
+  };
+
+  return request<API.ResponseData>('/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data,
+  }).then((response) => {
+    if (response.success) {
+      return response.data.updateAccount;
+    }
+    throw new Error('无效的后台反馈，更新账户失败');
   });
 }

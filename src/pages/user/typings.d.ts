@@ -1,7 +1,7 @@
 declare namespace USER {
   type AccountStatus = {
     id?: number;
-    status?: number;
+    status?: string;
     type?: string;
   };
 
@@ -14,6 +14,13 @@ declare namespace USER {
     loginPassword?: string;
     autoLogin?: boolean;
     type?: string;
+  };
+
+  type UpdateParams = {
+    id: number;
+    loginName?: string;
+    loginEmail?: string;
+    loginPassword?: string;
   };
 
   type CurrentUser = {

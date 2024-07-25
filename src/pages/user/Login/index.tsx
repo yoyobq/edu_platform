@@ -69,9 +69,11 @@ const Login: React.FC = () => {
       // console.log(actionRef.current);
       // 登录
       const res: any = await login({ ...values, type });
-      // res = {id: 2, status: 1}
+      // res = {id: 2, status: 1} 旧数据， status 是数值常量
+      // res = {id: 2, status: 'ACTIVE'} 新数据，改动了数据库中存储的 status 为枚举类型
+      // TODO：根据不同的 status 做不同的处理
       const { id, status } = res;
-      if (id !== null && status === 1) {
+      if (id !== null && status === 'ACTIVE') {
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
@@ -93,7 +95,7 @@ const Login: React.FC = () => {
       //   defaultMessage: error.message,
       // });
       // message.error(error.message);
-      setUserLoginState({ status: 0, type });
+      setUserLoginState({ status: 'UNKNOWN', type });
     }
   };
 
@@ -168,7 +170,7 @@ const Login: React.FC = () => {
             ]}
           />
 
-          {status === 0 && loginType === 'account' && (
+          {status === 'UNKNOWN' && loginType === 'account' && (
             <LoginMessage
               content={intl.formatMessage({
                 id: 'pages.login.accountLogin.errorMessage',
