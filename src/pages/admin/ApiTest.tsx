@@ -1,4 +1,5 @@
 import Footer from '@/components/Footer';
+import { updateAccount } from '@/services/ant-design-pro/login';
 
 // import {
 //   // AlipayCircleOutlined,
@@ -67,6 +68,25 @@ const ApiTest: React.FC = () => {
     }
   }
 
+  async function pythonHi() {
+    console.log('The PythonHi trigger is activated.');
+    const body = null;
+    // JSON.stringify({});
+
+    try {
+      let res = await request<any>('/api/pythonHi', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: body,
+      });
+      console.log(res);
+    } catch (error) {
+      console.error('error msg:', error);
+    }
+  }
+
   async function testLogin() {
     console.log('The common trigger is activated.');
     const body = null;
@@ -87,6 +107,23 @@ const ApiTest: React.FC = () => {
     }
   }
 
+  // 重置 guest 密码
+  const handleUpdateEmail = async () => {
+    try {
+      // 更新账户邮箱
+      const res: any = await updateAccount({
+        id: 3, // 用户的 id
+        loginEmail: 'guest@example.com', // 新的邮箱地址
+        loginPassword: 'guest',
+      });
+      console.log('账户邮箱更新成功：', res);
+      // 在这里可以做一些成功更新后的操作，例如提示用户更新成功、重新加载数据等
+    } catch (error) {
+      console.error('更新账户邮箱失败：', error);
+      // 在这里可以做一些更新失败后的操作，例如提示用户更新失败、记录错误日志等
+    }
+  };
+
   return (
     <div className={containerClassName}>
       <section>API test</section>
@@ -103,6 +140,8 @@ const ApiTest: React.FC = () => {
         {/* commonTrigger 按钮代码结束 */}
         <Button onClick={testChat}>测试 /chat</Button>
         <Button onClick={testLogin}>测试 /testLogin</Button>
+        <Button onClick={pythonHi}>测试 /pythonHi</Button>
+        <Button onClick={handleUpdateEmail}>测试 /handleUpdateEmail</Button>
       </div>
       <Footer />
     </div>
