@@ -1,14 +1,20 @@
 import {
+  checkEmailUsage,
+  checkStaffByJobId,
+  checkVerifCode,
+  sendRegistrationEmail,
+  validateTeacherIdentity,
+} from '@/services/ant-design-pro/register';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import {
   CheckCard,
   ProForm,
   ProFormText,
   // ProFormTextArea,
   StepsForm,
 } from '@ant-design/pro-components';
-import { request } from '@umijs/max';
-import { Avatar, message, Modal } from 'antd';
-import { debounce } from 'lodash';
-import { useEffect, useState } from 'react';
+import { Alert, Avatar, Button, Col, FormInstance, message, Modal, Row } from 'antd';
+import { useEffect, useRef, useState } from 'react';
 
 const waitTime = (time: number = 100) => {
   return new Promise((resolve) => {
@@ -24,57 +30,199 @@ interface RegisterFormProps {
 }
 
 export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
-  const [jobId, setJobId]: [string | undefined, React.Dispatch<React.SetStateAction<string>>] =
-    useState('');
+  // const [jobId, setJobId]: [string | undefined, React.Dispatch<React.SetStateAction<string>>] =
+  //   useState('');
+  const formRef = useRef<FormInstance>();
+  // 默认教师身份
+  const [identityType, setIdentityType] = useState<string>('teacher');
 
-  // 根据 jobId 从爬虫获取 name
-  const crawlName = async () => {
+  // 用于存放注册过程中，各个分部表单的数据
+  const [registrationData, setRegistrationData] = useState<Record<string, any>>({});
+
+  // 提供 loading 状态，避免用户多次点击按钮导致重复操作
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [loading, setLoading] = useState(false);
+
+  const [countdown, setCountdown] = useState(0);
+  const [emailSent, setEmailSent] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [verificationString, setVerificationString] = useState('');
+
+  // step1：选择身份并提供相关信息进行验证
+  const chooseAndValidateIdentity = async (formData: Record<string, any>) => {
+    // 将当前步骤数据合并到全局状态
+    // React 会保证 prevData 是最新的状态，因此你合并数据时不会遗漏前面的表单数据。
+    setRegistrationData((prevData) => ({ ...prevData, ...formData }));
+
+    // 此处需要注意的是 setRegistrationData 是异步更新，所以当前步骤数据还是应该从 formData 中获得
+    const { name, jobId, stuname, studentId, department, advisorName } = formData;
+
     try {
-      const name = await request<Record<string, any>>('/api/crawl?noToken=true', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      console.log(name);
-      return name;
+      let res: boolean = false;
+      if (identityType === 'teacher') {
+        // 若存在匹配信息，res 变成 true
+        res = await validateTeacherIdentity({ name, jobId });
+        setRegistrationData((prevData) => ({ ...prevData, identityType: 'teacher' }));
+      } else if (identityType === 'student') {
+        // 此部分代码未完成
+        console.log('学生身份验证');
+        console.log(`姓名: ${stuname}`);
+        console.log(`学号: ${studentId}`);
+        console.log(`系部: ${department}`);
+        console.log(`班主任姓名: ${advisorName}`);
+      }
+
+      if (!res) {
+        message.error(`查无匹配 [${jobId}]${name} 的教职工。新进教师若确认无误，请联系管理员。`);
+      } else {
+        // 根据 jobId 核对该教职工是否已经注册过
+        const staffInfo = await checkStaffByJobId({ jobId });
+        // 如果查无 staffInfo，为 null 则允许注册
+        res = !staffInfo;
+        if (res) {
+          message.success('姓名工号验证成功。');
+        } else {
+          message.error(`教师 [${jobId}]${name} 已经注册，若有疑问，请联系管理员。`);
+        }
+      }
+
+      return res;
     } catch (error) {
       console.error(error);
+      return false;
     }
   };
 
+  // step2.1 验证 Email 发送流程
+  const sendRegEmail = async () => {
+    // 检查是否已经有有效倒计时
+    const storedExpiryTime = sessionStorage.getItem('emailCountdown');
+    const timeLeft = storedExpiryTime ? parseInt(storedExpiryTime, 10) - Date.now() : 0;
+
+    if (timeLeft > 0) {
+      const secondsLeft = Math.ceil(timeLeft / 1000);
+      message.warning(`邮件发送计时被非法重置，请等待 ${secondsLeft} 秒后再发送验证邮件。`);
+      setCountdown(secondsLeft);
+      return; // 倒计时尚未结束，阻止邮件发送
+    }
+
+    try {
+      // 获取 Email 地址
+      const email: string = formRef.current?.getFieldValue('email');
+      const { name, jobId, identityType } = registrationData;
+
+      // 检查该邮箱是否已注册
+      const res = await checkEmailUsage({ loginEmail: email });
+
+      if (!res.used) {
+        message.success('邮箱已记录，注册信发送中。');
+
+        // 此处应该有不同身份的不同注册逻辑，待后期补充
+        const param = {
+          applicantType: 'registration',
+          email,
+          applicantId: 1,
+          issuerId: 0,
+          data: {
+            name,
+            jobId,
+            email,
+            identityType,
+          },
+        };
+
+        // 发送注册验证邮件
+        const sendEmailResult = await sendRegistrationEmail(param);
+
+        if (sendEmailResult) {
+          message.success('验证邮件已成功发送！');
+          setEmailSent(true);
+
+          // 为防止高级用户随意跳过倒计时滥发邮件，将倒计时结束时间存入 sessionStorage
+          // 请注意这并不是一个严格的限制，还是有办法跳过的
+          const expiryTime = Date.now() + 60 * 1000;
+          sessionStorage.setItem('emailCountdown', expiryTime.toString());
+
+          // 重置倒计时
+          setCountdown(60);
+
+          setRegistrationData((prevData) => ({ ...prevData, email }));
+        } else {
+          message.error('验证邮件发送失败，请更换邮箱或稍后再试。');
+        }
+      } else {
+        message.error(`${email} 邮箱已被使用，若确已注册，请找回密码；若从未注册，请联系管理员。`);
+      }
+    } catch (error) {
+      message.error('操作失败，请检查您的网络连接或稍后重试，若多次出现此提示，请联系管理员。');
+      // console.error('检查邮箱或发送邮件时出错:', error);
+    }
+  };
+
+  // step2.2：提交验证码，供后台二次验证
+  const sendAndcheckVerifCode = async (formData: Record<string, any>) => {
+    // 提取表单中的 email 和 verificationString
+    // const { email, verificationString } = formData;
+    setRegistrationData((prevData) => ({ ...prevData, ...formData }));
+
+    try {
+      setLoading(true);
+
+      // 将 {name, jobId, email, verificationString } 整合后重新提交给后台
+      const { verificationString } = formData;
+      const verifResult = await checkVerifCode({ verifCode: verificationString });
+
+      if (verifResult) {
+        // 假设验证通过，可以进入下一步
+        message.success('邮箱验证成功！');
+        return true; // 成功后进入下一步
+      }
+    } catch (error) {
+      message.error('验证失败，请检查验证码后重试');
+      return false; // 验证失败，不进入下一步
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 页面加载时检查 sessionStorage 中是否有存储的倒计时结束时间
   useEffect(() => {
-    console.log(jobId);
-    if (jobId !== undefined && jobId.length === 4) {
-      const name = crawlName();
-      console.log(name);
+    const storedExpiryTime = sessionStorage.getItem('emailCountdown');
+    if (storedExpiryTime) {
+      const timeLeft = parseInt(storedExpiryTime, 10) - Date.now();
+
+      if (timeLeft > 0) {
+        setCountdown(Math.floor(timeLeft / 1000)); // 设置剩余倒计时
+        setEmailSent(true); // 恢复已发送状态
+      } else {
+        sessionStorage.removeItem('emailCountdown'); // 如果倒计时已过期，清除存储
+      }
     }
-  }, [jobId]);
+  }, []);
 
-  // 处理 JobId 变更
-  // const handleJobIdChange = (value: any) => {
-  //   setJobId(value);
-  // };
+  // 倒计时逻辑
+  useEffect(() => {
+    if (countdown > 0 && emailSent) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer); // 在回调中正确清除定时器
+            return 0; // 倒计时结束，重置为 0
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-  // 定义防抖处理函数，抖动指的是表单内容变化时频繁的触发 onChange
-  const handleValuesChangeDebounced = debounce((value) => {
-    // console.log('Form values changed:', value);
-    if (value.jobId !== jobId) {
-      setJobId(value.jobId);
+      // 组件卸载或 countdown 变化时清除定时器
+      return () => clearInterval(timer);
     }
-  }, 500);
-
-  // 监控表单变化
-  const handleFormValuesChange = (_changedValues: any, allValues: any) => {
-    // handleValuesChangeDebounced(changedValues);
-    handleValuesChangeDebounced(allValues);
-    // 在这里进行表单内容变化的处理逻辑
-  };
+  }, [countdown, emailSent]); // 确保依赖项正确
 
   const { visible, hideModal } = props;
   return (
     <>
       <StepsForm
+        formRef={formRef} // 将 formRef 绑定到 StepsForm
         onFinish={async (values) => {
           console.log(values);
           await waitTime(1000);
@@ -86,15 +234,21 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
             required: '此项为必填项',
           },
         }}
+        submitter={{
+          submitButtonProps: {
+            loading, // 当任一操作在加载时显示 loading
+          },
+        }}
         stepsFormRender={(dom, submitter) => {
           return (
             <Modal
-              title="分步表单"
-              width={'45%'}
+              title="新用户注册"
+              width={'60%'}
               onCancel={() => hideModal()}
               open={visible}
               footer={submitter}
               destroyOnClose
+              maskClosable={false} // 禁止点击遮罩关闭
             >
               {dom}
             </Modal>
@@ -104,21 +258,16 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
         <StepsForm.StepForm
           name="base"
           title="身份选择"
-          onFinish={async (values) => {
-            console.log(values);
-            const { name, jobId } = values;
-            if (name === jobId) {
-              return true;
-            }
-
-            return false;
-            // await waitTime(200);
-            // return true;
-          }}
-          onValuesChange={handleFormValuesChange}
+          onFinish={chooseAndValidateIdentity}
+          // onValuesChange={handleFormValuesChange}
         >
           <ProForm.Group title="身份">
-            <CheckCard.Group style={{ width: '100%' }} defaultValue="teacher">
+            <CheckCard.Group
+              style={{ width: '100%' }}
+              defaultValue="teacher"
+              multiple={false}
+              onChange={(value) => setIdentityType((value as string) || 'teacher')}
+            >
               <CheckCard
                 title="教师"
                 avatar={
@@ -144,120 +293,178 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
               />
             </CheckCard.Group>
           </ProForm.Group>
-          <ProFormText
-            name="name"
-            width="md"
-            label="您的真实姓名"
-            // tooltip="最长为 24 位，用于标定的唯一 id"
-            placeholder="请输入姓名"
-            rules={[
-              { required: true },
-              { min: 2, message: '姓名至少为2个字' },
-              { max: 30, message: '姓名最多为30个字' },
-              { pattern: /^[\u4e00-\u9fa5a-zA-Z]+$/, message: '姓名必须为纯中文或纯英文' },
-            ]}
+          {identityType === 'teacher' ? (
+            <>
+              <ProFormText
+                name="name"
+                width="md"
+                label="您的真实姓名"
+                transform={(value) => value.trim()}
+                // tooltip="最长为 24 位，用于标定的唯一 id"
+                placeholder="请输入姓名"
+                rules={[
+                  { required: true },
+                  { min: 2, message: '姓名至少为2个字' },
+                  { max: 30, message: '姓名最多为30个字' },
+                  {
+                    pattern: /^[\u4e00-\u9fa5a-zA-Z]+$/,
+                    message: '姓名必须为纯中文或纯英文，首末位不应有空格',
+                  },
+                ]}
+              />
+              <ProFormText
+                name="jobId"
+                width="md"
+                label="您的工号"
+                tooltip="请提供校园网工号，用于验证教师身份"
+                placeholder="请输入工号"
+                rules={[
+                  { required: true },
+                  {
+                    pattern: /^[0-9]{3,5}$/,
+                    message: '工号一般是4位纯数字组成，首末位不应有空格',
+                  },
+                ]}
+              />
+            </>
+          ) : (
+            <>
+              <ProFormText
+                name="stuname"
+                width="md"
+                label="您的真实姓名"
+                placeholder="请输入姓名"
+                rules={[
+                  { required: true },
+                  { min: 2, message: '姓名至少为2个字' },
+                  { max: 30, message: '姓名最多为30个字' },
+                  { pattern: /^[\u4e00-\u9fa5a-zA-Z]+$/, message: '姓名必须为纯中文或纯英文' },
+                ]}
+              />
+              <ProFormText
+                name="studentId"
+                width="md"
+                label="您的学号"
+                placeholder="请输入学号"
+                rules={[
+                  { required: true },
+                  {
+                    pattern: /^[0-9]{5,10}$/,
+                    message: '学号一般是5到10位纯数字组成',
+                  },
+                ]}
+              />
+              <ProFormText
+                name="department"
+                width="md"
+                label="系部"
+                placeholder="请输入系部"
+                rules={[{ required: true, message: '请输入系部' }]}
+              />
+              <ProFormText
+                name="advisorName"
+                width="md"
+                label="班主任姓名"
+                placeholder="请输入班主任姓名"
+                rules={[{ required: true, message: '请输入班主任姓名' }]}
+              />
+            </>
+          )}
+        </StepsForm.StepForm>
+        <StepsForm.StepForm name="email" title="验证邮箱" onFinish={sendAndcheckVerifCode}>
+          <Alert
+            message={null} // 去掉默认 message，使 description 填满整个 Alert
+            description={
+              <span>
+                <ol style={{ marginLeft: '4px', marginTop: '4px' }}>
+                  <li>
+                    1. <strong>该邮箱将作为注册后的登录凭证。</strong>
+                  </li>
+                  <li>
+                    2. 如果未在收件箱中找到确认邮件，<strong>请检查垃圾邮件文件夹</strong>。
+                  </li>
+                  <li>3. 测试表明 QQ 邮箱和 Hotmail 邮箱能确保收到邮件。</li>
+                  <li>4. 非主流邮箱地址可能存在邮件延迟。</li>
+                </ol>
+              </span>
+            }
+            type="warning"
+            showIcon
+            icon={<ExclamationCircleOutlined style={{ fontSize: '16px' }} />} // 调整图标大小
+            style={{
+              marginBottom: '16px',
+              padding: '12px 24px',
+            }}
           />
-          <ProFormText
-            name="jobId"
-            width="md"
-            label="您的工号"
-            tooltip="请提供校园网工号，用于验证教师身份"
-            placeholder="请输入工号"
-            rules={[
-              { required: true },
-              {
-                pattern: /^[0-9]{3,5}$/,
-                message: '工号一般是4位纯数字组成',
-              },
-            ]}
-          />
+          <Row gutter={6} align="middle">
+            {/* 表单部分 */}
+            <Col xs={24} sm={16} md={16}>
+              <ProFormText
+                name="email"
+                width="md"
+                label="邮箱地址"
+                placeholder="请输入邮箱地址"
+                rules={[
+                  { required: true, message: '请输入邮箱地址' },
+                  { type: 'email', message: '请输入有效的邮箱地址' },
+                ]}
+              />
+            </Col>
+            {/* 按钮部分 */}
+            <Col xs={24} sm={8} md={8}>
+              <Button
+                type="primary"
+                onClick={sendRegEmail}
+                disabled={countdown > 0}
+                style={{ marginTop: '4px' }} // 只添加顶部间距，保持对齐
+                block // 在小屏幕时让按钮自适应宽度
+              >
+                {countdown > 0 ? `${countdown} 后可重发` : `发送验证码`}
+              </Button>
+            </Col>
+          </Row>
+          {registrationData.email && (
+            <>
+              <Alert
+                message={`验证码已发送，请检查收件箱或垃圾邮件，若确未收到邮件，可倒计时结束后重发。`}
+                type="info"
+                style={{
+                  marginBottom: '16px',
+                  padding: '8px 16px',
+                }}
+              />
+              <ProFormText
+                name="verificationString"
+                width="xl"
+                label="验证码"
+                placeholder="请输入64位16进制字符串"
+                rules={[
+                  { required: true, message: '请输入验证字符串' },
+                  { len: 64, message: '验证字符串必须为64位' },
+                  { pattern: /^[0-9a-fA-F]+$/, message: '验证字符串必须为16进制' },
+                ]}
+                transform={(value) => value.trim()}
+              />
+            </>
+          )}
+        </StepsForm.StepForm>
+        <StepsForm.StepForm name="info" title="信息补完" onFinish={async () => {}}>
+          <>
+            <h2>请检查邮箱</h2>
+          </>
+        </StepsForm.StepForm>
+        <StepsForm.StepForm
+          name="finish"
+          title="请检查邮箱"
+          onFinish={async () => {
+            hideModal();
+          }}
+        >
+          <>
+            <h2>请检查邮箱</h2>
+          </>
         </StepsForm.StepForm>
       </StepsForm>
     </>
   );
 };
-
-{
-  /* <StepsForm.StepForm name="time" title="完成设置">
-<ProFormCheckbox.Group
-  name="checkbox"
-  label="部署单元"
-  rules={[
-    {
-      required: true,
-    },
-  ]}
-  options={['部署单元1', '部署单元2', '部署单元3']}
-/>
-<ProFormSelect
-  label="部署分组策略"
-  name="remark"
-  rules={[
-    {
-      required: true,
-    },
-  ]}
-  width="md"
-  initialValue="1"
-  options={[
-    {
-      value: '1',
-      label: '策略一',
-    },
-    { value: '2', label: '策略二' },
-  ]}
-/>
-<ProFormSelect
-  label="Pod 调度策略"
-  name="remark2"
-  width="md"
-  initialValue="2"
-  options={[
-    {
-      value: '1',
-      label: '策略一',
-    },
-    { value: '2', label: '策略二' },
-  ]}
-/>
-</StepsForm.StepForm> */
-}
-
-{
-  /*
-          <ProFormText
-            name="name"
-            width="md"
-            label="实验名称"
-            tooltip="最长为 24 位，用于标定的唯一 id"
-            placeholder="请输入名称"
-            rules={[{ required: true }]}
-          />
-        <ProFormDatePicker name="date" label="日期" />
-          <ProForm.Group title="时间选择">
-            <ProFormDateTimePicker name="dateTime" label="开始时间" />
-            <ProFormDatePicker name="date" label="结束时间" />
-          </ProForm.Group>
-          <ProFormTextArea name="remark" label="备注" width="lg" placeholder="请输入备注" />*/
-}
-
-{
-  /* 
-        <StepsForm.StepForm name="checkbox" title="验证邮箱">
-          <ProFormCheckbox.Group
-            name="checkbox"
-            label="迁移类型"
-            width="lg"
-            options={['结构迁移', '全量迁移', '增量迁移', '全量校验']}
-          />
-          <ProForm.Group>
-            <ProFormText width="md" name="dbname" label="业务 DB 用户名" />
-            <ProFormDatePicker name="datetime" label="记录保存时间" width="sm" />
-            <ProFormCheckbox.Group
-              name="checkbox"
-              label="迁移类型"
-              options={['完整 LOB', '不同步 LOB', '受限制 LOB']}
-            />
-          </ProForm.Group> 
-        </StepsForm.StepForm> */
-}
