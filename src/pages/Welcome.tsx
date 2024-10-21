@@ -85,20 +85,20 @@ const InfoCard: React.FC<{
 };
 
 const Welcome: React.FC = () => {
+  // 主题配色信息
   const { token } = theme.useToken();
+
+  // 获取用户的全局初始化信息
   const { initialState } = useModel('@@initialState');
-  // console.log(initialState);
   return (
     <PageContainer>
       <Card
         style={{
           borderRadius: 8,
-        }}
-        bodyStyle={{
           backgroundImage:
             initialState?.settings?.navTheme === 'realDark'
-              ? 'background-image: linear-gradient(75deg, #1A1B1F 0%, #191C1F 100%)'
-              : 'background-image: linear-gradient(75deg, #FBFDFF 0%, #F5F7FF 100%)',
+              ? 'linear-gradient(75deg, #1A1B1F 0%, #191C1F 100%)'
+              : 'linear-gradient(75deg, #FBFDFF 0%, #F5F7FF 100%)',
         }}
       >
         <div

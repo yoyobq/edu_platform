@@ -50,6 +50,7 @@ const Login: React.FC = () => {
   // 引入 i18n 国际化
   const intl = useIntl();
 
+  // 从后台获取当前登录用户的具体信息
   const fetchUserInfo = async (accountId: number) => {
     const userInfo = await initialState?.fetchUserInfo?.(accountId);
     if (userInfo) {

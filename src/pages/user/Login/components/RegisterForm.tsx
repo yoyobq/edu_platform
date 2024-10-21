@@ -13,16 +13,27 @@ import {
   // ProFormTextArea,
   StepsForm,
 } from '@ant-design/pro-components';
-import { Alert, Avatar, Button, Col, FormInstance, message, Modal, Row } from 'antd';
+import {
+  Alert,
+  Avatar,
+  Button,
+  Col,
+  Descriptions,
+  FormInstance,
+  message,
+  Modal,
+  Row,
+  Tag,
+} from 'antd';
 import { useEffect, useRef, useState } from 'react';
 
-const waitTime = (time: number = 100) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, time);
-  });
-};
+// const waitTime = (time: number = 100) => {
+//   return new Promise((resolve) => {
+//     setTimeout(() => {
+//       resolve(true);
+//     }, time);
+//   });
+// };
 
 interface RegisterFormProps {
   visible: boolean;
@@ -45,8 +56,9 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
 
   const [countdown, setCountdown] = useState(0);
   const [emailSent, setEmailSent] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [verificationString, setVerificationString] = useState('');
+
+  // 用于存储验证码
+  const [verifCode, setVerifCode] = useState('');
 
   // step1：选择身份并提供相关信息进行验证
   const chooseAndValidateIdentity = async (formData: Record<string, any>) => {
@@ -111,6 +123,30 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
       const email: string = formRef.current?.getFieldValue('email');
       const { name, jobId, identityType } = registrationData;
 
+      console.log(email);
+      // 检查邮箱是否填写
+      if (!email) {
+        formRef.current?.setFields([
+          {
+            name: 'email',
+            errors: ['请输入邮箱地址'],
+          },
+        ]);
+        return;
+      }
+
+      // 使用正则表达式来检查 Email 格式是否有效
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailPattern.test(email)) {
+        formRef.current?.setFields([
+          {
+            name: 'email',
+            errors: ['请输入有效的邮箱地址'],
+          },
+        ]);
+        return;
+      }
+
       // 检查该邮箱是否已注册
       const res = await checkEmailUsage({ loginEmail: email });
 
@@ -168,21 +204,76 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
     try {
       setLoading(true);
 
-      // 将 {name, jobId, email, verificationString } 整合后重新提交给后台
+      // 出于安全考虑只将验证码提交给后台，其余 name，jobId 等信息
+      // 由验证码 decode 后计算得出
       const { verificationString } = formData;
       const verifResult = await checkVerifCode({ verifCode: verificationString });
 
       if (verifResult) {
         // 假设验证通过，可以进入下一步
         message.success('邮箱验证成功！');
+        setVerifCode(verificationString);
         return true; // 成功后进入下一步
       }
     } catch (error) {
-      message.error('验证失败，请检查验证码后重试');
+      formRef.current?.setFields([
+        {
+          name: 'verificationString',
+          errors: ['验证码无效或过期，请检查输入'],
+        },
+      ]);
       return false; // 验证失败，不进入下一步
     } finally {
       setLoading(false);
     }
+  };
+
+  // step3: 补完并验证信息，开启后台流程
+  const completeUserInfo = async (formData: Record<string, any>) => {
+    // 提取数据
+    const { loginName, nickname, password } = formData;
+
+    // 1. 检查 loginName 是否存在，不存在则置为空字符串
+    const validatedLoginName = loginName?.trim() || '';
+
+    // 2. 检查 nickname 是否存在，不存在则使用 registrationData.name 作为默认值
+    const validatedNickname = nickname?.trim() || `${registrationData.name}老师`;
+
+    // 3. 检查 password 是否符合规则
+    const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d|[!@#$%^&*()_+}{":;'?/>.<,]).{8,}$/;
+    if (!password || !passwordPattern.test(password)) {
+      message.error('密码不符合要求，请确保至少 8 位，包含字母和数字或特殊字符的组合');
+      return false;
+    }
+    const validatedPasswd = password;
+
+    console.log(validatedLoginName, validatedNickname, validatedPasswd);
+
+    // 4. 检查 verificationString 是否存在并符合规则
+    const verifCodePattern = /^[0-9a-fA-F]{64}$/;
+    if (!verifCode || !verifCodePattern.test(verifCode)) {
+      message.error('验证码出错或被非法修改，请重新开始注册流程');
+      return false;
+    }
+
+    return false;
+    // 如果以上所有验证都通过，则开始后台通信逻辑
+    // try {
+    //   // 你的后台通信逻辑，例如：
+    //   // const result = await api.submitRegistration({
+    //   //   loginName: validatedLoginName,
+    //   //   nickname: validatedNickname,
+    //   //   password,
+    //   //   verificationString,
+    //   // });
+
+    //   message.success('验证成功，信息已提交');
+    //   return true; // 表示表单提交成功
+    // } catch (error) {
+    //   console.error('提交信息时发生错误：', error);
+    //   message.error('提交信息时发生错误，请稍后重试');
+    //   return false;
+    // }
   };
 
   // 页面加载时检查 sessionStorage 中是否有存储的倒计时结束时间
@@ -223,9 +314,7 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
     <>
       <StepsForm
         formRef={formRef} // 将 formRef 绑定到 StepsForm
-        onFinish={async (values) => {
-          console.log(values);
-          await waitTime(1000);
+        onFinish={async () => {
           hideModal();
           message.success('提交成功');
         }}
@@ -426,7 +515,13 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
           {registrationData.email && (
             <>
               <Alert
-                message={`验证码已发送，请检查收件箱或垃圾邮件，若确未收到邮件，可倒计时结束后重发。`}
+                message={
+                  <>
+                    验证码已发送，30 分钟内有效，请检查收件箱或垃圾邮件，
+                    <br />
+                    若确未收到邮件，可倒计时结束后重发。
+                  </>
+                }
                 type="info"
                 style={{
                   marginBottom: '16px',
@@ -448,21 +543,101 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
             </>
           )}
         </StepsForm.StepForm>
-        <StepsForm.StepForm name="info" title="信息补完" onFinish={async () => {}}>
-          <>
-            <h2>请检查邮箱</h2>
-          </>
-        </StepsForm.StepForm>
-        <StepsForm.StepForm
-          name="finish"
-          title="请检查邮箱"
-          onFinish={async () => {
-            hideModal();
-          }}
-        >
-          <>
-            <h2>请检查邮箱</h2>
-          </>
+        <StepsForm.StepForm name="info" title="信息补完" onFinish={completeUserInfo}>
+          {/* 使用 Descriptions 显示不可修改的信息 */}
+          <Descriptions
+            bordered
+            column={1} // 单列显示
+            size="small" // 设置为 small 以缩小字体和行高
+            style={{ marginBottom: '16px' }}
+          >
+            {identityType === 'teacher' && (
+              <Descriptions.Item label="工号">{registrationData.jobId}</Descriptions.Item>
+            )}
+            <Descriptions.Item label="姓名">{registrationData.name}</Descriptions.Item>
+            <Descriptions.Item label="邮箱">{registrationData.email}</Descriptions.Item>
+          </Descriptions>
+
+          {/* 登录名 */}
+          <Row gutter={6} align="middle" style={{ marginBottom: '8px' }}>
+            <Col xs={24} sm={24}>
+              <ProFormText
+                name="loginName"
+                label={
+                  <>
+                    <strong>登录名</strong>
+                    <Tag color="green" style={{ marginLeft: '8px' }}>
+                      选填
+                    </Tag>
+                  </>
+                }
+                placeholder="登录名可替代邮箱作为登录凭证"
+                extra="登录名只能包含小写字母、数字和下划线，不得少于 4 位"
+                rules={[
+                  { min: 4, message: '登录名不得少于 4 位' },
+                  { pattern: /^[a-z0-9_]+$/, message: '登录名只能包含小写字母、数字、下划线' },
+                ]}
+              />
+            </Col>
+          </Row>
+
+          {/* 昵称 */}
+          <Row gutter={6} align="middle" style={{ marginBottom: '8px' }}>
+            <Col xs={24} sm={24}>
+              <ProFormText
+                name="nickname"
+                label={
+                  <>
+                    <strong>昵称</strong>
+                    <Tag color="green" style={{ marginLeft: '8px' }}>
+                      选填
+                    </Tag>
+                  </>
+                }
+                placeholder="昵称用于日常使用时的名字显示"
+                extra="昵称可以包含中文、字母、数字、下划线，2 到 20 个字符"
+                rules={[
+                  { min: 2, message: '昵称最少 2 个字符' },
+                  { max: 20, message: '昵称最多 20 个字符' },
+                  {
+                    pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/,
+                    message: '昵称只能包含中文、字母、数字、下划线',
+                  },
+                ]}
+              />
+            </Col>
+          </Row>
+
+          {/* 密码输入 */}
+          <Row gutter={6} align="middle" style={{ marginBottom: '8px' }}>
+            <Col xs={24} sm={24}>
+              <ProFormText.Password
+                name="password"
+                label={
+                  <>
+                    <strong>登录密码</strong>
+                    <Tag color="red" style={{ marginLeft: '8px' }}>
+                      必填
+                    </Tag>
+                  </>
+                }
+                placeholder="密码用于今后的登录"
+                extra="登录密码至少 8 位，包含字母、数字、符号中的两种"
+                rules={[
+                  { required: true, message: '请输入密码' },
+                  { min: 8, message: '密码至少 8 个字符' },
+                  // {
+                  //   pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/>.<,]).{8,}$/,
+                  //   message: '密码需包含大小写字母、数字和特殊字符中的三种',
+                  // },
+                  {
+                    pattern: /^(?=.*[a-zA-Z])(?=.*\d|[!@#$%^&*()_+}{":;'?/>.<,]).{8,}$/,
+                    message: '密码需包含字母和数字或特殊字符中的至少两种',
+                  },
+                ]}
+              />
+            </Col>
+          </Row>
         </StepsForm.StepForm>
       </StepsForm>
     </>

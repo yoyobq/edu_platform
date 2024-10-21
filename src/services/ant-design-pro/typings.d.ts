@@ -20,24 +20,43 @@ declare namespace API {
   };
 
   type CurrentUser = {
-    name?: string;
+    id: number;
+    loginName?: string;
+    nickname: string;
+    loginEmail: string;
     avatar?: string;
-    userid?: string;
     email?: string;
     signature?: string;
-    title?: string;
-    group?: string;
-    tags?: { key?: string; label?: string }[];
-    notifyCount?: number;
-    unreadCount?: number;
-    country?: string;
-    access?: string;
-    geographic?: {
-      province?: { label?: string; key?: string };
-      city?: { label?: string; key?: string };
-    };
+    accessGroup: string[];
     address?: string;
     phone?: string;
+    // tags?: { key?: string; label?: string }[];
+    notifyCount?: number;
+    unreadCount?: number;
+    role: string;
+    staffInfo?: {
+      id: number;
+      jobId: number;
+      name: string;
+      age?: number;
+      departmentId?: number;
+      jobTitle?: string;
+      remarks?: string;
+      createdAt?: string;
+      updatedAt?: string;
+    };
+    studentInfo?: {
+      id: number;
+      stuId: number;
+      name: string;
+      age?: number;
+      departmentId?: number;
+      classId?: number;
+      clubId?: number;
+      remarks: string;
+      createdAt: string;
+      updatedAt: string;
+    };
   };
 
   type LoginResult = {

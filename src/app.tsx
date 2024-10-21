@@ -39,9 +39,11 @@ export async function getInitialState(): Promise<{
   };
 
   const token = Cookies.get('token');
+  console.log(token);
   if (token) {
     let loading = true;
     const currentUser = await fetchUserInfo(0);
+    console.log(currentUser);
     if (currentUser) {
       loading = false;
       return {
@@ -72,7 +74,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       },
     },
     waterMarkProps: {
-      content: initialState?.currentUser?.name,
+      content: initialState?.currentUser?.nickname,
     },
     // footerRender: () => <Footer />,
     onPageChange: () => {
