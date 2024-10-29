@@ -1,34 +1,34 @@
 import Footer from '@/components/Footer';
 import { login } from '@/services/ant-design-pro/login';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LockOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { FormattedMessage, Helmet, history, useIntl, useModel } from '@umijs/max';
-import { Button, Tabs, message } from 'antd';
+import { Button, FormInstance, Tabs, message } from 'antd';
 import SliderCaptcha, { ActionType } from 'rc-slider-captcha';
 import React, { useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import Settings from '../../../../config/defaultSettings';
 import { Lang } from './components/Lang';
 import { LoginMessage } from './components/LoginMessage';
+import { PwResetForm } from './components/PwResetForm';
 import { RegisterFrom } from './components/RegisterForm';
 import './index.less';
 
 const Login: React.FC = () => {
-  // 记录登录状态及登录方式，用于切换登录方式或显示错误提示
-  const [userLoginState, setUserLoginState] = useState<USER.AccountStatus>({});
-  const [type, setType] = useState<string>('account');
+  const formRef = useRef<FormInstance>(null); // 创建 formRef
   // 用于滑块验证
   const actionRef = useRef<ActionType>();
 
+  // 记录登录状态及登录方式，用于切换登录方式或显示错误提示
+  const [userLoginState, setUserLoginState] = useState<USER.AccountStatus>({});
+  const [type, setType] = useState<string>('account');
   // 用于弹出注册表单
   const [regFormVisible, setRegFormVisible] = useState(false);
+  // 用于弹出密码重置表单
+  const [PwResetFormVisible, setPwResetFormVisible] = useState(false);
   const showModal = () => {
     setRegFormVisible(true);
-  };
-
-  const hideModal = () => {
-    setRegFormVisible(false);
   };
 
   // 鉴权流程：
@@ -96,6 +96,7 @@ const Login: React.FC = () => {
       //   defaultMessage: error.message,
       // });
       // message.error(error.message);
+      actionRef.current?.refresh();
       setUserLoginState({ status: 'UNKNOWN', type });
     }
   };
@@ -123,6 +124,7 @@ const Login: React.FC = () => {
         }}
       >
         <LoginForm
+          formRef={formRef} // 将 formRef 传递给 LoginForm
           contentStyle={{
             minWidth: 280,
             maxWidth: '70vw',
@@ -134,6 +136,7 @@ const Login: React.FC = () => {
           initialValues={{
             autoLogin: true,
           }}
+          submitter={false}
           actions={[
             // <FormattedMessage
             //   key="loginWith"
@@ -141,13 +144,32 @@ const Login: React.FC = () => {
             //   defaultMessage="其他登录方式"
             // />,
             // <ActionIcons key="icons" />,
-            <Button size="large" key="reg" onClick={showModal} block>
-              注册
-            </Button>,
+            <>
+              <Button size="large" key="reg" onClick={showModal} icon={<UserAddOutlined />} block>
+                注册
+              </Button>
+              <div style={{ marginTop: '10px' }}>
+                {/* <ProFormCheckbox noStyle name="autoLogin">
+                    <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录" />
+                  </ProFormCheckbox> */}
+                <Button
+                  type="link"
+                  style={{
+                    float: 'right',
+                    color: '#1890ff', // 设置链接为浅蓝色
+                    fontSize: '14px',
+                    padding: 0, // 去掉按钮的默认内边距
+                  }}
+                  onClick={() => setPwResetFormVisible(true)} // 打开 modal
+                >
+                  <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
+                </Button>
+              </div>
+            </>,
           ]}
-          onFinish={async (values) => {
-            await handleSubmit(values as USER.LoginParams);
-          }}
+          // onFinish={async (values) => {
+          //   await handleSubmit(values as USER.LoginParams);
+          // }}
         >
           <Tabs
             activeKey={type}
@@ -228,16 +250,22 @@ const Login: React.FC = () => {
               <SliderCaptcha
                 style={{
                   // flex: '1',
-                  padding: '2vh 0',
+                  // padding: '2vh 0',
+                  // marginBottom: '2vh',
                   width: '100%',
+                  border: '2px solid #1890ff', // 添加蓝色边框
+                  borderRadius: '8px', // 圆角
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', // 增加阴影
+                  color: '#1890ff', // 提示文字颜色
+                  // backgroundColor: '#bae7ff', // 浅蓝背景提升显著性
                 }}
                 bgSize={{
-                  width: 328,
+                  width: 322,
                   // height: 110
                 }}
                 mode="slider"
                 tipText={{
-                  default: '请按住滑块，拖动到最右边',
+                  default: '滑块拖动最右登录',
                   moving: '请按住滑块，拖动到最右边',
                   error: '验证失败，请重新操作',
                   success: '验证成功',
@@ -247,10 +275,21 @@ const Login: React.FC = () => {
                   console.log(data);
                   // 默认背景图宽度 320 减去默认拼图宽度 60 所以滑轨宽度是 260
                   // width 被我改成了 328 减去 60
-                  if (data.x === 268) {
+                  if (data.x === 262) {
+                    // 立即返回 Promise.resolve()，确保 SliderCaptcha 验证通过
+                    Promise.resolve().then(() => {
+                      // 在返回之后异步触发 handleSubmit
+                      const values = formRef.current?.getFieldsValue() as USER.LoginParams;
+                      // console.log(values);
+                      handleSubmit(values);
+                    });
+
                     return Promise.resolve();
+                  } else {
+                    // 验证失败时返回 Promise.reject()
+                    return Promise.reject();
                   }
-                  return Promise.reject();
+                  return Promise.resolve();
                 }}
                 actionRef={actionRef}
               />
@@ -339,24 +378,14 @@ const Login: React.FC = () => {
               />
             </>
           )} */}
-          {/* <div
-            style={{
-              marginBottom: 24,
-            }}
-          >
-            <ProFormCheckbox noStyle name="autoLogin">
-              <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录" />
-            </ProFormCheckbox>
-            <a
-              style={{
-                float: 'right',
-              }}
-            >
-              <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
-            </a>
-          </div> */}
         </LoginForm>
-        <RegisterFrom visible={regFormVisible} hideModal={hideModal} />
+        <RegisterFrom visible={regFormVisible} onClose={() => setRegFormVisible(false)} />
+        <PwResetForm
+          visible={PwResetFormVisible}
+          onClose={() => {
+            setPwResetFormVisible(false);
+          }}
+        />
       </div>
       <Footer />
     </div>

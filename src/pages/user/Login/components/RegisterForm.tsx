@@ -39,10 +39,14 @@ import { useEffect, useRef, useState } from 'react';
 
 interface RegisterFormProps {
   visible: boolean;
-  hideModal: () => void;
+  // 在 49 行 props 解构时直接为 onClose 添加默认值，
+  // 确保 onClose 总是一个有效的 () => void 函数。
+  // 这避免了 null 或 undefined 值的情况，
+  // 符合 Modal 组件 onCancel 属性的类型要求。
+  onClose: () => void;
 }
 
-export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
+export const RegisterFrom: React.FC<RegisterFormProps> = ({ visible, onClose = () => {} }) => {
   // const [jobId, setJobId]: [string | undefined, React.Dispatch<React.SetStateAction<string>>] =
   //   useState('');
   const formRef = useRef<FormInstance>();
@@ -123,9 +127,8 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
     try {
       // 获取 Email 地址
       const email: string = formRef.current?.getFieldValue('email');
-      const { name, jobId, identityType } = registrationData;
+      const { name, jobId, role } = registrationData;
 
-      console.log(email);
       // 检查邮箱是否填写
       if (!email) {
         formRef.current?.setFields([
@@ -161,11 +164,12 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
           email,
           applicantId: 1,
           issuerId: 0,
+          role,
           data: {
             name,
             jobId,
             email,
-            identityType,
+            role,
           },
         };
 
@@ -321,15 +325,10 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
     }
   }, [countdown, emailSent]); // 确保依赖项正确
 
-  const { visible, hideModal } = props;
   return (
     <>
       <StepsForm
         formRef={formRef} // 将 formRef 绑定到 StepsForm
-        onFinish={async () => {
-          hideModal();
-          message.success('提交成功');
-        }}
         formProps={{
           validateMessages: {
             required: '此项为必填项',
@@ -349,7 +348,7 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
             <Modal
               title="新用户注册"
               width={'60%'}
-              onCancel={() => hideModal()}
+              onCancel={() => onClose()}
               open={visible}
               footer={submitter}
               destroyOnClose
@@ -661,13 +660,7 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
             title="注册成功"
             subTitle="您的账号已成功注册，现在可以使用您的登录名或邮箱进行登录。"
             extra={[
-              <Button
-                type="primary"
-                key="login"
-                onClick={() => {
-                  hideModal(); // 关闭注册步骤对话框
-                }}
-              >
+              <Button type="primary" key="login" onClick={onClose}>
                 去登录
               </Button>,
             ]}

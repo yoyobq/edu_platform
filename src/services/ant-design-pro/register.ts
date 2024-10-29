@@ -160,6 +160,7 @@ export async function checkEmailUsage({ loginEmail }: { loginEmail: string }) {
 /** 发送注册验证邮件 */
 export async function sendRegistrationEmail({
   applicantType,
+  role,
   email,
   applicantId,
   issuerId,
@@ -167,6 +168,7 @@ export async function sendRegistrationEmail({
   data,
 }: {
   applicantType: string;
+  role: string;
   email: string;
   applicantId: number;
   issuerId: number;
@@ -183,6 +185,7 @@ export async function sendRegistrationEmail({
   const variables = {
     params: {
       applicantType,
+      role,
       email,
       applicantId,
       issuerId,
