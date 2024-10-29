@@ -83,7 +83,7 @@ export async function checkStaffByJobId({ jobId }: { jobId: string }) {
 
   const query = gql`
     query ($jobId: Int!) {
-      getStaffByJobId(jobId: $jobId) {
+      userStaffByJobId(jobId: $jobId) {
         id
         name
         accountId
@@ -105,7 +105,7 @@ export async function checkStaffByJobId({ jobId }: { jobId: string }) {
     data,
   }).then((response) => {
     if (response.success) {
-      return response.data.getStaffByJobId;
+      return response.data.userStaffByJobId;
     }
     throw new Error('根据 JobId 获取 Staff 失败');
   });
@@ -115,7 +115,7 @@ export async function checkStaffByJobId({ jobId }: { jobId: string }) {
 export async function checkEmailUsage({ loginEmail }: { loginEmail: string }) {
   const query = gql`
     query ($loginEmail: String!) {
-      accountByLoginEmail(loginEmail: $loginEmail) {
+      userByLoginEmail(loginEmail: $loginEmail) {
         id
       }
     }
@@ -141,10 +141,10 @@ export async function checkEmailUsage({ loginEmail }: { loginEmail: string }) {
     // 正常 repsonse 既 success，是否存在还需进一步判断
     if (response.success) {
       // 如果返回了 account 对象，说明邮箱已经被使用
-      if (response.data.accountByLoginEmail) {
+      if (response.data.userByLoginEmail) {
         return {
           used: true,
-          account: response.data.accountByLoginEmail, // 返回已存在的用户信息
+          account: response.data.userByLoginEmail, // 返回已存在的用户信息
         };
       } else {
         return {
@@ -173,7 +173,7 @@ export async function sendRegistrationEmail({
   // expiryTime: number;
   data?: Record<string, any>;
 }) {
-  console.log(data);
+  // console.log(data);
   const mutation = gql`
     mutation ($params: VerifEmailInput!) {
       sendVerifEmail(params: $params)
@@ -262,5 +262,67 @@ export async function checkVerifCode({
     })
     .catch((error) => {
       throw error; // 验证失败时返回 false
+    });
+}
+
+/** 提交数据，完成用户注册流程 */
+export async function registerUser({
+  loginEmail,
+  loginName,
+  loginPassword,
+  nickname,
+  verifCode,
+}: {
+  loginEmail: string;
+  loginName: string;
+  loginPassword: string;
+  nickname?: string;
+  verifCode: string;
+}) {
+  // 构造 GraphQL 变量
+  const variables = {
+    input: {
+      loginEmail,
+      loginName,
+      loginPassword,
+      nickname,
+      verifCode,
+    },
+  };
+
+  // 定义 GraphQL Mutation
+  const mutation = gql`
+    mutation ($input: RegisterUserInput!) {
+      registerUser(input: $input)
+    }
+  `;
+
+  // 构造请求体
+  const data = {
+    query: mutation.loc?.source.body, // 获取 GraphQL 查询的 body
+    operationName: null,
+    variables,
+  };
+
+  console.log(data);
+  console.log(variables);
+
+  // 使用 request 发送请求
+  return request<API.ResponseData>('/graphql/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data,
+  })
+    .then((response) => {
+      console.log(response);
+      if (response.success && response.data.registerUser) {
+        return true; // 返回 true，表示注册成功
+      }
+      throw new Error('注册失败');
+    })
+    .catch((error) => {
+      throw error; // 注册失败时抛出错误
     });
 }

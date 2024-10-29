@@ -2,6 +2,7 @@ import {
   checkEmailUsage,
   checkStaffByJobId,
   checkVerifCode,
+  registerUser,
   sendRegistrationEmail,
   validateTeacherIdentity,
 } from '@/services/ant-design-pro/register';
@@ -22,6 +23,7 @@ import {
   FormInstance,
   message,
   Modal,
+  Result,
   Row,
   Tag,
 } from 'antd';
@@ -74,7 +76,7 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
       if (identityType === 'teacher') {
         // 若存在匹配信息，res 变成 true
         res = await validateTeacherIdentity({ name, jobId });
-        setRegistrationData((prevData) => ({ ...prevData, identityType: 'teacher' }));
+        setRegistrationData((prevData) => ({ ...prevData, role: 'STAFF' }));
       } else if (identityType === 'student') {
         // 此部分代码未完成
         console.log('学生身份验证');
@@ -172,6 +174,7 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
 
         if (sendEmailResult) {
           message.success('验证邮件已成功发送！');
+          setRegistrationData((prevData) => ({ ...prevData, loginEmail: email }));
           setEmailSent(true);
 
           // 为防止高级用户随意跳过倒计时滥发邮件，将倒计时结束时间存入 sessionStorage
@@ -231,23 +234,19 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
   // step3: 补完并验证信息，开启后台流程
   const completeUserInfo = async (formData: Record<string, any>) => {
     // 提取数据
+    const { loginEmail } = registrationData;
     const { loginName, nickname, password } = formData;
-
     // 1. 检查 loginName 是否存在，不存在则置为空字符串
     const validatedLoginName = loginName?.trim() || '';
-
-    // 2. 检查 nickname 是否存在，不存在则使用 registrationData.name 作为默认值
-    const validatedNickname = nickname?.trim() || `${registrationData.name}老师`;
-
+    // 2. 检查 nickname 是否存在，不存在则职位空字符串
+    const validatedNickname = nickname?.trim() || '';
     // 3. 检查 password 是否符合规则
     const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d|[!@#$%^&*()_+}{":;'?/>.<,]).{8,}$/;
     if (!password || !passwordPattern.test(password)) {
       message.error('密码不符合要求，请确保至少 8 位，包含字母和数字或特殊字符的组合');
       return false;
     }
-    const validatedPasswd = password;
-
-    console.log(validatedLoginName, validatedNickname, validatedPasswd);
+    const validatedPassword = password;
 
     // 4. 检查 verificationString 是否存在并符合规则
     const verifCodePattern = /^[0-9a-fA-F]{64}$/;
@@ -256,24 +255,37 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
       return false;
     }
 
-    return false;
     // 如果以上所有验证都通过，则开始后台通信逻辑
-    // try {
-    //   // 你的后台通信逻辑，例如：
-    //   // const result = await api.submitRegistration({
-    //   //   loginName: validatedLoginName,
-    //   //   nickname: validatedNickname,
-    //   //   password,
-    //   //   verificationString,
-    //   // });
+    try {
+      setLoading(true);
 
-    //   message.success('验证成功，信息已提交');
-    //   return true; // 表示表单提交成功
-    // } catch (error) {
-    //   console.error('提交信息时发生错误：', error);
-    //   message.error('提交信息时发生错误，请稍后重试');
-    //   return false;
-    // }
+      // 准备调用 registerUser 的数据
+      const input = {
+        loginEmail,
+        loginName: validatedLoginName,
+        loginPassword: validatedPassword,
+        nickname: validatedNickname,
+        verifCode,
+      };
+
+      // 调用 registerUser 服务
+      const result = await registerUser(input);
+
+      if (result) {
+        message.success('注册成功！');
+        // 这里可以添加注册成功后的处理逻辑，例如跳转到登录页面
+        return true; // 表示表单提交成功
+      } else {
+        message.error('注册失败，请检查输入并重试');
+        return false;
+      }
+    } catch (error) {
+      console.error('提交信息时发生错误：', error);
+      message.error('提交信息时发生错误，请稍后重试');
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 页面加载时检查 sessionStorage 中是否有存储的倒计时结束时间
@@ -326,6 +338,10 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
         submitter={{
           submitButtonProps: {
             loading, // 当任一操作在加载时显示 loading
+          },
+          render: (props, dom) => {
+            // 判断是否为最后一步，隐藏默认提交按钮
+            return props.step === 3 ? null : dom;
           },
         }}
         stepsFormRender={(dom, submitter) => {
@@ -638,6 +654,24 @@ export const RegisterFrom: React.FC<RegisterFormProps> = (props) => {
               />
             </Col>
           </Row>
+        </StepsForm.StepForm>
+        <StepsForm.StepForm name="complete" title="完成注册">
+          <Result
+            status="success"
+            title="注册成功"
+            subTitle="您的账号已成功注册，现在可以使用您的登录名或邮箱进行登录。"
+            extra={[
+              <Button
+                type="primary"
+                key="login"
+                onClick={() => {
+                  hideModal(); // 关闭注册步骤对话框
+                }}
+              >
+                去登录
+              </Button>,
+            ]}
+          />
         </StepsForm.StepForm>
       </StepsForm>
     </>
