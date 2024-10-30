@@ -144,28 +144,27 @@ const Login: React.FC = () => {
             //   defaultMessage="其他登录方式"
             // />,
             // <ActionIcons key="icons" />,
-            <>
-              <Button size="large" key="reg" onClick={showModal} icon={<UserAddOutlined />} block>
-                注册
-              </Button>
-              <div style={{ marginTop: '10px' }}>
-                {/* <ProFormCheckbox noStyle name="autoLogin">
+            <Button size="large" key="reg" onClick={showModal} icon={<UserAddOutlined />} block>
+              注册
+            </Button>,
+            <div style={{ marginTop: '10px' }} key="forgotPassword">
+              {/* <ProFormCheckbox noStyle name="autoLogin">
                     <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录" />
                   </ProFormCheckbox> */}
-                <Button
-                  type="link"
-                  style={{
-                    float: 'right',
-                    color: '#1890ff', // 设置链接为浅蓝色
-                    fontSize: '14px',
-                    padding: 0, // 去掉按钮的默认内边距
-                  }}
-                  onClick={() => setPwResetFormVisible(true)} // 打开 modal
-                >
-                  <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
-                </Button>
-              </div>
-            </>,
+              <Button
+                type="link"
+                key="pwdReset"
+                style={{
+                  float: 'right',
+                  color: '#1890ff', // 设置链接为浅蓝色
+                  fontSize: '14px',
+                  padding: 0, // 去掉按钮的默认内边距
+                }}
+                onClick={() => setPwResetFormVisible(true)} // 打开 modal
+              >
+                <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
+              </Button>
+            </div>,
           ]}
           // onFinish={async (values) => {
           //   await handleSubmit(values as USER.LoginParams);
@@ -265,16 +264,15 @@ const Login: React.FC = () => {
                 }}
                 mode="slider"
                 tipText={{
-                  default: '滑块拖动最右登录',
+                  default: '登录右划到底',
                   moving: '请按住滑块，拖动到最右边',
                   error: '验证失败，请重新操作',
                   success: '验证成功',
                 }}
                 errorHoldDuration={1000}
                 onVerify={(data) => {
-                  console.log(data);
                   // 默认背景图宽度 320 减去默认拼图宽度 60 所以滑轨宽度是 260
-                  // width 被我改成了 328 减去 60
+                  // width 被我改成了 322 减去 60
                   if (data.x === 262) {
                     // 立即返回 Promise.resolve()，确保 SliderCaptcha 验证通过
                     Promise.resolve().then(() => {
@@ -296,7 +294,7 @@ const Login: React.FC = () => {
             </>
           )}
 
-          {/* {status === null && loginType === 'mobile' && <LoginMessage content="验证码错误" />}
+          {/*
           {type === 'mobile' && (
             <>
               <ProFormText

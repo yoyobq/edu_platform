@@ -39,7 +39,7 @@ export async function getInitialState(): Promise<{
   };
 
   const token = Cookies.get('token');
-  console.log(token);
+
   if (token) {
     let loading = true;
     const currentUser = await fetchUserInfo(0);

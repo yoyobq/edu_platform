@@ -22,6 +22,11 @@ export default [
         // component: './User/Login',
         component: './user/Login',
       },
+      {
+        name: 'reset-password',
+        path: '/user/reset-password/:verifCode',
+        component: './user/ResetPassword', // 指向新建的页面组件
+      },
     ],
   },
   {

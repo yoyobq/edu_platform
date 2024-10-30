@@ -215,6 +215,63 @@ export async function sendRegistrationEmail({
   });
 }
 
+/** 发送密码重置邮件 */
+export async function sendPwdResetEmail({
+  // applicantType,
+  // role,
+  email,
+  // applicantId,
+  // issuerId,
+  // data,
+}: {
+  // applicantType: string;
+  // role: string;
+  email: string;
+  // applicantId: number;
+  // issuerId: number;
+  // data?: Record<string, any>;
+}) {
+  // console.log(data);
+  const mutation = gql`
+    mutation ($params: VerifEmailInput!) {
+      sendVerifEmail(params: $params)
+    }
+  `;
+
+  const variables = {
+    params: {
+      applicantType: 'pwdreset',
+      role: 'UNKNOWN',
+      email,
+      applicantId: '0',
+      issuerId: '0',
+      data: {
+        email,
+      },
+    },
+  };
+
+  const dataPayload = {
+    query: mutation.loc?.source.body,
+    operationName: null,
+    variables,
+  };
+
+  return request<API.ResponseData>('/graphql/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: dataPayload,
+  }).then((response) => {
+    if (response.success && response.data.sendVerifEmail) {
+      return true; // 邮件发送成功
+    }
+
+    return false;
+  });
+}
+
 /** 发送验证码进行二次验证 */
 export async function checkVerifCode({
   // 其他数据被注释掉是因为这些内容均可从验证码推断，估不再二次提交，由验证码解析后得出
@@ -257,7 +314,7 @@ export async function checkVerifCode({
     data,
   })
     .then((response) => {
-      console.log(response);
+      console.log(response.success && response.data.checkVerifCode);
       if (response.success && response.data.checkVerifCode) {
         return response.data.checkVerifCode; // 返回布尔值，表示验证结果
       }
@@ -327,5 +384,61 @@ export async function registerUser({
     })
     .catch((error) => {
       throw error; // 注册失败时抛出错误
+    });
+}
+
+export async function resetPassword({
+  verifCode,
+  password,
+}: {
+  verifCode?: string;
+  password: string;
+}) {
+  // 如果没有提供 verifCode，立即返回
+  if (!verifCode) {
+    throw new Error('非法操作！');
+  }
+
+  // 定义 GraphQL 变量
+  const variables = {
+    input: {
+      verifCode,
+      newPassword: password,
+    },
+  };
+
+  // console.log(variables);
+
+  // 定义 GraphQL Mutation
+  const mutation = gql`
+    mutation ($input: ResetPasswordInput!) {
+      userResetPassword(input: $input)
+    }
+  `;
+
+  // 构造请求体
+  const data = {
+    query: mutation.loc?.source.body, // 获取 GraphQL 查询的 body
+    operationName: null,
+    variables,
+  };
+  console.log(data);
+  // 使用 request 发送请求
+  return request<API.ResponseData>('/graphql/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data,
+  })
+    .then((response) => {
+      if (response.success && response.data.userResetPassword) {
+        return true; // 返回布尔值，表示重置成功
+      }
+      throw new Error(response.errorMessage || '密码重置失败');
+    })
+    .catch((error) => {
+      console.error('Password reset failed:', error);
+      throw error; // 返回错误信息
     });
 }

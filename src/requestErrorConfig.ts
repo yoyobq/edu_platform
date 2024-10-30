@@ -32,7 +32,6 @@ export const errorConfig: RequestConfig = {
     errorThrower: (res) => {
       const { success, data, errorCode, errorMessage, showType } =
         res as unknown as ResponseStructure;
-      console.log(res);
       if (!success) {
         const error: any = new Error(errorMessage);
         error.name = 'BizError';
