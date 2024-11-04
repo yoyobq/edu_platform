@@ -9,6 +9,8 @@ export default {
   'menu.login': 'Login',
   'menu.register': 'Register',
   'menu.register-result': 'Register Result',
+  'menu.MySSTS': 'MySSTS',
+  'menu.MySSTS.log-mate': 'logMate',
   'menu.dashboard': 'Dashboard',
   'menu.dashboard.analysis': 'Analysis',
   'menu.dashboard.monitor': 'Monitor',

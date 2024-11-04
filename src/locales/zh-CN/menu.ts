@@ -6,6 +6,8 @@ export default {
   'menu.admin.api-test': '接口测试',
   'menu.admin.sub-page': '二级管理页',
   'menu.admin.blank-page': '空白页面',
+  'menu.MySSTS': 'MySSTS',
+  'menu.MySSTS.log-mate': '日志伴侣',
   'menu.ChatGPT': '科学聊天',
   'menu.login': '登录',
   'menu.register': '注册',

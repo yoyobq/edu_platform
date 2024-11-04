@@ -175,7 +175,6 @@ export async function sendRegistrationEmail({
   // expiryTime: number;
   data?: Record<string, any>;
 }) {
-  // console.log(data);
   const mutation = gql`
     mutation ($params: VerifEmailInput!) {
       sendVerifEmail(params: $params)
@@ -314,7 +313,6 @@ export async function checkVerifCode({
     data,
   })
     .then((response) => {
-      console.log(response.success && response.data.checkVerifCode);
       if (response.success && response.data.checkVerifCode) {
         return response.data.checkVerifCode; // 返回布尔值，表示验证结果
       }
@@ -422,7 +420,7 @@ export async function resetPassword({
     operationName: null,
     variables,
   };
-  console.log(data);
+  // console.log(data);
   // 使用 request 发送请求
   return request<API.ResponseData>('/graphql/register', {
     method: 'POST',

@@ -59,7 +59,25 @@ export default [
       {
         path: '/admin/blankComp',
         name: 'blank-page',
-        component: './BlankComp',
+        component: './BlankComp/BlankPage',
+      },
+    ],
+  },
+  {
+    path: '/MySSTS',
+    name: 'MySSTS',
+    icon: 'crown',
+    access: 'canTeacher',
+    routes: [
+      {
+        // 这一条的意义在于 /admin 的默认页
+        path: '/MySSTS',
+        redirect: '/MySSTS/log-automate',
+      },
+      {
+        path: '/MySSTS/log-automate',
+        name: 'log-mate',
+        component: './MySSTS/LogAutoMate',
       },
     ],
   },

@@ -1,4 +1,4 @@
-import { checkVerifCode, resetPassword } from '@/services/ant-design-pro/register'; // 假设服务方法存在
+import { checkVerifCode, resetPassword } from '@/services/ant-design-pro/register';
 import { LockOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, message, Space, Spin, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
