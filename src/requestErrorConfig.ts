@@ -28,7 +28,7 @@ interface ResponseStructure {
 export const errorConfig: RequestConfig = {
   // 错误处理： umi@3 的错误处理方案。
   errorConfig: {
-    // 错误抛出
+    // errorThrower 是利用 responseInterceptors 实现的，它的触发条件是: 当 data.success 为 false 时。
     errorThrower: (res) => {
       const { success, data, errorCode, errorMessage, showType } =
         res as unknown as ResponseStructure;
@@ -73,20 +73,35 @@ export const errorConfig: RequestConfig = {
       } else if (error.response) {
         // Axios 的错误
         // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
-        message.error(`Response status:${error.response.status}`);
+        switch (error.response.status) {
+          case 500:
+            message.error('后台服务器发生内部错误，请稍后再试。');
+            break;
+          case 502:
+            message.error('后台服务器网关错误，请稍后再试。');
+            break;
+          case 503:
+            message.error('后台服务器服务不可用，服务器暂时过载或维护中。');
+            break;
+          case 504:
+            message.error('后台服务器网关超时，请稍后再试。');
+            break;
+          default:
+            message.error(`发生未知错误，状态码: ${error.response.status}，请和管理员联系。`);
+        }
       } else if (error.request) {
         // 请求已经成功发起，但没有收到响应
         // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，
         // 而在node.js中是 http.ClientRequest 的实例
-        message.error('None response! Please retry.');
+        message.error('本机成功发起 request 但无响应! 请重试。');
       } else {
         // 发送请求时出了点问题
-        message.error('Request error, please retry.');
+        message.error('本机发送 request 时出了问题！请重试 .');
       }
     },
   },
 
-  // 请求拦截器
+  // 为 request 方法添加请求阶段的拦截器。
   requestInterceptors: [
     (config: RequestOptions) => {
       // 拦截请求配置，进行个性化处理。
@@ -104,6 +119,7 @@ export const errorConfig: RequestConfig = {
   // 响应拦截器
   responseInterceptors: [
     (response) => {
+      console.log(`res${response}`);
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
 

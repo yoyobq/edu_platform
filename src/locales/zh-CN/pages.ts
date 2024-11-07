@@ -1,7 +1,8 @@
 export default {
-  'pages.layouts.userLayout.title': '超越传统视界，未来触手可及',
+  // 'pages.layouts.userLayout.title': '超越传统视界，未来触手可及',
+  'pages.layouts.userLayout.title': '信息化的目的是解放生产力而非束缚',
   'pages.login.accountLogin.tab': '邮箱密码登录',
-  'pages.login.accountLogin.errorMessage': '错误的用户名和密码，访客可以用 guest / guest 登录试用',
+  'pages.login.accountLogin.errorMessage': '访客可以用 guest / guest 登录试用',
   'pages.login.failure': '登录失败，请重试！',
   'pages.login.success': '登录成功！',
   'pages.login.loginName.placeholder': '输入账号或邮箱均可登录',

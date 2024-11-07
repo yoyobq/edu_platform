@@ -127,7 +127,10 @@ const Login: React.FC = () => {
           formRef={formRef} // 将 formRef 传递给 LoginForm
           contentStyle={{
             minWidth: 280,
-            maxWidth: '70vw',
+          }}
+          style={{
+            maxWidth: 500,
+            width: '100%',
           }}
           logo={<img alt="logo" src="/logo.svg" />}
           title="智能教辅平台"
@@ -207,6 +210,7 @@ const Login: React.FC = () => {
                 fieldProps={{
                   size: 'large',
                   prefix: <UserOutlined />,
+                  style: { width: '100%' },
                 }}
                 placeholder={intl.formatMessage({
                   id: 'pages.login.loginName.placeholder',

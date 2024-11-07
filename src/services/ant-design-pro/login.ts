@@ -50,6 +50,7 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
       // throw new Error('无效的后台反馈，登录失败');
     })
     .catch((error) => {
+      console.log(error);
       throw new Error(error.message);
     });
 }
