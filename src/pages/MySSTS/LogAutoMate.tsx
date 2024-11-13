@@ -1,4 +1,3 @@
-import Footer from '@/components/Footer'; // 导入底部组件，用于页面底部展示
 import { sstsGetCurriPlan } from '@/services/my-ssts/getCurriPlan'; // 教学日志相关
 import { sstsLogin } from '@/services/my-ssts/login'; // 登录相关
 import { useModel } from '@umijs/max'; // 用于访问全局状态管理的钩子
@@ -46,7 +45,7 @@ const LogAutoMate: React.FC = () => {
     const existingJSESSIONID = sessionStorage.getItem('ssts_JSESSIONID_A');
 
     const executeLogin = async (values: { userId: string; password: string }) => {
-      setLoading(true);
+      const hide = message.loading('正在登录，请稍候...', 0);
       try {
         // 发起校园网登录请求
         const response = await sstsLogin({ userId: values.userId, password: values.password });
@@ -73,6 +72,7 @@ const LogAutoMate: React.FC = () => {
       } catch (error) {
         message.error('登录过程意外中断，请稍后再试。');
       } finally {
+        hide();
         setLoading(false);
       }
     };
@@ -95,15 +95,23 @@ const LogAutoMate: React.FC = () => {
   };
 
   const getCurriPlan = async () => {
+    const hide = message.loading('正在获取日志数据，请稍候...', 0); // 第二个参数 0 表示不自动关闭
+
     try {
       const formData = form.getFieldsValue();
       const userId = formData.userId;
       const password = formData.password;
+
       const curriPlan = await sstsGetCurriPlan({ userId, password });
       setData(curriPlan.planList);
       setcurriDetails(curriPlan.curriDetails);
+
+      message.success('日志数据获取成功！');
     } catch (error) {
-      console.log(error);
+      message.error('日志数据获取失败，请稍后重试。');
+    } finally {
+      hide();
+      setLoading(false);
     }
   };
 
@@ -168,7 +176,13 @@ const LogAutoMate: React.FC = () => {
           {/* 操作提示区域 */}
           <div
             className="card-container"
-            style={{ width: '28vw', minWidth: '150px', paddingTop: '8px' }}
+            style={{
+              width: '28vw',
+              minWidth: '130px',
+              paddingTop: '2vh',
+              maxHeight: '62vh',
+              overflowY: 'auto',
+            }}
           >
             <Typography>
               <Typography.Text strong>操作提示：</Typography.Text>
@@ -177,9 +191,22 @@ const LogAutoMate: React.FC = () => {
                 <li>点击获取日志详情查看教学计划。</li>
                 <li>务必核对计划是否与实际一致。</li>
                 <li>根据计划和日志的填写情况，会出现日志信息确认卡片。</li>
-                <li>核对日志内容并补充信息后提交。</li>
+                <li>核对日志内容并补充信息后保存。</li>
+              </ol>
+              <Typography.Text strong>安全提示：</Typography.Text>
+              <ol style={{ marginTop: '8px' }}>
+                <li>本系统不以任何形式记录用户的校园网密码。</li>
+                <li>密码的明文会随登录流程发送给校园网。</li>
+                <li>自动化流程进行中的所有数据，都是从校园网实时抓取。</li>
+                <li>请登录后尽快完成操作，如果长时间未操作，建议重新抓取数据后再继续。</li>
+                <li>网页多开会导致无法追踪的错误，请尽量避免。</li>
+                <li>保存按钮只会生成日志信息但不会提交。</li>
+                <li>自动化流程完毕后，请登录校园网检查并补完数据后正式提交。</li>
               </ol>
             </Typography>
+            <Typography.Text strong style={{ color: '#ff4d4f', fontSize: '1.2rem' }}>
+              运动会，新生入学等情况会导致计划和日志不符，请注意修正。
+            </Typography.Text>
           </div>
 
           <Flex vertical style={{ flexBasis: '68vw' }}>
@@ -190,23 +217,25 @@ const LogAutoMate: React.FC = () => {
               rowKey="curriPlanId"
               size="small"
               pagination={{ pageSize: 10, hideOnSinglePage: true }}
-              style={{ width: '66vw', marginBottom: '1vh' }}
+              style={{ width: '66vw', marginBottom: '1vh', paddingRight: '1vw' }}
               // scroll={{ x: 'max-content' }}
             />
 
             {/* card区域 */}
-            {curriDetails.map((detail) => (
-              <TeachingLogCard
-                key={`${detail.teaching_date}-${detail.section_id.charAt(0)}`}
-                {...detail}
-              />
-            ))}
+            <div style={{ maxHeight: '61vh', overflowY: 'auto', paddingRight: '0.5vw' }}>
+              {curriDetails.map((detail) => (
+                <TeachingLogCard
+                  key={`${detail.teaching_date}-${detail.section_id.charAt(0)}`}
+                  {...detail}
+                />
+              ))}
+            </div>
           </Flex>
         </Flex>
       </div>
       <div className="content-padding"></div>
       {/* 页面底部组件 */}
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };

@@ -70,7 +70,7 @@ export async function sstsLogin({ userId, password }: SstsLoginParams): Promise<
         }
         sessionStorage.setItem('ssts_jiaowu_token', loginResponse.refreshedToken);
 
-        message.success('与校园网会话建立，用户登录成功');
+        // message.success('与校园网会话建立，用户登录成功');
         // console.log(loginResponse);
         return loginResponse; // 返回成功结果
       } else {

@@ -125,7 +125,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
             <Input.TextArea
               maxLength={200}
               placeholder="输入课程内容"
-              autoSize={{ minRows: 2 }}
+              autoSize={{ minRows: 1 }}
               style={{ width: '30vw', marginRight: '1vw' }}
             />
           </Form.Item>
@@ -139,7 +139,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
             <Input.TextArea
               maxLength={200}
               placeholder="输入作业布置情况"
-              autoSize={{ minRows: 2 }}
+              autoSize={{ minRows: 1 }}
               style={{ width: '10vw', marginRight: '1vw' }}
             />
           </Form.Item>
@@ -153,7 +153,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
             <Radio.Group
               buttonStyle="solid"
               size="small"
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}
+              // style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}
             >
               <Radio.Button value="优">优</Radio.Button>
               <Radio.Button value="良">良</Radio.Button>

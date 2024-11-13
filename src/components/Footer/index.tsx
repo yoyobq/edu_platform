@@ -18,9 +18,9 @@ const Footer: React.FC = () => {
         position: 'fixed',
         bottom: 0,
         width: '100%',
-        margin: '0 auto',
-        // marginBlockStart: 0,
-        // marginBlockEnd: 0,
+        margin: '0 to',
+        marginBlockStart: 0,
+        marginBlockEnd: 0,
       }}
       copyright={`${currentYear} ${defaultMessage}`}
       // links={[
