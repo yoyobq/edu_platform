@@ -2,9 +2,10 @@ import Footer from '@/components/Footer'; // 导入底部组件，用于页面�
 import { sstsGetCurriPlan } from '@/services/my-ssts/getCurriPlan'; // 教学日志相关
 import { sstsLogin } from '@/services/my-ssts/login'; // 登录相关
 import { useModel } from '@umijs/max'; // 用于访问全局状态管理的钩子
-import { Button, Form, Input, message, Modal } from 'antd';
+import { Button, Flex, Form, Input, message, Modal, Table, Typography } from 'antd';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom'; // React DOM 的同步刷新函数
+import TeachingLogCard from './components/TeachingLogCard';
 import './style.less'; // 引入样式文件，包含页面整体布局的样式
 
 /**
@@ -14,6 +15,9 @@ const LogAutoMate: React.FC = () => {
   // 使用 useModel 钩子访问 initialState，包含全局的初始化数据
   const { initialState, setInitialState } = useModel('@@initialState');
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]); // 存储表格数据
+
+  const [curriDetails, setcurriDetails] = useState<CurriDetails[]>([]); // 存储需要填写的日志数据
   // const [sstsUserName, setSstsUserName] = useState(false);
   const [form] = Form.useForm();
   const jobId: number | null = initialState?.currentUser?.staffInfo?.jobId ?? null;
@@ -91,16 +95,27 @@ const LogAutoMate: React.FC = () => {
   };
 
   const getCurriPlan = async () => {
-    const formData = form.getFieldsValue();
-    const userId = formData.userId;
-    const password = formData.password;
     try {
-      await sstsGetCurriPlan({ userId, password });
+      const formData = form.getFieldsValue();
+      const userId = formData.userId;
+      const password = formData.password;
+      const curriPlan = await sstsGetCurriPlan({ userId, password });
+      setData(curriPlan.planList);
+      setcurriDetails(curriPlan.curriDetails);
     } catch (error) {
       console.log(error);
     }
-    message.success(`你好你好你们好`);
   };
+
+  // 定义表格列
+  const columns = [
+    { title: '课程', dataIndex: 'courseName', key: 'courseName' },
+    { title: '班级', dataIndex: 'className', key: 'className' },
+    // { title: '任课老师', dataIndex: 'teacherName', key: 'teacherName' },
+    { title: '起止周', dataIndex: 'teachingWeeksRange', key: 'teachingWeeksRange' },
+    { title: '周数', dataIndex: 'teachingWeeksCount', key: 'teachingWeeksCount' },
+    { title: '周学时', dataIndex: 'weeklyHours', key: 'weeklyHours' },
+  ];
 
   return (
     <>
@@ -120,8 +135,13 @@ const LogAutoMate: React.FC = () => {
           >
             <Input
               placeholder="输入工号"
-              readOnly={accessGroup.includes('admin')}
+              readOnly={!accessGroup.includes('admin')}
               style={{ width: 120 }}
+              onFocus={() => {
+                if (!accessGroup.includes('admin')) {
+                  message.warning('为了数据安全，您只可以查询本人信息');
+                }
+              }}
             />
           </Form.Item>
           <Form.Item
@@ -144,11 +164,49 @@ const LogAutoMate: React.FC = () => {
         </Form>
       </div>
       <div className="container">
-        {/* 页面内容区域 */}
-        <div className="content-padding"></div>
-        {/* 页面底部组件 */}
-        <Footer />
+        <Flex gap="middle">
+          {/* 操作提示区域 */}
+          <div
+            className="card-container"
+            style={{ width: '28vw', minWidth: '150px', paddingTop: '8px' }}
+          >
+            <Typography>
+              <Typography.Text strong>操作提示：</Typography.Text>
+              <ol style={{ marginTop: '8px' }}>
+                <li>填写校园网工号和密码，点击登录获取校园网会话。</li>
+                <li>点击获取日志详情查看教学计划。</li>
+                <li>务必核对计划是否与实际一致。</li>
+                <li>根据计划和日志的填写情况，会出现日志信息确认卡片。</li>
+                <li>核对日志内容并补充信息后提交。</li>
+              </ol>
+            </Typography>
+          </div>
+
+          <Flex vertical style={{ flexBasis: '68vw' }}>
+            {/* 表格区域 */}
+            <Table
+              columns={columns}
+              dataSource={data}
+              rowKey="curriPlanId"
+              size="small"
+              pagination={{ pageSize: 10, hideOnSinglePage: true }}
+              style={{ width: '66vw', marginBottom: '1vh' }}
+              // scroll={{ x: 'max-content' }}
+            />
+
+            {/* card区域 */}
+            {curriDetails.map((detail) => (
+              <TeachingLogCard
+                key={`${detail.teaching_date}-${detail.section_id.charAt(0)}`}
+                {...detail}
+              />
+            ))}
+          </Flex>
+        </Flex>
       </div>
+      <div className="content-padding"></div>
+      {/* 页面底部组件 */}
+      <Footer />
     </>
   );
 };

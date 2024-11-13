@@ -119,9 +119,9 @@ export const errorConfig: RequestConfig = {
   // 响应拦截器
   responseInterceptors: [
     (response) => {
-      console.log(`res${response}`);
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
+      console.log(data);
 
       if (data?.err === false) {
         console.log('后台报告异常！');

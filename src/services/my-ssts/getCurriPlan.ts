@@ -4,14 +4,12 @@ import { checkSessionExpiration } from './utils';
 
 /** 获得登录用户的教学计划 */
 export async function sstsGetCurriPlan({ userId, password }: SstsLoginParams): Promise<any> {
-  // 确保 session 有效
+  const JSESSIONID_A = sessionStorage.getItem('ssts_JSESSIONID_A');
+  const token = sessionStorage.getItem('ssts_jiaowu_token');
+  // const refreshToken = sessionStorage.getItem('ssts_refreshToken');
   await checkSessionExpiration({ userId, password });
 
-  const JSESSIONID_A = sessionStorage.getItem('ssts_JSESSIONID_A');
-  const token = sessionStorage.getItem('ssts_token');
-  const refreshToken = sessionStorage.getItem('ssts_refreshToken');
-
-  if (!JSESSIONID_A || !token || !refreshToken) {
+  if (!JSESSIONID_A) {
     throw new Error('会话信息缺失，请先点击登录校园网按钮');
   }
 
@@ -19,14 +17,14 @@ export async function sstsGetCurriPlan({ userId, password }: SstsLoginParams): P
   const variables = {
     input: {
       JSESSIONID_A,
+      userId,
       token,
-      refreshToken,
     },
   };
 
   // 定义 GraphQL 查询
   const query = gql`
-    query ($input: SstsSessionInfo!) {
+    query ($input: SstsSessionInput!) {
       sstsGetCurriPlan(input: $input)
     }
   `;
@@ -37,25 +35,20 @@ export async function sstsGetCurriPlan({ userId, password }: SstsLoginParams): P
     variables,
   };
 
-  try {
-    // 调用接口获取教学计划
-    const response = await request('/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data,
-    });
+  // 调用接口获取教学计划
+  const response = await request('/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data,
+  });
 
-    // 检查返回数据
-    if (response?.data?.sstsGetCurriPlan) {
-      console.log('教学计划:', response.data.sstsGetCurriPlan);
-      return response.data.sstsGetCurriPlan;
-    } else {
-      throw new Error('获取教学计划失败，请稍后重试。');
-    }
-  } catch (error) {
-    console.error('获取教学计划时出错:', error);
-    throw error;
+  // 检查返回数据
+  if (response?.data?.sstsGetCurriPlan) {
+    // console.log('教学计划:', response.data.sstsGetCurriPlanList);
+    return response.data.sstsGetCurriPlan;
+  } else {
+    throw new Error('获取教学计划失败，请稍后重试。');
   }
 }

@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import { message } from 'antd';
 import { gql } from 'graphql-tag';
 
 /** 登录校园网 */
@@ -18,6 +19,7 @@ export async function sstsLogin({ userId, password }: SstsLoginParams): Promise<
         cookie
         jsessionCookie
         userInfo
+        refreshedToken
       }
     }
   `;
@@ -63,14 +65,21 @@ export async function sstsLogin({ userId, password }: SstsLoginParams): Promise<
         sessionStorage.setItem('ssts_token', loginResponse.cookie.token);
         sessionStorage.setItem('ssts_refreshToken', loginResponse.cookie.refreshToken);
 
-        console.log(loginResponse);
+        if (!loginResponse.refreshedToken) {
+          throw new Error('找不到教务系统独立 Token');
+        }
+        sessionStorage.setItem('ssts_jiaowu_token', loginResponse.refreshedToken);
+
+        message.success('与校园网会话建立，用户登录成功');
+        // console.log(loginResponse);
         return loginResponse; // 返回成功结果
       } else {
         throw new Error('登录失败');
       }
     })
     .catch((error) => {
-      console.error('登录过程出错:', error);
+      message.error('与校园网会话建立过程过程出错。');
+      // console.log(error);
       throw error;
     });
 }

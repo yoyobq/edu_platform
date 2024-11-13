@@ -4,6 +4,16 @@ interface SstsLoginParams {
   password: string;
 }
 
+interface SstsGetCurriPlanDetailParams {
+  loginInfo: SstsLoginParams;
+  curriPlanList: curriPlanListParams;
+}
+
+interface curriPlanListParams {
+  LECTURE_PLAN_ID: any;
+  [key: string]: any;
+}
+
 interface SstsLoginResponse {
   success: boolean;
   cookie: {
