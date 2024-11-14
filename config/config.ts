@@ -16,6 +16,12 @@ export default defineConfig({
   hash: true,
 
   /**
+   * @name 开启 IIFE 模式的 esbuild 压缩
+   * @description 设置为 `true` 后，会启用 esbuild 的 IIFE (Immediately Invoked Function Expression) 模式压缩。该模式适用于构建时生成单一的立即执行函数表达式，以减少浏览器中的全局变量污染。开启该选项后，打包的代码会被压缩并以 IIFE 形式输出，这对于某些库或框架的打包优化非常有用，尤其是在构建小型的前端应用时。
+   * @doc https://esbuild.github.io/api/#minify-iife
+   */
+  esbuildMinifyIIFE: true,
+  /**
    * @name 兼容性设置
    * @description 设置 ie11 不一定完美兼容，需要检查自己使用的所有依赖
    * @doc https://umijs.org/docs/api/config#targets
