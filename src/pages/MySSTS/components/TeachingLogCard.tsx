@@ -1,5 +1,18 @@
-import { Button, Card, Divider, Flex, Form, Input, Radio, Space, Tooltip, Typography } from 'antd';
-import React, { useEffect } from 'react';
+import {
+  Button,
+  Card,
+  Divider,
+  Flex,
+  Form,
+  Input,
+  message,
+  Modal,
+  Radio,
+  Space,
+  Tooltip,
+  Typography,
+} from 'antd';
+import React, { useEffect, useState } from 'react';
 
 const { Text } = Typography;
 const chineseNumbers = [
@@ -45,30 +58,122 @@ type TeachingLogCardProps = {
   journal_type: string;
   className: string;
   courseName: string;
+  onSubmitTeachingLog: (teachingLogData: TeachingLogData) => Promise<void>;
 };
 
+const delay = (ms: number | undefined) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
+  teaching_class_id,
   teaching_date,
   week_number,
   day_of_week,
   lesson_hours,
   section_id,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   section_name,
   course_content,
   homework_assignment,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  topic_record,
+  journal_type,
   className,
   courseName,
+  onSubmitTeachingLog,
 }) => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log('form use');
     form.setFieldsValue({ course_content, homework_assignment });
   }, [form, course_content, homework_assignment]);
 
+  const confirmChange = async (
+    field: string,
+    currentValue: any,
+    originalValue: any,
+    resetFn: () => void,
+  ) => {
+    return new Promise<boolean>((resolve) => {
+      if (currentValue !== originalValue) {
+        Modal.confirm({
+          title: `${field}被改动`,
+          content: `检测到您修改了${field}，是否确认保存更改？`,
+          okText: '确认修改',
+          cancelText: '数据回滚',
+          onCancel: () => {
+            resetFn(); // 取消时重置为原始值
+            resolve(false);
+          },
+          onOk: () => resolve(true),
+          style: { right: '5vw', top: '15vh', position: 'absolute' }, // 靠右显示
+        });
+      } else {
+        resolve(true);
+      }
+    });
+  };
+  // 上传数据到校园网的函数
+  const uploadToSSTS = async () => {
+    const hide = message.loading('正在向校园网提交课程日志，请稍候...', 0);
+    setLoading(true);
+    // 获取表单中的最新数据
+    const formValues = form.getFieldsValue();
+
+    try {
+      // 第一轮比较 `course_content`
+      const courseConfirmed = await confirmChange(
+        '课程内容',
+        formValues.course_content,
+        course_content,
+        () => form.setFieldsValue({ course_content }),
+      );
+
+      if (!courseConfirmed) {
+        message.warning('课程内容已恢复至教学计划一致。');
+        return; // 若取消则退出
+      }
+      // 第二轮比较 `homework_assignment`
+      const homeworkConfirmed = await confirmChange(
+        '作业布置情况',
+        formValues.homework_assignment,
+        homework_assignment,
+        () => form.setFieldsValue({ homework_assignment }),
+      );
+
+      if (!homeworkConfirmed) {
+        message.warning('作业布置情况已恢复至教学计划一致。');
+        return; // 若取消则退出
+      }
+
+      // 所有确认通过后，组织数据并上传
+      const teachingLogData = {
+        teaching_class_id,
+        teaching_date,
+        week_number,
+        day_of_week,
+        lesson_hours,
+        section_id,
+        section_name,
+        journal_type,
+        // 虽然有简便写法，但这么写更容易阅读
+        //...formValues
+        topic_record: formValues.topic_record,
+        homework_assignment: formValues.homework_assignment || '无',
+        course_content: formValues.course_content,
+      };
+      // 模拟上传逻辑
+      await onSubmitTeachingLog(teachingLogData);
+      console.log('上传到校园网的数据:', teachingLogData);
+      message.success('数据已成功上传到校园网');
+    } catch (error) {
+      message.error('上传失败，请稍后再试');
+    } finally {
+      hide();
+      await delay(500);
+      setLoading(false);
+    }
+  };
   return (
     <Card
       style={{
@@ -104,8 +209,9 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
             </Space>
           </Text>
           <Space>
-            <Button>清空</Button>
-            <Button type="primary">保存</Button>
+            <Button type="primary" onClick={uploadToSSTS} loading={loading} disabled={loading}>
+              保存到校园网
+            </Button>
             <Button type="primary" hidden danger>
               提交
             </Button>
@@ -118,7 +224,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
           <Form.Item
             label="课程内容"
             name="course_content"
-            initialValue={course_content}
+            // initialValue={course_content}
             rules={[{ required: true, message: '请输入课程内容' }]}
             // style={{width: '30vw'}}
           >
@@ -133,7 +239,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
           <Form.Item
             label="作业布置情况"
             name="homework_assignment"
-            initialValue={homework_assignment}
+            // initialValue={homework_assignment}
             rules={[{ required: true, message: '请输入作业布置情况' }]}
           >
             <Input.TextArea

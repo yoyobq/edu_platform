@@ -1,7 +1,8 @@
-import { sstsGetCurriPlan } from '@/services/my-ssts/getCurriPlan'; // 教学日志相关
+import { sstsGetCurriPlan, sstsSubmitTeachingLog } from '@/services/my-ssts/getCurriPlan'; // 教学日志相关
 import { sstsLogin } from '@/services/my-ssts/login'; // 登录相关
 import { useModel } from '@umijs/max'; // 用于访问全局状态管理的钩子
-import { Button, Flex, Form, Input, message, Modal, Table, Typography } from 'antd';
+import { Button, Empty, Flex, Form, Input, message, Modal, Table, Typography } from 'antd';
+import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom'; // React DOM 的同步刷新函数
 import TeachingLogCard from './components/TeachingLogCard';
@@ -16,11 +17,14 @@ const LogAutoMate: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]); // 存储表格数据
 
-  const [curriDetails, setcurriDetails] = useState<CurriDetails[]>([]); // 存储需要填写的日志数据
+  const [curriDetails, setCurriDetails] = useState<CurriDetails[] | null>(null); // 存储需要填写的日志数据
   // const [sstsUserName, setSstsUserName] = useState(false);
   const [form] = Form.useForm();
   const jobId: number | null = initialState?.currentUser?.staffInfo?.jobId ?? null;
   const accessGroup: string[] = initialState?.currentUser?.accessGroup ?? ['guest'];
+
+  const currentDate = new Date();
+  const formattedDate = currentDate.toISOString().split('T')[0];
   /**
    * 示例函数 exampleUpdate: 使用 flushSync 来强制同步更新 initialState 中的 currentUser 数据
    * flushSync 是 React 的同步刷新函数，确保更新立即生效
@@ -45,6 +49,7 @@ const LogAutoMate: React.FC = () => {
     const existingJSESSIONID = sessionStorage.getItem('ssts_JSESSIONID_A');
 
     const executeLogin = async (values: { userId: string; password: string }) => {
+      setLoading(true);
       const hide = message.loading('正在登录，请稍候...', 0);
       try {
         // 发起校园网登录请求
@@ -94,8 +99,39 @@ const LogAutoMate: React.FC = () => {
     await executeLogin(values);
   };
 
+  const handleSubmitTeachingLog = async (teachingLogData: TeachingLogData) => {
+    const formData = form.getFieldsValue();
+    const userId = formData.userId;
+    const password = formData.password;
+
+    const loginParams = {
+      userId,
+      password,
+    };
+    try {
+      await sstsSubmitTeachingLog({
+        loginParams,
+        teachingLogData,
+      });
+
+      // 更新 curriDetails，移除成功上传的日志项
+      setCurriDetails((prevDetails) =>
+        prevDetails
+          ? prevDetails.filter(
+              (detail) =>
+                detail.teaching_date !== teachingLogData.teaching_date ||
+                detail.section_id !== teachingLogData.section_id,
+            )
+          : [],
+      );
+    } catch (error) {
+      message.error('上传失败，请稍后再试');
+    }
+  };
+
   const getCurriPlan = async () => {
-    const hide = message.loading('正在获取日志数据，请稍候...', 0); // 第二个参数 0 表示不自动关闭
+    const hide = message.loading('正在获取日志数据，受限于校园网的访问速度，请耐心等待...', 0); // 第二个参数 0 表示不自动关闭
+    setLoading(true);
 
     try {
       const formData = form.getFieldsValue();
@@ -104,7 +140,7 @@ const LogAutoMate: React.FC = () => {
 
       const curriPlan = await sstsGetCurriPlan({ userId, password });
       setData(curriPlan.planList);
-      setcurriDetails(curriPlan.curriDetails);
+      setCurriDetails(curriPlan.curriDetails);
 
       message.success('日志数据获取成功！');
     } catch (error) {
@@ -160,12 +196,12 @@ const LogAutoMate: React.FC = () => {
             <Input.Password placeholder="输入密码" style={{ width: 120 }} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
+            <Button type="primary" htmlType="submit" loading={loading} disabled={loading}>
               登录校园网
             </Button>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" loading={loading} onClick={getCurriPlan}>
+            <Button type="primary" loading={loading} disabled={loading} onClick={getCurriPlan}>
               获取日志
             </Button>
           </Form.Item>
@@ -178,30 +214,30 @@ const LogAutoMate: React.FC = () => {
             className="card-container"
             style={{
               width: '28vw',
-              minWidth: '130px',
+              // minWidth: '130px',
               paddingTop: '2vh',
-              maxHeight: '62vh',
+              maxHeight: '75',
               overflowY: 'auto',
             }}
           >
             <Typography>
               <Typography.Text strong>操作提示：</Typography.Text>
               <ol style={{ marginTop: '8px' }}>
-                <li>填写校园网工号和密码，点击登录获取校园网会话。</li>
-                <li>点击获取日志详情查看教学计划。</li>
+                <li>填写校园网工号和密码，点击【登录校园网】获取会话。</li>
+                <li>点击【获取日志】查看教学计划。</li>
                 <li>务必核对计划是否与实际一致。</li>
                 <li>根据计划和日志的填写情况，会出现日志信息确认卡片。</li>
-                <li>核对日志内容并补充信息后保存。</li>
+                <li>核对日志内容并补充信息后【保存到校园网】。</li>
+                <li>保存按钮只会在校园网生成日志信息但不会提交。</li>
+                <li>自动化流程完毕后，请登录校园网检查并补完数据后正式提交。</li>
               </ol>
               <Typography.Text strong>安全提示：</Typography.Text>
               <ol style={{ marginTop: '8px' }}>
-                <li>本系统不以任何形式记录用户的校园网密码。</li>
+                <li>若本页面在同台设备上多开并同时填写，可能会导致无法追踪的错误，应尽量避免。</li>
+                <li>系统不会以任何形式记录用户校园网密码。</li>
                 <li>密码的明文会随登录流程发送给校园网。</li>
                 <li>自动化流程进行中的所有数据，都是从校园网实时抓取。</li>
                 <li>请登录后尽快完成操作，如果长时间未操作，建议重新抓取数据后再继续。</li>
-                <li>网页多开会导致无法追踪的错误，请尽量避免。</li>
-                <li>保存按钮只会生成日志信息但不会提交。</li>
-                <li>自动化流程完毕后，请登录校园网检查并补完数据后正式提交。</li>
               </ol>
             </Typography>
             <Typography.Text strong style={{ color: '#ff4d4f', fontSize: '1.2rem' }}>
@@ -221,14 +257,42 @@ const LogAutoMate: React.FC = () => {
               // scroll={{ x: 'max-content' }}
             />
 
-            {/* card区域 */}
+            {/* TeachingLogCards 区域 */}
             <div style={{ maxHeight: '61vh', overflowY: 'auto', paddingRight: '0.5vw' }}>
-              {curriDetails.map((detail) => (
-                <TeachingLogCard
-                  key={`${detail.teaching_date}-${detail.section_id.charAt(0)}`}
-                  {...detail}
+              {curriDetails === null ? (
+                // curriDetails 为 null 时，不显示任何内容
+                <></> // 返回空的片段
+              ) : curriDetails.length === 0 ? (
+                <Empty
+                  description={
+                    <span>
+                      截止 {formattedDate}，所有需要填写的日志都在校园网找到已填写并保存的记录。
+                    </span>
+                  }
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
-              ))}
+              ) : (
+                <AnimatePresence>
+                  {curriDetails.map((detail) => (
+                    <motion.div
+                      key={`${detail.teaching_date}-${detail.section_id.charAt(0)}`}
+                      initial={{ opacity: 0, scale: 0.95 }} // 初始状态：不透明且稍微缩小
+                      animate={{ opacity: 1, scale: 1 }} // 动画结束：完全透明且恢复原始大小
+                      exit={{
+                        opacity: 0, // 退出时完全透明
+                        scale: 0.9, // 退出时缩小
+                        y: 10, // 退出时稍微下移
+                      }}
+                      transition={{
+                        duration: 0.6, // 增加退出动画时间
+                        ease: 'easeInOut', // 使用更平滑的过渡效果
+                      }}
+                    >
+                      <TeachingLogCard {...detail} onSubmitTeachingLog={handleSubmitTeachingLog} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              )}
             </div>
           </Flex>
         </Flex>
