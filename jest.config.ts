@@ -6,8 +6,6 @@ export default async () => {
       target: 'browser',
     }),
   });
-
-  console.log();
   return {
     ...config,
     testEnvironmentOptions: {
