@@ -1,7 +1,3 @@
-### **Edu Platform - README（中文版本）**
-
----
-
 <h1 align="center">智能教辅平台</h1>
 
 <div align="center">

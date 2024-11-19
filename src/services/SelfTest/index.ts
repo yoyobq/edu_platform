@@ -37,7 +37,7 @@ async function extractQuestionsByType(
 
   const data = {
     query: query.loc?.source.body,
-    operationName: null, // 操作名称，选填，查询文档有多个操作时必填
+    operationName: 'questions', // 操作名称，选填，查询文档有多个操作时必填
     // variables, // 对象集合，选填
   };
   return request<API.ResponseData>('/graphql', {

@@ -27,7 +27,7 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
 
   const data = {
     query: query.loc?.source.body,
-    operationName: null, // 操作名称，选填，查询文档有多个操作时必填
+    operationName: 'userLoginCheck', // 操作名称，选填，查询文档有多个操作时必填
     variables, // 对象集合，选填
   };
 
@@ -182,7 +182,7 @@ export async function updateAccount(body: USER.UpdateParams, options?: { [key: s
 
   const data = {
     query: mutation.loc?.source.body,
-    operationName: null,
+    operationName: 'updateAccount',
     variables,
   };
 

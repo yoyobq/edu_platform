@@ -27,7 +27,7 @@ export async function sstsLogin({ userId, password }: SstsLoginParams): Promise<
   // 构造请求体
   const data = {
     query: query.loc?.source.body, // 获取 GraphQL 查询的 body
-    operationName: null,
+    operationName: 'sstsLogin',
     variables,
   };
 

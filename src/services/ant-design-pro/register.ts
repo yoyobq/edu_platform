@@ -19,7 +19,7 @@ export async function validateTeacherIdentity({ name, jobId }: { name: string; j
 
   const data = {
     query: query.loc?.source.body,
-    operationName: null,
+    operationName: 'existsStaffIndex',
     variables,
   };
 
@@ -57,7 +57,7 @@ export async function fetchStudentInfo(studentId: string, name: string) {
 
   const data = {
     query: query.loc?.source.body,
-    operationName: null,
+    operationName: 'getStudentInfo',
     variables,
   };
 
@@ -93,7 +93,7 @@ export async function checkStaffByJobId({ jobId }: { jobId: string }) {
 
   const data = {
     query: query.loc?.source.body,
-    operationName: null,
+    operationName: 'userStaffByJobId',
     variables,
   };
 
@@ -127,7 +127,7 @@ export async function checkEmailUsage({ loginEmail }: { loginEmail: string }) {
 
   const data = {
     query: query.loc?.source.body,
-    operationName: null,
+    operationName: 'userByLoginEmail',
     variables,
   };
 
@@ -195,7 +195,7 @@ export async function sendRegistrationEmail({
 
   const dataPayload = {
     query: mutation.loc?.source.body,
-    operationName: null,
+    operationName: 'sendVerifEmail',
     variables,
   };
 
@@ -252,7 +252,7 @@ export async function sendPwdResetEmail({
 
   const dataPayload = {
     query: mutation.loc?.source.body,
-    operationName: null,
+    operationName: 'sendVerifEmail',
     variables,
   };
 
@@ -300,7 +300,7 @@ export async function checkVerifCode({
   // 构造请求体
   const data = {
     query: mutation.loc?.source.body, // 获取 GraphQL 查询的 body
-    operationName: null,
+    operationName: 'checkVerifCode',
     variables,
   };
 
@@ -358,7 +358,7 @@ export async function registerUser({
   // 构造请求体
   const data = {
     query: mutation.loc?.source.body, // 获取 GraphQL 查询的 body
-    operationName: null,
+    operationName: 'registerUser',
     variables,
   };
 
@@ -417,7 +417,7 @@ export async function resetPassword({
   // 构造请求体
   const data = {
     query: mutation.loc?.source.body, // 获取 GraphQL 查询的 body
-    operationName: null,
+    operationName: 'userResetPassword',
     variables,
   };
   // console.log(data);

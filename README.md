@@ -1,10 +1,3 @@
----
----
-
-### **Edu Platform - README (English Version)**
-
----
-
 <h1 align="center">Edu Platform</h1>
 
 <div align="center">

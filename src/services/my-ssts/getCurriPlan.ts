@@ -31,7 +31,7 @@ export async function sstsGetCurriPlan({ userId, password }: SstsLoginParams): P
 
   const data = {
     query: query.loc?.source.body, // 获取 GraphQL 查询的 body
-    operationName: null,
+    operationName: 'sstsGetCurriPlan',
     variables,
   };
 
@@ -90,7 +90,7 @@ export async function sstsSubmitTeachingLog({
 
   const data = {
     query: mutation.loc?.source.body, // 获取 GraphQL Mutation 的 body
-    operationName: null,
+    operationName: 'sstsSubmitTeachingLog',
     variables,
   };
 
