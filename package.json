@@ -1,9 +1,9 @@
 {
-  "name": "ant-design-pro",
-  "version": "6.0.0",
-  "private": true,
-  "description": "An out-of-box UI solution for enterprise applications",
-  "repository": "git@github.com:ant-design/ant-design-pro.git",
+  "name": "edu-platform",
+  "version": "0.8.0Beta",
+  "private": false,
+  "description": "An intelligent platform showcasing digital transformation in education.",
+  "repository": "git@github.com:yoyobq/edu_platform.git",
   "scripts": {
     "analyze": "cross-env ANALYZE=1 max build",
     "build": "max build",
@@ -121,6 +121,5 @@
       "CNAME",
       "create-umi"
     ]
-  },
-  "packageManager": "pnpm@9.13.1+sha512.5ac37545851c55ec58521b6c285db6f848f93ca70889beb4145f5b40fe234e4ea4faee4dad12ac5c139e494374c65d9c3a6ec9a25954378fa286a250e68d2f20"
+  }
 }

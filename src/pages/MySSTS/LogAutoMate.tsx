@@ -32,7 +32,7 @@ const LogAutoMate: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const exampleUpdate: any = () => {
     flushSync(() => {
-      setInitialState((s) => ({
+      setInitialState((s: any) => ({
         ...s,
         currentUser: initialState?.currentUser,
       }));

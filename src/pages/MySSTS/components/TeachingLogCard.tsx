@@ -79,6 +79,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
   journal_type,
   className,
   courseName,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSubmitTeachingLog,
 }) => {
   const [form] = Form.useForm();
@@ -163,9 +164,10 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
         course_content: formValues.course_content,
       };
       // 模拟上传逻辑
-      await onSubmitTeachingLog(teachingLogData);
-      console.log('上传到校园网的数据:', teachingLogData);
-      message.success('数据已成功上传到校园网');
+      console.log(teachingLogData);
+      // await onSubmitTeachingLog(teachingLogData);
+      // console.log('上传到校园网的数据:', teachingLogData);
+      // message.success('数据已成功上传到校园网');
     } catch (error) {
       message.error('上传失败，请稍后再试');
     } finally {
@@ -188,7 +190,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
         <Flex gap="middle" justify="space-between" align="flex-end">
           <Text strong style={{ color: '#2d3e50' }}>
             第{chineseNumbers[parseInt(week_number)]}周 星期{chineseNumbers[parseInt(day_of_week)]}{' '}
-            {section_id}节
+            {section_name ? ` ${section_id}节` : ''}
           </Text>
           <Text style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#3A5FCD' }}>
             <Space size="large">

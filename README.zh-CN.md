@@ -1,126 +1,73 @@
-Language : [🇺🇸](./README.md) | 🇨🇳 | [🇷🇺](./README.ru-RU.md) | [🇹🇷](./README.tr-TR.md) | [🇯🇵](./README.ja-JP.md) | [🇫🇷](./README.fr-FR.md) | [🇵🇹](./README.pt-BR.md) | [🇸🇦](./README.ar-DZ.md)
+### **Edu Platform - README（中文版本）**
 
-<h1 align="center">Ant Design Pro</h1>
+---
+
+<h1 align="center">智能教辅平台</h1>
 
 <div align="center">
 
-开箱即用的中台前端/设计解决方案。
-
-[![Node CI](https://github.com/ant-design/ant-design-pro/actions/workflows/ci.yml/badge.svg)](https://github.com/ant-design/ant-design-pro/actions/workflows/ci.yml) [![Preview Deploy](https://github.com/ant-design/ant-design-pro/actions/workflows/preview-deploy.yml/badge.svg)](https://github.com/ant-design/ant-design-pro/actions/workflows/preview-deploy.yml) [![Build With Umi](https://img.shields.io/badge/build%20with-umi-028fe4.svg?style=flat-square)](http://umijs.org/) ![](https://badgen.net/badge/icon/Ant%20Design?icon=https://gw.alipayobjects.com/zos/antfincdn/Pp4WPgVDB3/KDpgvguMpGfqaHPjicRK.svg&label)
-
-![](https://github.com/user-attachments/assets/fde29061-3d9a-4397-8ac2-397b0e033ef5)
+一个旨在整合苏州技师学院内部信息、展示信息工程系技术实力的智能平台。Edu Platform 是一个综合性智能解决方案，旨在示范如何真正利用计算机科学实现数字化转型。
 
 </div>
 
-- 预览：http://preview.pro.ant.design
-- 首页：http://pro.ant.design/index-cn
-- 使用文档：http://pro.ant.design/docs/getting-started-cn
-- 更新日志: http://pro.ant.design/docs/changelog-cn
-- 常见问题：http://pro.ant.design/docs/faq-cn
+---
 
-## 5.0 已经发布! 🎉🎉🎉
+### **平台愿景**
 
-[Ant Design Pro 5.0.0](https://github.com/ant-design/ant-design-pro/issues/8656)
+Edu Platform 致力于通过信息化手段优化 **教学**、**教育** 和 **教辅** 相关的关键业务场景，提升学校事务的处理效率与体验，为 **学生**、**教师** 和 **教工** 提供全面服务。
 
-## 特性
+---
 
-- :bulb: **TypeScript**: 应用程序级 JavaScript 的语言
-- :scroll: **区块**: 通过区块模板快速构建页面
-- :gem: **优雅美观**：基于 Ant Design 体系精心设计
-- :triangular_ruler: **常见设计模式**：提炼自中后台应用的典型页面和场景
-- :rocket: **最新技术栈**：使用 React/umi/dva/antd 等前端前沿技术开发
-- :iphone: **响应式**：针对不同屏幕大小设计
-- :art: **主题**：可配置的主题满足多样化的品牌诉求
-- :globe_with_meridians: **国际化**：内建业界通用的国际化方案
-- :gear: **最佳实践**：良好的工程实践助您持续产出高质量代码
-- :1234: **Mock 数据**：实用的本地数据调试方案
-- :white_check_mark: **UI 测试**：自动化测试保障前端产品质量
+### **核心功能**
 
-## 模板
+#### **如果您是学生**
 
-```
-- Dashboard
-  - 分析页
-  - 监控页
-  - 工作台
-- 表单页
-  - 基础表单页
-  - 分步表单页
-  - 高级表单页
-- 列表页
-  - 查询表格
-  - 标准列表
-  - 卡片列表
-  - 搜索列表（项目/应用/文章）
-- 详情页
-  - 基础详情页
-  - 高级详情页
-- 用户
-  - 用户中心页
-  - 用户设置页
-- 结果
-  - 成功页
-  - 失败页
-- 异常
-  - 403 无权限
-  - 404 找不到
-  - 500 服务器出错
-- 帐户
-  - 登录
-  - 注册
-  - 注册成功
-```
+- **便捷学习工具**  
+  Edu Platform 提供展示教学过程及教学内容的丰富功能，包括专业问答与知识辅导。
+- **学习进度监测**  
+  内置学习进度追踪功能，让学生清楚掌握自己的学习成果。
+- **资源统一访问**  
+  学生可以便捷地访问课件、作业与考试资源。
 
-## 使用
+#### **如果您是教师**
 
-我们提供了 pro-cli 来快速的初始化脚手架。
+- **教学设计与规划**  
+  平台帮助教师更高效地规划和设计教学内容，提升教学展示效果。
+- **自动化工具**  
+  使用信息化手段替代重复性工作，让教师专注于教学本身。
+- **互动与反馈**  
+  支持教师和学生间的实时沟通，并提供基于数据的教学反馈。
 
-```bash
-# 使用 npm
-npm i @ant-design/pro-cli -g
-pro create myapp
-```
+#### **如果您是教工**
 
-选择 umi 的版本
+- **信息整合与梳理**  
+  Edu Platform 为教工提供一个全面整合学院各类信息的平台。
+- **智能查询功能**  
+  提供便捷的搜索和处理工具，提升行政事务的处理效率。
+- **数据支持决策**  
+  利用平台生成的数据分析，帮助管理层制定更合理的策略。
 
-```shell
-? 🐂 使用 umi@4 还是 umi@3 ? (Use arrow keys)
-❯ umi@4
-  umi@3
-```
+---
 
-> 如果选择了 umi@4 版本，暂时还不支持全量区块。
+### **技术亮点**
 
-如果选择了 umi@3，还可以选择 pro 的模板，simple 是基础模板，只提供了框架运行的基本内容，complete 包含所有区块，不太适合当基础模板来进行二次开发
+- :rocket: **流程优化**：结合实际工作场景，量身定制功能，避免冗余操作。
+- :art: **智能界面**：界面设计友好直观，操作体验顺畅。
+- :gear: **高效管理**：支持跨角色操作的功能模块，为所有用户提供定制化服务。
 
-```shell
-? 🚀 要全量的还是一个简单的脚手架? (Use arrow keys)
-❯ simple
-  complete
-```
+---
 
-安装依赖：
+### **快速开始**
 
-```shell
-$ cd myapp && tyarn
-// 或
-$ cd myapp && npm install
-```
-
-更多信息请参考 [使用文档](http://pro.ant.design/docs/getting-started)。
-
-## 支持环境
-
-现代浏览器。
-
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera_48x48.png" alt="Opera" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Opera |
-| --- | --- | --- | --- | --- |
-| Edge | last 2 versions | last 2 versions | last 2 versions | last 2 versions |
-
-## 参与贡献
-
-我们非常欢迎你的贡献，你可以通过以下方式和我们一起共建 :smiley:：
-
-- 在你的公司或个人项目中使用 Ant Design Pro。
-- 通过 [Issue](http://github.com/ant-design/ant-design-pro/issues) 报告 bug 或进行咨询。
-- 提交 [Pull Request](http://github.com/ant-design/ant-design-pro/pulls) 改进 Pro 的代码。
+1. **安装依赖**：
+   ```bash
+   npm install
+   ```
+2. **运行开发环境**：
+   ```bash
+   npm run dev
+   ```
+3. **构建生产环境**：
+   ```bash
+   npm run build
+   ```
