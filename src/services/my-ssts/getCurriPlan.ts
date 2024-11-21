@@ -24,7 +24,7 @@ export async function sstsGetCurriPlan({ userId, password }: SstsLoginParams): P
 
   // 定义 GraphQL 查询
   const query = gql`
-    query ($input: SstsSessionInput!) {
+    query sstsGetCurriPlan($input: SstsSessionInput!) {
       sstsGetCurriPlan(input: $input)
     }
   `;
@@ -64,8 +64,8 @@ export async function sstsSubmitTeachingLog({
   // 从 sessionStorage 中获取会话信息
   const JSESSIONID_A = sessionStorage.getItem('ssts_JSESSIONID_A');
   const token = sessionStorage.getItem('ssts_jiaowu_token');
-
   const { userId, password } = loginParams;
+
   await checkSessionExpiration({ userId, password });
 
   if (!JSESSIONID_A || !token) {
@@ -83,7 +83,7 @@ export async function sstsSubmitTeachingLog({
 
   // 定义 GraphQL Mutation
   const mutation = gql`
-    mutation ($input: TeachingLogInput!) {
+    mutation sstsSubmitTeachingLog($input: TeachingLogInput!) {
       sstsSubmitTeachingLog(input: $input)
     }
   `;
@@ -103,6 +103,7 @@ export async function sstsSubmitTeachingLog({
     data,
   });
 
+  console.log(response);
   // 检查返回数据并处理结果
   if (response?.data?.sstsSubmitTeachingLog) {
     return response.data.sstsSubmitTeachingLog;

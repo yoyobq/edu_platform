@@ -121,7 +121,6 @@ export const errorConfig: RequestConfig = {
     (response) => {
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
-      console.log(data);
 
       if (data?.err === false) {
         console.log('后台报告异常！');

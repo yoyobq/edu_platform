@@ -1,5 +1,4 @@
 import { request } from '@umijs/max';
-import { message } from 'antd';
 import { gql } from 'graphql-tag';
 
 /** 登录校园网 */
@@ -13,7 +12,7 @@ export async function sstsLogin({ userId, password }: SstsLoginParams): Promise<
   };
   // 定义 GraphQL 查询
   const query = gql`
-    query ($input: SstsLoginInput!) {
+    query sstsLogin($input: SstsLoginInput!) {
       sstsLogin(input: $input) {
         success
         cookie
@@ -78,8 +77,6 @@ export async function sstsLogin({ userId, password }: SstsLoginParams): Promise<
       }
     })
     .catch((error) => {
-      message.error('与校园网会话建立过程过程出错。');
-      // console.log(error);
       throw error;
     });
 }

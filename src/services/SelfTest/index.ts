@@ -13,7 +13,7 @@ async function extractQuestionsByType(
   // 注意这是一个拼接字符串的实例,query 后是 query 的名字
   type = type === 'mix' ? '' : type;
   const query = gql`
-    query {
+    query questions{
       questions(tableName: "${tableName}", type: "${type}") {
         id
         custom_id

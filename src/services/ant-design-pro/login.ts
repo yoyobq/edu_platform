@@ -11,7 +11,7 @@ export async function login(body: USER.LoginParams, options?: { [key: string]: a
   //.query 后是 gql 查询的的名字，在 schema 中定义
   // 这个输出展示了查询的结构，但不会直接把 loginName 和 loginPassword 的值替换进去。
   const query = gql`
-    query ($params: LoginParams!) {
+    query userLoginCheck($params: LoginParams!) {
       userLoginCheck(params: $params)
     }
   `;
@@ -170,7 +170,7 @@ export async function updateAccount(body: USER.UpdateParams, options?: { [key: s
   };
 
   const mutation = gql`
-    mutation ($params: UpdateParams!) {
+    mutation updateAccount($params: UpdateParams!) {
       updateAccount(params: $params) {
         id
         loginName

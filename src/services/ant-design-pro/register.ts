@@ -12,7 +12,7 @@ export async function validateTeacherIdentity({ name, jobId }: { name: string; j
   };
 
   const query = gql`
-    query ($name: String!, $jobId: Int!) {
+    query existsStaffIndex($name: String!, $jobId: Int!) {
       existsStaffIndex(name: $name, jobId: $jobId)
     }
   `;
@@ -45,7 +45,7 @@ export async function fetchStudentInfo(studentId: string, name: string) {
   };
 
   const query = gql`
-    query ($studentId: Int!, $name: String!) {
+    query getStudentInfo($studentId: Int!, $name: String!) {
       getStudentInfo(studentId: $studentId, name: $name) {
         studentId
         name
@@ -82,7 +82,7 @@ export async function checkStaffByJobId({ jobId }: { jobId: string }) {
   };
 
   const query = gql`
-    query ($jobId: Int!) {
+    query userStaffByJobId($jobId: Int!) {
       userStaffByJobId(jobId: $jobId) {
         id
         name
@@ -114,7 +114,7 @@ export async function checkStaffByJobId({ jobId }: { jobId: string }) {
 /** 验证邮箱是否已被使用 */
 export async function checkEmailUsage({ loginEmail }: { loginEmail: string }) {
   const query = gql`
-    query ($loginEmail: String!) {
+    query userByLoginEmail($loginEmail: String!) {
       userByLoginEmail(loginEmail: $loginEmail) {
         id
       }
@@ -176,7 +176,7 @@ export async function sendRegistrationEmail({
   data?: Record<string, any>;
 }) {
   const mutation = gql`
-    mutation ($params: VerifEmailInput!) {
+    mutation sendVerifEmail($params: VerifEmailInput!) {
       sendVerifEmail(params: $params)
     }
   `;
@@ -232,7 +232,7 @@ export async function sendPwdResetEmail({
 }) {
   // console.log(data);
   const mutation = gql`
-    mutation ($params: VerifEmailInput!) {
+    mutation sendPwdResetEmail($params: VerifEmailInput!) {
       sendVerifEmail(params: $params)
     }
   `;
@@ -252,7 +252,7 @@ export async function sendPwdResetEmail({
 
   const dataPayload = {
     query: mutation.loc?.source.body,
-    operationName: 'sendVerifEmail',
+    operationName: 'sendPwdResetEmail',
     variables,
   };
 
@@ -292,7 +292,7 @@ export async function checkVerifCode({
 
   // 定义 GraphQL 查询
   const mutation = gql`
-    mutation ($verifCode: String!) {
+    mutation checkVerifCode($verifCode: String!) {
       checkVerifCode(params: { verifCode: $verifCode })
     }
   `;
@@ -350,7 +350,7 @@ export async function registerUser({
 
   // 定义 GraphQL Mutation
   const mutation = gql`
-    mutation ($input: RegisterUserInput!) {
+    mutation registerUser($input: RegisterUserInput!) {
       registerUser(input: $input)
     }
   `;
@@ -409,7 +409,7 @@ export async function resetPassword({
 
   // 定义 GraphQL Mutation
   const mutation = gql`
-    mutation ($input: ResetPasswordInput!) {
+    mutation userResetPassword($input: ResetPasswordInput!) {
       userResetPassword(input: $input)
     }
   `;

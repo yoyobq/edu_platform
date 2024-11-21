@@ -163,11 +163,10 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
         homework_assignment: formValues.homework_assignment || '无',
         course_content: formValues.course_content,
       };
-      // 模拟上传逻辑
-      console.log(teachingLogData);
-      // await onSubmitTeachingLog(teachingLogData);
-      // console.log('上传到校园网的数据:', teachingLogData);
-      // message.success('数据已成功上传到校园网');
+      // 进行上传逻辑
+      await onSubmitTeachingLog(teachingLogData);
+      console.log('上传到校园网的数据:', teachingLogData);
+      message.success('数据已成功上传到校园网');
     } catch (error) {
       message.error('上传失败，请稍后再试');
     } finally {
