@@ -164,11 +164,14 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
         course_content: formValues.course_content,
       };
       // 进行上传逻辑
+      // 请注意，根据后台设置，只要不是网络错误或服务器宕机，
+      // 平台都会返回 200 正常响应，因此不能仅靠 try catch 来拦截错误
       await onSubmitTeachingLog(teachingLogData);
       console.log('上传到校园网的数据:', teachingLogData);
-      message.success('数据已成功上传到校园网');
+      // message.success('数据已成功上传到校园网');
     } catch (error) {
-      message.error('上传失败，请稍后再试');
+      // 此处只能处理智能平台宕机或网络出错导致的上传失败
+      message.error('日志信息上传失败，请稍后再试');
     } finally {
       hide();
       await delay(500);

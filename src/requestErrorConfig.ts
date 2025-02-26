@@ -32,6 +32,7 @@ export const errorConfig: RequestConfig = {
     errorThrower: (res) => {
       const { success, data, errorCode, errorMessage, showType } =
         res as unknown as ResponseStructure;
+      console.log(res);
       if (!success) {
         const error: any = new Error(errorMessage);
         error.name = 'BizError';
@@ -55,7 +56,7 @@ export const errorConfig: RequestConfig = {
               message.warning(errorMessage);
               break;
             case ErrorShowType.ERROR_MESSAGE:
-              message.error(errorMessage);
+              message.error(errorMessage, 10);
               break;
             case ErrorShowType.NOTIFICATION:
               notification.open({

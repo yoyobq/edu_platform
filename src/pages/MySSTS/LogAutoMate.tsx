@@ -75,7 +75,7 @@ const LogAutoMate: React.FC = () => {
           message.error('登录失败，请检查工号或密码。');
         }
       } catch (error) {
-        message.error('登录过程中断，请参考校园网信息后重试。');
+        // message.error('登录过程中断，请参考校园网信息后重试。');
       } finally {
         hide();
         setLoading(false);
