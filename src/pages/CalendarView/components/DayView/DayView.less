@@ -1,0 +1,38 @@
+.dayView {
+  width: 100%;
+  min-height: 180px; /* 限制 DayView 高度，避免过高 */
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+  padding: 10px; /* 让内容稍微紧凑 */
+
+  &.weekday {
+    background-color: #fcfcfc;
+  }
+
+  &.weekend {
+    background-color: #ededed;
+  }
+
+  &.week-mode {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.detailsButton {
+  width: 100%;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 4px;
+  margin-top: 8px;
+  cursor: pointer;
+  display: block;
+}
+
+.week-mode .detailsButton {
+  display: none; /* 在 week 视图下隐藏按钮 */
+}

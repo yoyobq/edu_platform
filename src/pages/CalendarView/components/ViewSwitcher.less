@@ -1,0 +1,33 @@
+/* ViewSwitcher.less */
+.viewSwitcher {
+  position: absolute;
+  top: 20px; // 距离顶部 20px
+  right: 20px; // 靠近右侧 20px
+  z-index: 100; // 确保它不会被其他元素遮挡
+  display: flex;
+
+  .ant-radio-group {
+    width: 40vw; // 让整个 Radio 组占据 40% 视口宽度
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .ant-radio-button-wrapper {
+    flex: 1; // 让所有按钮等宽
+    text-align: center;
+    padding: 12px 0; // 让按钮更高，提高触摸体验
+    font-size: 14px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: #1890ff;
+    }
+
+    &-checked {
+      background-color: #1890ff !important;
+      color: #fff !important;
+      border-color: #1890ff !important;
+      font-weight: bold;
+    }
+  }
+}

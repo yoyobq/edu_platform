@@ -100,6 +100,13 @@ export default [
     path: '/selfTest',
     component: './SelfTest',
   },
+  {
+    name: 'calendar-view',
+    icon: 'table',
+    path: '/CalendarView',
+    component: './CalendarView',
+    access: 'canTeacher',
+  },
   //   path: '/exercises',
   //   // layout: false,
   //   routes: [

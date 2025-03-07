@@ -1,0 +1,49 @@
+.semesterContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.weekRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dayCard {
+  border-radius: 4px;
+  padding: 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+.emptyDay {
+  background-color: transparent;
+}
+
+// 颜色定义
+.normal {
+  background-color: #ffffff;
+  border: 1px solid #f0f0f0;
+}
+
+.weekend,
+.holiday {
+  background-color: #f0f0f0;
+}
+
+.special {
+  background-color: #e6f7ff;
+}
+
+.exam {
+  background-color: #ffe6e6;
+}

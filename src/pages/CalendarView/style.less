@@ -1,0 +1,13 @@
+/* style.less */
+.container {
+  display: flex; /* 使用 flex 布局，使子元素更灵活 */
+  flex-direction: column; /* 子元素垂直排列 */
+  height: 100vh; /* 容器高度占满整个视口 */
+  overflow: auto; /* 启用滚动以显示超出内容 */
+  background-size: 100% 100%; /* 背景图片填满容器 */
+}
+
+.content-padding {
+  flex: 1; /* 占据剩余空间，保持内容区域高度自适应 */
+  padding: 32px 0; /* 顶部和底部的内边距，优化内容展示 */
+}
