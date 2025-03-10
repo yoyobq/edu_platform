@@ -1,49 +1,100 @@
 .semesterContainer {
+  max-width: 660px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  overflow-y: auto;
-  max-height: 80vh;
 }
 
-.weekRow {
+/* 顶部表头: 左1空白 + 7列（自动分配） */
+.headerRow {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  /* 第一列固定 40px，后面 7 列使用 1fr */
+  grid-template-columns: 28px repeat(7, 1fr);
   gap: 4px;
 }
 
-.dayCard {
-  border-radius: 4px;
-  padding: 6px;
+.blankCell {
+  background-color: #fff;
+  border: 1px solid #f0f0f0;
+}
+
+.headerCell {
+  background-color: #fff;
+  border: 1px solid #f0f0f0;
   text-align: center;
+  padding: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* 一周的行: 第一列（周数）固定 40px，后面 7 列使用 1fr */
+.weekRow {
+  display: grid;
+  grid-template-columns: 28px repeat(7, 1fr);
+  gap: 4px;
+}
+
+.weekLabelCell {
+  background-color: #fff;
+  border: 1px solid #f0f0f0;
+  text-align: center;
+  padding: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  /* 如果“准备周”或“第X周”字符太长，可考虑再缩小字体或做换行 */
+}
+
+.dayCard {
+  text-align: center;
+  padding: 6px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid #f0f0f0;
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
   }
 }
 
-.emptyDay {
-  background-color: transparent;
-}
-
-// 颜色定义
+/* 其余颜色和样式保持不变 */
 .normal {
-  background-color: #ffffff;
-  border: 1px solid #f0f0f0;
+  background-color: #fff;
 }
-
-.weekend,
+.weekend {
+  background-color: #fffbe6;
+}
 .holiday {
-  background-color: #f0f0f0;
+  background-color: #fffbe6;
 }
-
 .special {
   background-color: #e6f7ff;
 }
-
 .exam {
   background-color: #ffe6e6;
+}
+
+.dateText {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+.examLabel {
+  font-size: 12px;
+  color: #d0021b;
+  margin-bottom: 2px;
+}
+.topicText {
+  font-size: 12px;
+  color: #333;
+  font-weight: 600;
+  min-height: 16px;
+}
+.emptyDay {
+  background-color: transparent;
+  border: 1px solid transparent;
 }
