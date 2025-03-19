@@ -36,6 +36,13 @@ export default [
     component: './Welcome',
   },
   {
+    name: 'calendar-view',
+    icon: 'calendar',
+    path: '/CalendarView',
+    component: './CalendarView',
+    access: 'canTeacher',
+  },
+  {
     path: '/admin',
     name: 'admin',
     icon: 'crown',
@@ -99,13 +106,6 @@ export default [
     icon: 'table',
     path: '/selfTest',
     component: './SelfTest',
-  },
-  {
-    name: 'calendar-view',
-    icon: 'table',
-    path: '/CalendarView',
-    component: './CalendarView',
-    access: 'canTeacher',
   },
   //   path: '/exercises',
   //   // layout: false,

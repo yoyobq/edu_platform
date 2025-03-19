@@ -1,4 +1,7 @@
-import { Card } from 'antd';
+import { fetchCalendarEvents } from '@/services/plan/calendarEvent';
+import { fetchSemester, fetchSemesters } from '@/services/plan/semester';
+import { DownOutlined } from '@ant-design/icons';
+import { Card, Dropdown, Typography } from 'antd';
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -28,187 +31,30 @@ interface SemesterDay {
 }
 
 /** 学期基础信息 */
-const semester = {
-  id: 2,
-  name: '2425第二学期',
-  start_date: '2025-02-14', // 注意: 2月14日可能不是周一
-  exam_start_date: '2025-06-09', // 一般来说考试周是周一
-  end_date: '2025-06-29',
-  is_current: 1,
-};
+interface Semester {
+  id: number;
+  name: string;
+  startDate: string; // 格式 YYYY-MM-DD
+  examStartDate: string; // 考试开始日期
+  endDate: string; // 学期结束日期
+  isCurrent: boolean; // 是否是当前学期
+}
 
-/** 后端返回的事件数据 */
-const mockCalendarEvents = [
-  {
-    id: 1,
-    semester_id: 2,
-    topic: '校领导报到',
-    date: '2025-02-14',
-    time_slot: 'all_day',
-    event_type: 'activity',
-    original_date: null,
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 09:37:00',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 2,
-    semester_id: 2,
-    topic: '教职工报到',
-    date: '2025-02-15',
-    time_slot: 'all_day',
-    event_type: 'activity',
-    original_date: null,
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 09:37:53',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 3,
-    semester_id: 2,
-    topic: '学生报到',
-    date: '2025-02-16',
-    time_slot: 'all_day',
-    event_type: 'activity',
-    original_date: null,
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 10:19:48',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 4,
-    semester_id: 2,
-    topic: '调课',
-    date: '2025-04-02',
-    time_slot: 'all_day',
-    event_type: 'weekday_swap',
-    original_date: '2025-04-03',
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 11:33:07',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 5,
-    semester_id: 2,
-    topic: '调课',
-    date: '2025-04-03',
-    time_slot: 'all_day',
-    event_type: 'weekday_swap',
-    original_date: '2025-04-02',
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 11:33:12',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 6,
-    semester_id: 2,
-    topic: '清明放假',
-    date: '2025-04-04',
-    time_slot: 'all_day',
-    event_type: 'holiday',
-    original_date: null,
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 10:23:59',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 9,
-    semester_id: 2,
-    topic: '调课',
-    date: '2025-04-27',
-    time_slot: 'all_day',
-    event_type: 'holiday_makeup',
-    original_date: '2025-05-05',
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 10:28:13',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 10,
-    semester_id: 2,
-    topic: '劳动节放假',
-    date: '2025-05-01',
-    time_slot: 'all_day',
-    event_type: 'holiday',
-    original_date: null,
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 10:27:14',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 11,
-    semester_id: 2,
-    topic: '劳动节放假',
-    date: '2025-05-02',
-    time_slot: 'all_day',
-    event_type: 'holiday',
-    original_date: null,
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 10:27:14',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 14,
-    semester_id: 2,
-    topic: '劳动节放假',
-    date: '2025-05-05',
-    time_slot: 'all_day',
-    event_type: 'holiday',
-    original_date: null,
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 10:27:14',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 15,
-    semester_id: 2,
-    topic: '端午节放假',
-    date: '2025-06-02',
-    time_slot: 'all_day',
-    event_type: 'holiday',
-    original_date: null,
-    record_status: 'active',
-    version: 1,
-    updated_at: '2025-02-28 11:21:58',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 16,
-    semester_id: 2,
-    topic: '运动会',
-    date: '2025-04-24',
-    time_slot: 'all_day',
-    event_type: 'sports_meet',
-    original_date: null,
-    record_status: 'active_tentative',
-    version: 1,
-    updated_at: '2025-02-28 10:58:20',
-    updated_by_accout_id: 2,
-  },
-  {
-    id: 17,
-    semester_id: 2,
-    topic: '运动会',
-    date: '2025-04-25',
-    time_slot: 'all_day',
-    event_type: 'sports_meet',
-    original_date: null,
-    record_status: 'active_tentative',
-    version: 1,
-    updated_at: '2025-02-28 10:58:57',
-    updated_by_accout_id: 2,
-  },
-];
+/** 学期事件信息 */
+interface CalendarEvent {
+  id: number;
+  semesterId: number;
+  topic: string;
+  date: string; // 格式 YYYY-MM-DD
+  timeSlot: 'ALL_DAY' | 'MORNING' | 'AFTERNOON'; // 枚举类型
+  eventType: 'HOLIDAY' | 'EXAM' | 'ACTIVITY' | 'HOLIDAY_MAKEUP' | 'WEEKDAY_SWAP' | 'SPORTS_MEET'; // 事件类型
+  originalDate?: string | null; // 可能为空
+  recordStatus: 'ACTIVE' | 'ACTIVE_TENTATIVE' | 'EXPIRY'; // 记录状态
+  version: number;
+  createdAt: string; // 格式 YYYY-MM-DD HH:mm:ss
+  updatedAt: string; // 格式 YYYY-MM-DD HH:mm:ss
+  updatedByAccoutId?: number | null; // 可能为空
+}
 
 /**
  * isInThirdLastWeek：以学期结束日的 isoWeek（周一为起点）计算，
@@ -230,22 +76,24 @@ const mockCalendarEvents = [
  * getDayData：统一根据日期返回当天的数据
  * 如果存在调课相关事件，则从 original_date 中提取信息，格式为 "与 MM-DD(周X)"。
  */
-function getDayData(dateStr: string): DayData {
-  const d = dayjs(dateStr);
-  const weekday = d.isoWeekday(); // 1=Monday ... 7=Sunday
-  const events = mockCalendarEvents.filter(
-    (e) => e.semester_id === semester.id && e.date === dateStr && e.record_status !== 'expiry',
+// 需要同时更新 getDayData 中的字段引用
+function getDayData(dateStr: string, semester: Semester, calendarEvents: CalendarEvent[]): DayData {
+  const events = calendarEvents.filter(
+    (e) => e.semesterId === semester.id && e.date === dateStr && e.recordStatus !== 'EXPIRY',
   );
   const topic = events.length ? events.map((e) => e.topic).join(', ') : '';
   let eventType: EventType;
   let rescheduleInfo: string | undefined = undefined;
 
-  // 如果存在调课事件，则取 original_date
+  // 新增日期星期计算
+  const weekday = dayjs(dateStr).isoWeekday();
+
   const rescheduledEvent = events.find(
-    (e) => e.event_type === 'weekday_swap' || e.event_type === 'holiday_makeup',
+    (e) => e.eventType === 'WEEKDAY_SWAP' || e.eventType === 'HOLIDAY_MAKEUP',
   );
-  if (rescheduledEvent && rescheduledEvent.original_date) {
-    const orig = dayjs(rescheduledEvent.original_date);
+  if (rescheduledEvent && rescheduledEvent.originalDate) {
+    // 修改字段
+    const orig = dayjs(rescheduledEvent.originalDate); // 修改字段
     const origDateStr = orig.format('MM-DD');
     const weekdayMap: { [key: number]: string } = {
       1: '一',
@@ -260,10 +108,11 @@ function getDayData(dateStr: string): DayData {
     rescheduleInfo = `调 ${origDateStr}(${weekdayMap[origWeekday]})`;
   }
 
+  // 修改字段引用为 eventType
   if (events.length > 0) {
-    if (events.some((e) => e.event_type === 'holiday')) {
+    if (events.some((e) => e.eventType === 'HOLIDAY')) {
       eventType = 'holiday';
-    } else if (events.some((e) => ['sports_meet', 'activity'].includes(e.event_type))) {
+    } else if (events.some((e) => ['SPORTS_MEET', 'ACTIVITY'].includes(e.eventType))) {
       eventType = 'special';
     } else if (rescheduledEvent) {
       eventType = 'normal';
@@ -271,10 +120,11 @@ function getDayData(dateStr: string): DayData {
       eventType = 'normal';
     }
   } else {
+    // 使用计算出的 weekday 判断周末
     eventType = weekday === 6 || weekday === 7 ? 'weekend' : 'normal';
   }
 
-  const examStart = dayjs(semester.exam_start_date);
+  const examStart = dayjs(semester.examStartDate);
   const examEnd = examStart.add(4, 'day'); // 考试周为周一起连续4天
   if (
     eventType === 'normal' &&
@@ -334,26 +184,105 @@ interface SemesterViewProps {
 }
 
 const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
+  // 学期列表数组
+  const [semesters, setSemesters] = useState<Semester[]>([]); // 所有可用学期
+  const [loadingSemesters, setLoadingSemesters] = useState<boolean>(false);
+
+  // 单个学期数据
+  const [semester, setSemester] = useState<Semester | null>(null); // 当前学期
+  const [loadingSemester, setLoadingSemester] = useState<boolean>(false);
+
+  // 修改初始化类型为 number | null
+  const [semesterId, setSemesterId] = useState<number | null>(null);
   const [weeks, setWeeks] = useState<WeekData[]>([]);
+
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState<boolean>(true);
+
+  // **获取所有学期信息**
+  useEffect(() => {
+    setLoadingSemesters(true);
+    fetchSemesters({})
+      .then((data) => {
+        const sorted = [...data].sort(
+          (a, b) => dayjs(b.startDate).unix() - dayjs(a.startDate).unix(),
+        );
+        setSemesters(sorted);
+
+        const current = sorted.find((s) => s.isCurrent);
+        const latest = sorted[0];
+        // 确保ID有效时更新
+        if (current?.id || latest?.id) {
+          setSemesterId(current?.id ?? latest!.id);
+        }
+      })
+      .catch((error) => console.error('获取学期列表失败:', error))
+      .finally(() => setLoadingSemesters(false));
+  }, []);
+
+  // **获取选中学期信息**
+  useEffect(() => {
+    if (!semesterId) return; // 添加空值校验
+
+    setLoadingSemester(true); // 开始加载
+    fetchSemester(semesterId) // 通过 fetchSemester 获取学期信息
+      .then((data) => {
+        setSemester(data);
+        setLoadingSemester(false); // 加载成功
+      })
+      .catch((error) => {
+        console.error('获取学期信息失败:', error);
+        setLoadingSemester(false); // 加载失败
+      });
+  }, [semesterId]);
 
   // 1) 生成所有日期 => 2) 分周 => 3) setWeeks
   useEffect(() => {
-    const start = dayjs(semester.start_date);
-    const end = dayjs(semester.end_date);
-    const totalDays = end.diff(start, 'day') + 1;
+    if (!semester || calendarEvents.length === 0) return;
 
+    const start = dayjs(semester.startDate);
+    const end = dayjs(semester.endDate);
+    const totalDays = end.diff(start, 'day') + 1;
     const allDays: SemesterDay[] = [];
     for (let i = 0; i < totalDays; i++) {
       const current = start.add(i, 'day');
       const dateStr = current.format('YYYY-MM-DD');
       // 解构时同时取出 rescheduleInfo
-      const { topic, eventType, rescheduleInfo } = getDayData(dateStr);
+      const { topic, eventType, rescheduleInfo } = getDayData(dateStr, semester, calendarEvents);
       allDays.push({ date: dateStr, topic, type: eventType, rescheduleInfo });
     }
 
     const splitted = splitDaysIntoWeeks(allDays);
     setWeeks(splitted);
-  }, []);
+  }, [semester, calendarEvents]); // 依赖 semester，calendarEvents 数据加载后会自动更新
+
+  // **获取校历事件**
+  useEffect(() => {
+    if (!semesterId) return; // 避免 semesterId 为空时报错
+    setLoadingEvents(true);
+
+    fetchCalendarEvents(semesterId)
+      .then((events) => {
+        console.log('获取的事件列表:', events);
+        setCalendarEvents(events);
+      })
+      .catch((error) => {
+        console.error('获取校历事件失败:', error);
+      })
+      .finally(() => {
+        setLoadingEvents(false);
+      });
+  }, [semesterId]); // ✅ 当 semesterId 变化时，重新加载事件
+
+  // **如果加载中，显示占位 UI**
+  if (loadingSemesters || loadingSemester || loadingEvents) {
+    return <Card loading>加载学期数据中...</Card>;
+  }
+
+  // **如果 semester 仍然为空，或学期事件未正确加载，显示错误信息**
+  if (!semester || calendarEvents.length === 0) {
+    return <Card>学期数据加载失败，请稍后重试。</Card>;
+  }
 
   /** 渲染顶部表头 */
   const renderHeaderRow = () => {
@@ -405,8 +334,37 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
     );
   };
 
+  const handleMenuClick = (e: any) => {
+    const selectedSemester = semesters.find((s) => s.id === parseInt(e.key, 10));
+    if (selectedSemester) {
+      console.log(selectedSemester.id);
+      setSemesterId(selectedSemester.id);
+      console.log(`切换到: ${selectedSemester.name}`);
+    }
+  };
+
+  const menuItems = semesters.map((s) => ({
+    key: s.id.toString(),
+    label: s.name,
+  }));
+
   return (
-    <Card title={`学期视图：${semester.name}`}>
+    <Card
+      title={
+        <Dropdown.Button
+          menu={{
+            items: menuItems,
+            onClick: handleMenuClick,
+          }}
+          trigger={['click']}
+          icon={<DownOutlined />}
+        >
+          <Typography.Title level={4} style={{ cursor: 'pointer', margin: 0 }}>
+            {semester?.name}校历
+          </Typography.Title>
+        </Dropdown.Button>
+      }
+    >
       <div className={styles.semesterContainer}>
         {renderHeaderRow()}
         {weeks.map((w) => renderWeekRow(w))}

@@ -95,6 +95,7 @@ export default defineConfig({
   title: 'Ant Design Pro',
   layout: {
     locale: true,
+    // pure: true,
     ...defaultSettings,
   },
   /**
