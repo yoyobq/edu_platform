@@ -1,5 +1,5 @@
-import { fetchCalendarEvents } from '@/services/plan/calendarEvent';
-import { fetchSemester, fetchSemesters } from '@/services/plan/semester';
+import { getCalendarEvents } from '@/services/plan/calendarEvent';
+import { getSemester, getSemesters } from '@/services/plan/semester';
 import { DownOutlined } from '@ant-design/icons';
 import { Card, Dropdown, Typography } from 'antd';
 import dayjs from 'dayjs';
@@ -81,7 +81,7 @@ function getDayData(dateStr: string, semester: Semester, calendarEvents: Calenda
   const events = calendarEvents.filter(
     (e) => e.semesterId === semester.id && e.date === dateStr && e.recordStatus !== 'EXPIRY',
   );
-  const topic = events.length ? events.map((e) => e.topic).join(', ') : '';
+  const topic = events.length ? events.map((e) => e.topic).join(' · ') : '';
   let eventType: EventType;
   let rescheduleInfo: string | undefined = undefined;
 
@@ -105,7 +105,7 @@ function getDayData(dateStr: string, semester: Semester, calendarEvents: Calenda
       7: '日',
     };
     const origWeekday = orig.isoWeekday();
-    rescheduleInfo = `调 ${origDateStr}(${weekdayMap[origWeekday]})`;
+    rescheduleInfo = `调 ${origDateStr} 课(周${weekdayMap[origWeekday]})`;
   }
 
   // 修改字段引用为 eventType
@@ -202,7 +202,7 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
   // **获取所有学期信息**
   useEffect(() => {
     setLoadingSemesters(true);
-    fetchSemesters({})
+    getSemesters({})
       .then((data) => {
         const sorted = [...data].sort(
           (a, b) => dayjs(b.startDate).unix() - dayjs(a.startDate).unix(),
@@ -225,7 +225,7 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
     if (!semesterId) return; // 添加空值校验
 
     setLoadingSemester(true); // 开始加载
-    fetchSemester(semesterId) // 通过 fetchSemester 获取学期信息
+    getSemester(semesterId) // 通过 getSemester 获取学期信息
       .then((data) => {
         setSemester(data);
         setLoadingSemester(false); // 加载成功
@@ -261,7 +261,7 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
     if (!semesterId) return; // 避免 semesterId 为空时报错
     setLoadingEvents(true);
 
-    fetchCalendarEvents(semesterId)
+    getCalendarEvents(semesterId)
       .then((events) => {
         console.log('获取的事件列表:', events);
         setCalendarEvents(events);
@@ -272,7 +272,7 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
       .finally(() => {
         setLoadingEvents(false);
       });
-  }, [semesterId]); // ✅ 当 semesterId 变化时，重新加载事件
+  }, [semesterId]); // 当 semesterId 变化时，重新加载事件
 
   // **如果加载中，显示占位 UI**
   if (loadingSemesters || loadingSemester || loadingEvents) {

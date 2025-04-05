@@ -1,5 +1,6 @@
 .semesterContainer {
-  max-width: 660px;
+  max-width: 840px;
+  min-width: 520px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -27,10 +28,10 @@
   font-weight: bold;
 }
 
-/* 一周的行: 第一列（周数）固定 40px，后面 7 列使用 1fr */
+/* 一周的行: 第一列（周数）固定 20px，后面 7 列使用 1fr */
 .weekRow {
   display: grid;
-  grid-template-columns: 28px repeat(7, 1fr);
+  grid-template-columns: 28px repeat(7, 2fr);
   gap: 4px;
 }
 
@@ -93,6 +94,7 @@
   color: #333;
   font-weight: 600;
   min-height: 16px;
+  // white-space: 'pre-line';
 }
 .emptyDay {
   background-color: transparent;

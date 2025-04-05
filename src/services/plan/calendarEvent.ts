@@ -1,11 +1,11 @@
 import { request } from '@umijs/max';
 import { DocumentNode, print } from 'graphql';
 import {
-  createCalendarEvent,
-  deleteCalendarEvent,
-  getCalendarEvent,
-  listCalendarEvents,
-  updateCalendarEvent,
+  mutationCreateCalendarEvent,
+  mutationDeleteCalendarEvent,
+  mutationUpdateCalendarEvent,
+  queryCalendarEvent,
+  queryCalendarEvents,
 } from './graphql/calendarEvent.graphql';
 import type { CalendarEvent, CreateCalendarEventInput, UpdateCalendarEventInput } from './types';
 
@@ -42,8 +42,8 @@ async function graphqlRequest<T>(
  * @param id 事件 ID
  * @returns `Promise<CalendarEvent>` 返回事件的详细信息
  */
-export async function fetchCalendarEvent(id: number): Promise<CalendarEvent> {
-  return graphqlRequest<CalendarEvent>('getCalendarEvent', getCalendarEvent, { id });
+export async function getCalendarEvent(id: number): Promise<CalendarEvent> {
+  return graphqlRequest<CalendarEvent>('getCalendarEvent', queryCalendarEvent, { id });
 }
 
 /**
@@ -51,8 +51,8 @@ export async function fetchCalendarEvent(id: number): Promise<CalendarEvent> {
  * @param semesterId 学期 ID
  * @returns `Promise<CalendarEvent[]>` 返回符合条件的校历事件数组
  */
-export async function fetchCalendarEvents(semesterId: number): Promise<CalendarEvent[]> {
-  return graphqlRequest<CalendarEvent[]>('listCalendarEvents', listCalendarEvents, { semesterId });
+export async function getCalendarEvents(semesterId: number): Promise<CalendarEvent[]> {
+  return graphqlRequest<CalendarEvent[]>('listCalendarEvents', queryCalendarEvents, { semesterId });
 }
 
 /**
@@ -63,7 +63,9 @@ export async function fetchCalendarEvents(semesterId: number): Promise<CalendarE
 export async function createNewCalendarEvent(
   input: CreateCalendarEventInput,
 ): Promise<CalendarEvent> {
-  return graphqlRequest<CalendarEvent>('createCalendarEvent', createCalendarEvent, { input });
+  return graphqlRequest<CalendarEvent>('createCalendarEvent', mutationCreateCalendarEvent, {
+    input,
+  });
 }
 
 /**
@@ -76,7 +78,10 @@ export async function modifyCalendarEvent(
   id: number,
   input: UpdateCalendarEventInput,
 ): Promise<CalendarEvent> {
-  return graphqlRequest<CalendarEvent>('updateCalendarEvent', updateCalendarEvent, { id, input });
+  return graphqlRequest<CalendarEvent>('updateCalendarEvent', mutationUpdateCalendarEvent, {
+    id,
+    input,
+  });
 }
 
 /**
@@ -85,5 +90,5 @@ export async function modifyCalendarEvent(
  * @returns `Promise<boolean>` 返回 `true` 表示删除成功
  */
 export async function removeCalendarEvent(id: number): Promise<boolean> {
-  return graphqlRequest<boolean>('deleteCalendarEvent', deleteCalendarEvent, { id });
+  return graphqlRequest<boolean>('deleteCalendarEvent', mutationDeleteCalendarEvent, { id });
 }

@@ -24,11 +24,11 @@
 import { request } from '@umijs/max';
 import { DocumentNode, print } from 'graphql'; // 需要 `print` 来转换
 import {
-  createSemester,
-  deleteSemester,
-  getSemester,
-  listSemesters,
-  updateSemester,
+  mutationCreateSemester,
+  mutationDeleteSemester,
+  mutationUpdateSemester,
+  querySemester,
+  querySemesters,
 } from './graphql/semester.graphql';
 import type { CreateSemesterInput, Semester, UpdateSemesterInput } from './types';
 
@@ -53,7 +53,7 @@ import type { CreateSemesterInput, Semester, UpdateSemesterInput } from './types
  * @returns              `Promise<T>` 解析后的数据，类型与 `T` 对应
  *
  * **示例：获取单个学期信息**
- * - const semester = await graphqlRequest<Semester>('getSemester', getSemester, { id: 1 });
+ * - const semester = await graphqlRequest<Semester>('getSemester', querySemester, { id: 1 });
  * - console.log(semester.name); // TypeScript 会自动推导出 `semester` 的类型
  */
 async function graphqlRequest<T>(
@@ -81,8 +81,8 @@ async function graphqlRequest<T>(
  * @param id 学期 ID
  * @returns Promise<Semester> 返回指定学期的详细信息
  */
-export async function fetchSemester(id: number): Promise<Semester> {
-  return graphqlRequest<Semester>('getSemester', getSemester, { id });
+export async function getSemester(id: number): Promise<Semester> {
+  return graphqlRequest<Semester>('getSemester', querySemester, { id });
 }
 
 /**
@@ -92,11 +92,11 @@ export async function fetchSemester(id: number): Promise<Semester> {
  * @param filters.isCurrent 是否为当前学期（可选）
  * @returns Promise<Semester[]> 返回符合条件的学期数组
  */
-export async function fetchSemesters(filters: {
+export async function getSemesters(filters: {
   schoolYear?: number;
   isCurrent?: boolean;
 }): Promise<Semester[]> {
-  return graphqlRequest<Semester[]>('listSemesters', listSemesters, filters);
+  return graphqlRequest<Semester[]>('listSemesters', querySemesters, filters);
 }
 
 /**
@@ -112,7 +112,7 @@ export async function fetchSemesters(filters: {
  * @returns Promise<Semester> 返回新创建的学期信息
  */
 export async function createNewSemester(input: CreateSemesterInput): Promise<Semester> {
-  return graphqlRequest<Semester>('createSemester', createSemester, { input });
+  return graphqlRequest<Semester>('createSemester', mutationCreateSemester, { input });
 }
 
 /**
@@ -129,7 +129,7 @@ export async function createNewSemester(input: CreateSemesterInput): Promise<Sem
  * @returns Promise<Semester> 返回更新后的学期信息
  */
 export async function modifySemester(id: number, input: UpdateSemesterInput): Promise<Semester> {
-  return graphqlRequest<Semester>('updateSemester', updateSemester, { id, input });
+  return graphqlRequest<Semester>('updateSemester', mutationUpdateSemester, { id, input });
 }
 
 /**
@@ -138,5 +138,5 @@ export async function modifySemester(id: number, input: UpdateSemesterInput): Pr
  * @returns Promise<boolean> 返回 `true` 表示删除成功
  */
 export async function removeSemester(id: number): Promise<boolean> {
-  return graphqlRequest<boolean>('deleteSemester', deleteSemester, { id });
+  return graphqlRequest<boolean>('deleteSemester', mutationDeleteSemester, { id });
 }

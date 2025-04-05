@@ -1,7 +1,7 @@
 import { gql } from 'graphql-tag';
 
 // 获取单个校历事件
-export const getCalendarEvent = gql`
+export const queryCalendarEvent = gql`
   query getCalendarEvent($id: Int!) {
     getCalendarEvent(id: $id) {
       id
@@ -21,7 +21,7 @@ export const getCalendarEvent = gql`
 `;
 
 // 获取学期的所有校历事件
-export const listCalendarEvents = gql`
+export const queryCalendarEvents = gql`
   query listCalendarEvents($semesterId: Int!) {
     listCalendarEvents(semesterId: $semesterId) {
       id
@@ -41,7 +41,7 @@ export const listCalendarEvents = gql`
 `;
 
 // 创建校历事件
-export const createCalendarEvent = gql`
+export const mutationCreateCalendarEvent = gql`
   mutation createCalendarEvent($input: CreateCalendarEventInput!) {
     createCalendarEvent(input: $input) {
       id
@@ -61,7 +61,7 @@ export const createCalendarEvent = gql`
 `;
 
 // 更新校历事件
-export const updateCalendarEvent = gql`
+export const mutationUpdateCalendarEvent = gql`
   mutation updateCalendarEvent($id: Int!, $input: UpdateCalendarEventInput!) {
     updateCalendarEvent(id: $id, input: $input) {
       id
@@ -81,7 +81,7 @@ export const updateCalendarEvent = gql`
 `;
 
 // 删除校历事件
-export const deleteCalendarEvent = gql`
+export const mutationDeleteCalendarEvent = gql`
   mutation deleteCalendarEvent($id: Int!) {
     deleteCalendarEvent(id: $id)
   }

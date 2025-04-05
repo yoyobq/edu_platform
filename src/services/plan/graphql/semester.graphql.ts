@@ -1,7 +1,7 @@
 import { gql } from 'graphql-tag';
 
 // 获取单个学期
-export const getSemester = gql`
+export const querySemester = gql`
   query getSemester($id: Int!) {
     getSemester(id: $id) {
       id
@@ -17,7 +17,7 @@ export const getSemester = gql`
 `;
 
 // 获取学期列表
-export const listSemesters = gql`
+export const querySemesters = gql`
   query listSemesters($schoolYear: Int, $isCurrent: Boolean) {
     listSemesters(schoolYear: $schoolYear, isCurrent: $isCurrent) {
       id
@@ -33,7 +33,7 @@ export const listSemesters = gql`
 `;
 
 // 创建学期
-export const createSemester = gql`
+export const mutationCreateSemester = gql`
   mutation createSemester($input: CreateSemesterInput!) {
     createSemester(input: $input) {
       id
@@ -49,7 +49,7 @@ export const createSemester = gql`
 `;
 
 // 更新学期
-export const updateSemester = gql`
+export const mutationUpdateSemester = gql`
   mutation updateSemester($id: Int!, $input: UpdateSemesterInput!) {
     updateSemester(id: $id, input: $input) {
       id
@@ -65,7 +65,7 @@ export const updateSemester = gql`
 `;
 
 // 删除学期
-export const deleteSemester = gql`
+export const mutationDeleteSemester = gql`
   mutation deleteSemester($id: Int!) {
     deleteSemester(id: $id)
   }

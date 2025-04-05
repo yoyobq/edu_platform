@@ -1,26 +1,83 @@
-import { Card, List } from 'antd';
-import React from 'react';
+import { getDailySchedule } from '@/services/plan/courseScheduleManager';
+import { useModel } from '@umijs/max';
+import { Card, List, Tag } from 'antd';
+import React, { useEffect, useState } from 'react';
+import styles from './DayView.less';
 
-interface ScheduleEvent {
-  time: string;
-  course: string;
-  location: string;
+interface ScheduleListProps {
+  date: string;
 }
 
-const mockEvents: ScheduleEvent[] = [
-  { time: '08:00-09:30', course: '计算机基础', location: 'A101' },
-  { time: '10:00-11:30', course: '高等数学', location: 'C302' },
-];
+interface FlatCourseSchedule {
+  scheduleId: number;
+  courseName: string;
+  staffId: number;
+  staffName: string;
+  teachingClassName: string;
+  classroomName?: string;
+  semesterId: number;
+  courseCategory: string;
+  credits?: number;
+  weekCount?: number;
+  weeklyHours?: number;
+  coefficient: string;
+  weekNumberString?: string;
+  slotId: number;
+  dayOfWeek: number;
+  periodStart: number;
+  periodEnd: number;
+  weekType: string;
+}
 
-const ScheduleList: React.FC<{ date: string }> = ({ date }) => {
-  console.log(date);
+const ScheduleList: React.FC<ScheduleListProps> = ({ date }) => {
+  const { initialState } = useModel('@@initialState');
+  const staffId = initialState?.currentUser?.id;
+  const [loading, setLoading] = useState<boolean>(true);
+  const [dailySchedule, setDailySchedule] = useState<FlatCourseSchedule[]>([]);
+
+  console.log('staffId:', staffId);
+  console.log('date:', date);
+  useEffect(() => {
+    setLoading(true);
+    if (!staffId) {
+      console.error('未获取到有效用户ID');
+      return;
+    }
+    getDailySchedule(staffId, date)
+      .then((res) => {
+        setDailySchedule(res.sort((a, b) => a.periodStart - b.periodStart));
+        setDailySchedule(res);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [date, staffId]);
+
   return (
-    <Card title="当日课表">
+    <Card
+      title={`${date} 课表`}
+      loading={loading}
+      className={styles.scheduleListCard}
+      bordered={false}
+    >
       <List
-        dataSource={mockEvents}
+        dataSource={dailySchedule}
+        locale={{ emptyText: '今日无课程安排' }}
         renderItem={(item) => (
           <List.Item>
-            <List.Item.Meta title={item.course} description={item.time} />
+            <div className="course-header">
+              <Tag color="blue" className="period-tag">
+                {`${item.periodStart}-${item.periodEnd}节`}
+              </Tag>
+              <div className="course-title">
+                {item.courseName ? item.courseName.substring(8) : '未命名课程'}
+              </div>
+            </div>
+            <div className="course-info">
+              <span className="class-name">班级: {item.teachingClassName}</span>
+              <span>教室: {item.classroomName || '未安排'}</span>
+            </div>
+            <div className="course-type-watermark">{item.courseCategory}</div>
           </List.Item>
         )}
       />
