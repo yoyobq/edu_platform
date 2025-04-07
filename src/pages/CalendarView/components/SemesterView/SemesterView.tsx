@@ -254,6 +254,16 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
 
     const splitted = splitDaysIntoWeeks(allDays);
     setWeeks(splitted);
+
+    // 数据加载完成后，添加一个延时，确保DOM已经渲染
+    setTimeout(() => {
+      const today = document.querySelector(`.${styles.today}`);
+      if (today) {
+        // 滚动到今天的位置，并向上偏移100px，让今天显示在页面上部
+        today.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.scrollBy(0, 250);
+      }
+    }, 300);
   }, [semester, calendarEvents]); // 依赖 semester，calendarEvents 数据加载后会自动更新
 
   // **获取校历事件**
@@ -298,20 +308,33 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
     );
   };
   /** 渲染日期方格 */
-  const renderDayCell = (day: SemesterDay) => (
-    <div
-      key={day.date}
-      className={`${styles.dayCard} ${styles[day.type]}`}
-      onClick={() => onDateSelect?.(day.date)}
-    >
-      <div className={styles.dateText}>{dayjs(day.date).format('MM-DD')}</div>
-      <div className={styles.topicText}>
-        {day.type === 'exam' && <div className={styles.examLabel}>考试周</div>}
-        {day.rescheduleInfo && <div className={styles.rescheduleLabel}>{day.rescheduleInfo}</div>}
-        {!day.rescheduleInfo && <div>{day.topic}</div>}
+  const renderDayCell = (day: SemesterDay) => {
+    const isToday = dayjs(day.date).isSame(dayjs(), 'day');
+    const date = dayjs(day.date);
+    const isFirstDay = date.date() === 1; // 判断是否为每月1号
+    const monthName = date.format('M月'); // 获取月份名称
+
+    return (
+      <div
+        key={day.date}
+        id={isToday ? 'today-cell' : undefined}
+        className={`${styles.dayCard} ${styles[day.type]} ${isToday ? styles.today : ''}`}
+        onClick={() => onDateSelect?.(day.date)}
+      >
+        <div
+          className={`${styles.dateText} ${isFirstDay ? styles.firstDay : ''}`}
+          data-month={isFirstDay ? monthName : ''}
+        >
+          {date.format('MM-DD')}
+        </div>
+        <div className={styles.topicText}>
+          {day.type === 'exam' && <div className={styles.examLabel}>考试周</div>}
+          {day.rescheduleInfo && <div className={styles.rescheduleLabel}>{day.rescheduleInfo}</div>}
+          {!day.rescheduleInfo && <div>{day.topic}</div>}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   /** 渲染一周: 第一列 => 周数, 后面7列 => 日期方格 */
   const renderWeekRow = (weekData: WeekData) => {

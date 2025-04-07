@@ -247,3 +247,36 @@
     left: 100%;
   }
 }
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+}
+
+.backNavigation {
+  margin-bottom: 16px;
+  padding: 8px 0;
+}
+
+.floatBackButton {
+  background-color: #fa8c16;
+
+  &:hover {
+    background-color: #ff9c2b;
+  }
+
+  :global {
+    .ant-float-btn-body {
+      background-color: #fa8c16;
+
+      &:hover {
+        background-color: #ff9c2b;
+      }
+    }
+  }
+}
+
+.dateTitle {
+  font-size: clamp(16px, 1.2vw, 20px);
+  font-weight: 500;
+}
