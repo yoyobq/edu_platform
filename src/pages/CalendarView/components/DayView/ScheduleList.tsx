@@ -75,7 +75,7 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ date }) => {
             </div>
             <div className="course-info">
               <span className="class-name">班级: {item.teachingClassName}</span>
-              <span>教室: {item.classroomName || '未安排'}</span>
+              <span className="classroom-name">教室: {item.classroomName || '未安排'}</span>
             </div>
             <div className="course-type-watermark">{item.courseCategory}</div>
           </List.Item>
