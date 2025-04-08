@@ -32,7 +32,7 @@ export interface CourseSchedule {
   weeklyHours?: number;
   credits?: number;
   coefficient: number;
-  courseCategory: 'REQUIRED' | 'ELECTIVE' | 'CLUB' | 'CLASS_MEETING' | 'OTHER';
+  courseCategory: 'THEORY' | 'PRACTICE' | 'INTEGRATED' | 'CLUB' | 'CLASS_MEETING' | 'OTHER';
   weekNumberString?: string;
   slots?: CourseSlot[];
   sourceMap?: CourseSourceMap;

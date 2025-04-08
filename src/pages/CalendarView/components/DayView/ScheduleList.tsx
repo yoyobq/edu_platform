@@ -29,14 +29,21 @@ interface FlatCourseSchedule {
   weekType: string;
 }
 
+const courseCategoryMap: Record<string, string> = {
+  THEORY: '理论课',
+  PRACTICE: '实践课',
+  INTEGRATED: '一体化',
+  CLUB: '社团课',
+  CLASS_MEETING: '班会课',
+  OTHER: '其他课程',
+};
+
 const ScheduleList: React.FC<ScheduleListProps> = ({ date }) => {
   const { initialState } = useModel('@@initialState');
   const staffId = initialState?.currentUser?.id;
   const [loading, setLoading] = useState<boolean>(true);
   const [dailySchedule, setDailySchedule] = useState<FlatCourseSchedule[]>([]);
 
-  console.log('staffId:', staffId);
-  console.log('date:', date);
   useEffect(() => {
     setLoading(true);
     if (!staffId) {
@@ -77,7 +84,9 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ date }) => {
               <span className="class-name">班级: {item.teachingClassName}</span>
               <span className="classroom-name">教室: {item.classroomName || '未安排'}</span>
             </div>
-            <div className="course-type-watermark">{item.courseCategory}</div>
+            <div className="course-type-watermark">
+              {courseCategoryMap[item.courseCategory] || '未知课程类型'}
+            </div>
           </List.Item>
         )}
       />
