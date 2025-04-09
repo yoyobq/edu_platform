@@ -54,8 +54,8 @@ export const queryDailySchedule = gql`
 
 // 查询实际教学日程（带周次过滤）
 export const queryActualTeachingDates = gql`
-  query actualTeachingDates($filter: TeachingDateInput!) {
-    actualTeachingDates(input: $filter) {
+  query actualTeachingDates($input: TeachingDateInput!) {
+    actualTeachingDates(input: $input) {
       date
       weekOfDay
       weekNumber

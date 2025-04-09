@@ -8,6 +8,7 @@ import { Card, Dropdown, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import CourseTable from './components/CourseTable';
+import TeachingWorkloadTable from './components/TeachingWorkloadTable';
 import styles from './style.less';
 
 /**
@@ -92,6 +93,10 @@ const CourseSchedulePage: React.FC = () => {
       </Card>
 
       <CourseTable semesterId={semesterId} semester={semester} staffId={staffInfo?.id} />
+
+      {/* 添加工作量预报表 */}
+      <TeachingWorkloadTable semesterId={semesterId} staffInfo={staffInfo} />
+
       <div className={styles.contentPadding}></div>
       <Footer />
     </div>

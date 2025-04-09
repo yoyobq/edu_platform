@@ -76,7 +76,9 @@ export function getDailySchedule(staffId: number, date: string) {
  * @returns `Promise<TeachingDate[]>` 返回所有有效的教学日及课程安排
  */
 export function getActualTeachingDates(input: TeachingDateInput) {
-  return graphqlRequest<TeachingDate[]>('actualTeachingDates', queryActualTeachingDates, { input });
+  return graphqlRequest<TeachingDate[]>('actualTeachingDates', queryActualTeachingDates, {
+    input,
+  });
 }
 
 /**
