@@ -1,4 +1,3 @@
-import { getFullScheduleByStaff } from '@/services/plan/courseScheduleManager';
 import type { FlatCourseSchedule } from '@/services/plan/types';
 import { Card, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -13,11 +12,7 @@ interface StaffInfo {
   departmentId: number;
 }
 
-interface TeachingWorkloadTableProps {
-  semesterId: number | null;
-  staffInfo: StaffInfo;
-}
-
+// 添加 WorkloadItem 接口定义
 interface WorkloadItem {
   className: string;
   courseName: string;
@@ -27,7 +22,17 @@ interface WorkloadItem {
   totalHours: number;
 }
 
-const TeachingWorkloadTable: React.FC<TeachingWorkloadTableProps> = ({ semesterId, staffInfo }) => {
+interface TeachingWorkloadTableProps {
+  semesterId: number | null;
+  staffInfo: StaffInfo;
+  scheduleData?: FlatCourseSchedule[]; // 添加课表数据作为可选属性
+}
+
+const TeachingWorkloadTable: React.FC<TeachingWorkloadTableProps> = ({
+  semesterId,
+  staffInfo,
+  scheduleData = [], // 设置默认值为空数组
+}) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [workloadData, setWorkloadData] = useState<WorkloadItem[]>([]);
   const [totalWorkload, setTotalWorkload] = useState<number>(0);
@@ -96,16 +101,17 @@ const TeachingWorkloadTable: React.FC<TeachingWorkloadTableProps> = ({ semesterI
 
     setLoading(true);
 
-    getFullScheduleByStaff(staffInfo.id, semesterId)
-      .then((res) => {
-        // 处理返回的数据，转换为工作量表格数据
-        const processedData = processWorkloadData(res);
-        setWorkloadData(processedData.items);
-        setTotalWorkload(processedData.total);
-      })
-      .catch((error) => console.error('获取工作量数据失败:', error))
-      .finally(() => setLoading(false));
-  }, [semesterId, staffInfo]);
+    // 直接使用传入的 scheduleData，不再发起请求
+    try {
+      const processedData = processWorkloadData(scheduleData);
+      setWorkloadData(processedData.items);
+      setTotalWorkload(processedData.total);
+    } catch (error) {
+      console.error('处理工作量数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [semesterId, staffInfo, scheduleData]); // 添加 scheduleData 作为依赖项
 
   return (
     <Card

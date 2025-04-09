@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Footer from '@/components/Footer';
+import { getFullScheduleByStaff } from '@/services/plan/courseScheduleManager';
 import { getSemesters } from '@/services/plan/semester';
-import type { Semester } from '@/services/plan/types';
+import type { FlatCourseSchedule, Semester } from '@/services/plan/types';
 import { DownOutlined, UserOutlined } from '@ant-design/icons';
 import { useModel } from '@umijs/max';
 import { Card, Dropdown, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import CourseTable from './components/CourseTable';
+import HolidayDeductionTable from './components/HolidayDeductionTable';
 import TeachingWorkloadTable from './components/TeachingWorkloadTable';
 import styles from './style.less';
 
@@ -20,8 +21,11 @@ const CourseSchedulePage: React.FC = () => {
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [semester, setSemester] = useState<Semester | null>(null);
   const [semesterId, setSemesterId] = useState<number | null>(null);
+  const [scheduleData, setScheduleData] = useState<FlatCourseSchedule[]>([]);
+
   const [staffInfo, setStaffInfo] = useState<any>(null);
 
+  const [loading, setLoading] = useState<boolean>(true);
   // 获取所有学期信息
   useEffect(() => {
     getSemesters({})
@@ -48,8 +52,27 @@ const CourseSchedulePage: React.FC = () => {
     }
   }, [initialState?.currentUser?.staffInfo]);
 
+  // 获取课表数据
+  useEffect(() => {
+    if (!semesterId || !staffInfo) return;
+
+    setLoading(true);
+
+    getFullScheduleByStaff(staffInfo.id, semesterId)
+      .then((res) => {
+        setScheduleData(res);
+      })
+      .catch((error) => console.error('获取课表数据失败:', error))
+      .finally(() => setLoading(false));
+  }, [semesterId, staffInfo]);
+
   // 处理学期变更
   const handleSemesterChange = (newSemester: Semester) => {
+    // 清理相关状态数据
+    setScheduleData([]);
+    setLoading(true);
+
+    // 更新学期信息
     setSemesterId(newSemester.id);
     setSemester(newSemester);
   };
@@ -92,13 +115,28 @@ const CourseSchedulePage: React.FC = () => {
         </div>
       </Card>
 
-      <CourseTable semesterId={semesterId} semester={semester} staffId={staffInfo?.id} />
+      <CourseTable
+        semesterId={semesterId}
+        semester={semester}
+        staffId={staffInfo?.id}
+        scheduleData={scheduleData}
+      />
 
       {/* 添加工作量预报表 */}
-      <TeachingWorkloadTable semesterId={semesterId} staffInfo={staffInfo} />
+      <TeachingWorkloadTable
+        semesterId={semesterId}
+        staffInfo={staffInfo}
+        scheduleData={scheduleData}
+      />
+
+      {/* 添加节假日扣课时统计表 */}
+      <HolidayDeductionTable
+        semesterId={semesterId}
+        staffInfo={staffInfo}
+        scheduleData={scheduleData}
+      />
 
       <div className={styles.contentPadding}></div>
-      <Footer />
     </div>
   );
 };

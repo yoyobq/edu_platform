@@ -1,4 +1,3 @@
-import { getFullScheduleByStaff } from '@/services/plan/courseScheduleManager';
 import type { FlatCourseSchedule, Semester } from '@/services/plan/types';
 import { Card, message, Switch, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -8,9 +7,15 @@ interface CourseTableProps {
   semesterId: number | null;
   semester: Semester | null;
   staffId?: number;
+  scheduleData?: FlatCourseSchedule[]; // 添加课表数据作为可选属性
 }
 
-const CourseTable: React.FC<CourseTableProps> = ({ semesterId, semester, staffId }) => {
+const CourseTable: React.FC<CourseTableProps> = ({
+  semesterId,
+  semester,
+  staffId,
+  scheduleData = [], // 设置默认值为空数组
+}) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [courseTable, setCourseTable] = useState<any[][]>([]);
   // 在组件顶部添加状态初始化逻辑
@@ -99,6 +104,7 @@ const CourseTable: React.FC<CourseTableProps> = ({ semesterId, semester, staffId
         classroom: course.classroomName,
         weekRange: weekRangeText,
         rowSpan: endPeriod - startPeriod + 1, // 计算跨行数
+        courseCategory: course.courseCategory, // 添加课程类型
       };
 
       // 将课程信息放入对应的单元格
@@ -113,15 +119,6 @@ const CourseTable: React.FC<CourseTableProps> = ({ semesterId, semester, staffId
     return table;
   };
 
-  useEffect(() => {
-    if (!semesterId || !staffId) return;
-    setLoading(true);
-    getFullScheduleByStaff(staffId, semesterId)
-      .then((res) => setCourseTable(processCourseData(res)))
-      .catch((error) => console.error('获取课表失败:', error))
-      .finally(() => setLoading(false));
-  }, [semesterId, staffId]);
-
   // 渲染课程单元格
   const renderCourseCell = (course: any) => {
     if (!course) return null;
@@ -129,8 +126,45 @@ const CourseTable: React.FC<CourseTableProps> = ({ semesterId, semester, staffId
     // 在拆分模式下，即使是被占用的单元格也显示课程信息
     if (course.isOccupied && !splitMode) return null;
 
+    // 根据课程类型确定水印样式类
+    let courseTypeClass = '';
+    if (course.courseCategory) {
+      switch (course.courseCategory) {
+        case 'INTEGRATED':
+          courseTypeClass = styles.integratedCourse;
+          break;
+        case 'THEORY':
+        case 'PRACTICE':
+          courseTypeClass = styles.theoryPracticeCourse;
+          break;
+        default:
+          courseTypeClass = styles.otherCourse;
+          break;
+      }
+    }
+
+    // 获取课程类型的中文名称
+    const getCategoryText = (category: string) => {
+      switch (category) {
+        case 'THEORY':
+          return '理论课';
+        case 'PRACTICE':
+          return '实践课';
+        case 'INTEGRATED':
+          return '一体化';
+        case 'CLUB':
+          return '社团课';
+        case 'CLASS_MEETING':
+          return '班会课';
+        case 'OTHER':
+          return '其他';
+        default:
+          return '';
+      }
+    };
+
     return (
-      <div className={styles.courseCell}>
+      <div className={`${styles.courseCell} ${courseTypeClass}`}>
         <div className={styles.courseName}>{course.name}</div>
         <div className={styles.courseClass}>
           {course.className} {course.weekRange}
@@ -138,9 +172,27 @@ const CourseTable: React.FC<CourseTableProps> = ({ semesterId, semester, staffId
         {course.classroom !== '未记录' && (
           <div className={styles.courseRoom}>{course.classroom}</div>
         )}
+        {course.courseCategory && (
+          <div className={styles.courseWatermark}>{getCategoryText(course.courseCategory)}</div>
+        )}
       </div>
     );
   };
+
+  useEffect(() => {
+    if (!semesterId || !staffId) return;
+
+    setLoading(true);
+
+    // 直接使用传入的 scheduleData，不再发起请求
+    try {
+      setCourseTable(processCourseData(scheduleData));
+    } catch (error) {
+      console.error('处理课表数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [semesterId, staffId, scheduleData]); // 添加 scheduleData 作为依赖项
 
   // 在组件内添加一个函数来检查特定时间段是否有课程
   const hasCourseInPeriod = (period: number) => {
@@ -155,7 +207,7 @@ const CourseTable: React.FC<CourseTableProps> = ({ semesterId, semester, staffId
     <Card
       title={
         <Typography.Title level={4} style={{ margin: 0 }}>
-          {semester?.name || '请选择学期'}
+          {semester?.name}课表
         </Typography.Title>
       }
       loading={loading}

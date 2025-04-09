@@ -74,8 +74,8 @@ export const queryActualTeachingDates = gql`
 
 // 查询取消的课程（带假期与调课说明）
 export const queryCancelledCourses = gql`
-  query cancelledCourses($filter: TeachingDateInput!) {
-    cancelledCourses(input: $filter) {
+  query cancelledCourses($input: TeachingDateInput!) {
+    cancelledCourses(input: $input) {
       date
       weekOfDay
       weekNumber
