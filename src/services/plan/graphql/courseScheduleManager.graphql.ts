@@ -2,40 +2,26 @@ import { gql } from 'graphql-tag';
 
 // 查询教师某学期完整课表
 export const queryFullScheduleByStaff = gql`
-  query getFullScheduleByStaff($staffId: Int!, $semesterId: Int!) {
-    getFullScheduleByStaff(staffId: $staffId, semesterId: $semesterId) {
-      id
+  query getFullScheduleByStaff($input: FullScheduleInput!) {
+    getFullScheduleByStaff(input: $input) {
+      scheduleId
+      courseName
       staffId
       staffName
       teachingClassName
-      classroomId
       classroomName
-      courseId
-      courseName
       semesterId
+      courseCategory
+      credits
       weekCount
       weeklyHours
-      credits
       coefficient
-      courseCategory
       weekNumberString
-      slots {
-        id
-        dayOfWeek
-        periodStart
-        periodEnd
-        weekType
-      }
-      sourceMap {
-        id
-        courseScheduleId
-        lecturePlanId
-        courseId
-        teacherInChargeId
-        teachingClassId
-        staffId
-        semesterId
-      }
+      # slotId
+      dayOfWeek
+      periodStart
+      periodEnd
+      weekType
     }
   }
 `;

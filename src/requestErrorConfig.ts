@@ -129,6 +129,15 @@ export const errorConfig: RequestConfig = {
 
       switch (data?.errorCode) {
         case 1001:
+          // token 未提交
+          history.push('/user/login');
+          break;
+        case 1002:
+          // token 无效
+          history.push('/user/login');
+          break;
+        case 1003:
+          // token 已过期
           history.push('/user/login');
           break;
         default:

@@ -4,6 +4,7 @@ export interface Semester {
   termNumber: number;
   name: string;
   startDate: string;
+  firstTeachingDate: string;
   examStartDate: string;
   endDate: string;
   isCurrent: boolean;
@@ -14,6 +15,7 @@ export interface CreateSemesterInput {
   termNumber: number;
   name: string;
   startDate: string;
+  firstTeachingDate: string;
   examStartDate: string;
   endDate: string;
   isCurrent: boolean;
@@ -144,7 +146,7 @@ export interface CourseSchedule {
   weeklyHours?: number;
   credits?: number;
   coefficient: number;
-  courseCategory: 'REQUIRED' | 'ELECTIVE' | 'CLUB' | 'CLASS_MEETING' | 'OTHER';
+  courseCategory: 'THEORY' | 'PRACTICE' | 'INTEGRATED' | 'CLUB' | 'CLASS_MEETING' | 'OTHER';
   weekNumberString?: string;
   slots?: CourseSlot[];
   sourceMap?: CourseSourceMap;

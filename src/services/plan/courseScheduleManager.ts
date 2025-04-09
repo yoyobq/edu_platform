@@ -11,7 +11,7 @@ import {
 import type {
   BatchTeachingHourFilter,
   CancelledTeachingDate,
-  CourseSchedule,
+  // FlatCourseSchedule,
   FlatCourseSchedule,
   TeachingDate,
   TeachingDateInput,
@@ -53,9 +53,8 @@ async function graphqlRequest<T>(
  * @returns `Promise<CourseSchedule[]>` 返回该教师该学期的完整课程表
  */
 export function getFullScheduleByStaff(staffId: number, semesterId: number) {
-  return graphqlRequest<CourseSchedule[]>('getFullScheduleByStaff', queryFullScheduleByStaff, {
-    staffId,
-    semesterId,
+  return graphqlRequest<FlatCourseSchedule[]>('getFullScheduleByStaff', queryFullScheduleByStaff, {
+    input: { staffId, semesterId },
   });
 }
 

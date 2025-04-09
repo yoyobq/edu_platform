@@ -52,7 +52,7 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ date }) => {
     }
     getDailySchedule(staffId, date)
       .then((res) => {
-        setDailySchedule(res.sort((a, b) => a.periodStart - b.periodStart));
+        res.sort((a, b) => a.periodStart - b.periodStart);
         setDailySchedule(res);
       })
       .finally(() => {

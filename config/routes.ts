@@ -43,6 +43,13 @@ export default [
     access: 'canTeacher',
   },
   {
+    name: 'course-schedule',
+    icon: 'schedule',
+    path: '/CourseSchedule',
+    component: './CourseSchedule',
+    access: 'canTeacher',
+  },
+  {
     path: '/admin',
     name: 'admin',
     icon: 'crown',

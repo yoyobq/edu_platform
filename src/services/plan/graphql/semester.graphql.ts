@@ -9,6 +9,7 @@ export const querySemester = gql`
       termNumber
       name
       startDate
+      firstTeachingDate
       examStartDate
       endDate
       isCurrent
@@ -25,6 +26,7 @@ export const querySemesters = gql`
       termNumber
       name
       startDate
+      firstTeachingDate
       examStartDate
       endDate
       isCurrent

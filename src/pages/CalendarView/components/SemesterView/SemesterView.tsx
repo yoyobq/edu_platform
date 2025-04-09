@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isoWeek from 'dayjs/plugin/isoWeek';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './SemesterView.less';
 
 // 扩展 dayjs 插件
@@ -36,6 +36,7 @@ interface Semester {
   name: string;
   startDate: string; // 格式 YYYY-MM-DD
   examStartDate: string; // 考试开始日期
+  firstTeachingDate: string; // 上课开始日期
   endDate: string; // 学期结束日期
   isCurrent: boolean; // 是否是当前学期
 }
@@ -186,11 +187,11 @@ interface SemesterViewProps {
 const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
   // 学期列表数组
   const [semesters, setSemesters] = useState<Semester[]>([]); // 所有可用学期
-  const [loadingSemesters, setLoadingSemesters] = useState<boolean>(false);
+  const [loadingSemesters, setLoadingSemesters] = useState<boolean>(true);
 
   // 单个学期数据
   const [semester, setSemester] = useState<Semester | null>(null); // 当前学期
-  const [loadingSemester, setLoadingSemester] = useState<boolean>(false);
+  const [loadingSemester, setLoadingSemester] = useState<boolean>(true);
 
   // 修改初始化类型为 number | null
   const [semesterId, setSemesterId] = useState<number | null>(null);
@@ -199,6 +200,7 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState<boolean>(true);
 
+  const todayRef = useRef<HTMLDivElement | null>(null);
   // **获取所有学期信息**
   useEffect(() => {
     setLoadingSemesters(true);
@@ -255,16 +257,27 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
     const splitted = splitDaysIntoWeeks(allDays);
     setWeeks(splitted);
 
-    // 数据加载完成后，添加一个延时，确保DOM已经渲染
-    setTimeout(() => {
-      const today = document.querySelector(`.${styles.today}`);
-      if (today) {
-        // 滚动到今天的位置，并向上偏移100px，让今天显示在页面上部
-        today.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        window.scrollBy(0, 250);
-      }
-    }, 300);
+    // // 数据加载完成后，添加一个延时，确保DOM已经渲染
+    // setTimeout(() => {
+    //   const today = document.querySelector(`.${styles.today}`);
+    //   if (today) {
+    //     // 滚动到今天的位置，并向上偏移300px，让今天显示在页面中上部
+    //     today.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    //     window.scrollBy(0, 300);
+    //   }
+    // }, 500);
   }, [semester, calendarEvents]); // 依赖 semester，calendarEvents 数据加载后会自动更新
+
+  // 使用 loading 状态判断数据是否加载完成
+  useEffect(() => {
+    setTimeout(() => {
+      if (!loadingSemesters && !loadingSemester && !loadingEvents && todayRef.current) {
+        // 滚动到今天的位置，让今天显示在页面中部
+        todayRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // window.scrollBy(0, 250);
+      }
+    }, 500);
+  }, [loadingSemesters, loadingSemester, loadingEvents]);
 
   // **获取校历事件**
   useEffect(() => {
@@ -273,12 +286,12 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
 
     getCalendarEvents(semesterId)
       .then((events) => {
-        console.log('获取的事件列表:', events);
+        // console.log('获取的事件列表:', events);
         setCalendarEvents(events);
       })
-      .catch((error) => {
-        console.error('获取校历事件失败:', error);
-      })
+      // .catch((error) => {
+      // console.error('获取校历事件失败:', error);
+      // })
       .finally(() => {
         setLoadingEvents(false);
       });
@@ -317,7 +330,8 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
     return (
       <div
         key={day.date}
-        id={isToday ? 'today-cell' : undefined}
+        // id={isToday ? 'today-cell' : undefined}
+        ref={isToday ? todayRef : null}
         className={`${styles.dayCard} ${styles[day.type]} ${isToday ? styles.today : ''}`}
         onClick={() => onDateSelect?.(day.date)}
       >
