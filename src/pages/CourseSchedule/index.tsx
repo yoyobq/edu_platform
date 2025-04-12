@@ -60,6 +60,7 @@ const CourseSchedulePage: React.FC = () => {
 
     getFullScheduleByStaff(staffInfo.id, semesterId)
       .then((res) => {
+        console.log(res);
         setScheduleData(res);
       })
       .catch((error) => console.error('获取课表数据失败:', error))
@@ -122,12 +123,8 @@ const CourseSchedulePage: React.FC = () => {
         scheduleData={scheduleData}
       />
 
-      {/* 添加工作量预报表 */}
-      <TeachingWorkloadTable
-        semesterId={semesterId}
-        staffInfo={staffInfo}
-        scheduleData={scheduleData}
-      />
+      {/* 添加工作量预报表 - 删除 scheduleData 属性 */}
+      <TeachingWorkloadTable semesterId={semesterId} staffInfo={staffInfo} />
 
       {/* 添加节假日扣课时统计表 */}
       <HolidayDeductionTable

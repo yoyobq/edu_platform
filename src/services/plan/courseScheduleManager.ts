@@ -7,6 +7,8 @@ import {
   queryDailySchedule,
   queryFullScheduleByStaff,
   queryTeachingHours,
+  queryStaffWorkloads,
+  queryStaffWorkload,
 } from './graphql/courseScheduleManager.graphql';
 import type {
   BatchTeachingHourFilter,
@@ -16,6 +18,9 @@ import type {
   TeachingDate,
   TeachingDateInput,
   TeachingHourSummary,
+  StaffWorkload,
+  StaffWorkloadFilter,
+  StaffWorkloadSingleInput,
 } from './types';
 
 /**
@@ -108,6 +113,28 @@ export function getTeachingHours(input: TeachingDateInput) {
  */
 export function getBatchTeachingHours(input: BatchTeachingHourFilter) {
   return graphqlRequest<TeachingHourSummary[]>('batchTeachingHours', queryBatchTeachingHours, {
+    input,
+  });
+}
+
+/**
+ * 查询多个教师的工作量信息
+ * @param input StaffWorkloadFilter 输入参数，包含学期ID和教师ID列表
+ * @returns `Promise<StaffWorkload[]>` 返回教师工作量信息数组
+ */
+export function getStaffWorkloads(input: StaffWorkloadFilter) {
+  return graphqlRequest<StaffWorkload[]>('staffWorkloads', queryStaffWorkloads, {
+    input,
+  });
+}
+
+/**
+ * 查询单个教师的工作量信息
+ * @param input StaffWorkloadSingleInput 输入参数，包含学期ID和教师ID
+ * @returns `Promise<StaffWorkload | null>` 返回单个教师的工作量信息
+ */
+export function getStaffWorkload(input: StaffWorkloadSingleInput) {
+  return graphqlRequest<StaffWorkload | null>('staffWorkload', queryStaffWorkload, {
     input,
   });
 }

@@ -1,4 +1,5 @@
-import type { FlatCourseSchedule } from '@/services/plan/types';
+import { getStaffWorkload } from '@/services/plan/courseScheduleManager';
+import type { StaffWorkload, TeachingWorkloadItem } from '@/services/plan/types';
 import { Card, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import styles from '../style.less';
@@ -25,16 +26,16 @@ interface WorkloadItem {
 interface TeachingWorkloadTableProps {
   semesterId: number | null;
   staffInfo: StaffInfo;
-  scheduleData?: FlatCourseSchedule[]; // 添加课表数据作为可选属性
+  // 删除 scheduleData 属性
 }
 
 const TeachingWorkloadTable: React.FC<TeachingWorkloadTableProps> = ({
   semesterId,
   staffInfo,
-  scheduleData = [], // 设置默认值为空数组
+  // 删除 scheduleData 参数
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [workloadData, setWorkloadData] = useState<WorkloadItem[]>([]);
+  const [workloadItems, setWorkloadItems] = useState<WorkloadItem[]>([]);
   const [totalWorkload, setTotalWorkload] = useState<number>(0);
 
   // 处理班级名称，去掉逗号并添加HTML换行标签
@@ -44,75 +45,65 @@ const TeachingWorkloadTable: React.FC<TeachingWorkloadTableProps> = ({
     return className.replace(/,/g, '<br>');
   };
 
-  // 处理工作量数据
-  const processWorkloadData = (courses: FlatCourseSchedule[]) => {
-    // 按课程名和班级分组
-    const courseMap = new Map<string, FlatCourseSchedule[]>();
+  // 删除 processWorkloadData 函数，不再需要处理课表数据
 
-    courses.forEach((course) => {
-      const key = `${course.courseName}-${course.teachingClassName}`;
-      if (!courseMap.has(key)) {
-        courseMap.set(key, []);
-      }
-      courseMap.get(key)?.push(course);
-    });
+  // 将新的工作量数据转换为组件内部使用的格式
+  const convertWorkloadData = (
+    data: StaffWorkload | null,
+  ): { items: WorkloadItem[]; total: number } => {
+    if (!data || !data.items || data.items.length === 0) {
+      return { items: [], total: 0 };
+    }
 
-    // 计算每门课程的工作量
-    const items: WorkloadItem[] = [];
+    const items: WorkloadItem[] = data.items.map((item: TeachingWorkloadItem) => ({
+      className: item.teachingClassName || '',
+      courseName: item.courseName || '',
+      weeklyHours: item.weeklyHours || 0,
+      totalWeeks: item.weekCount || 0,
+      coefficient: item.coefficient || 1,
+      totalHours: item.workloadHours || 0,
+    }));
 
-    courseMap.forEach((coursesGroup) => {
-      // 取第一个课程获取基本信息
-      const course = coursesGroup[0];
-
-      // 计算每周课时数（周课时）
-      const weeklyHours = coursesGroup.reduce((sum, c) => {
-        // 计算单次课程的课时数
-        const periodsCount = c.periodEnd - c.periodStart + 1;
-        return sum + periodsCount;
-      }, 0);
-
-      // 计算上课总周数
-      const totalWeeks = course.weekCount || 0;
-
-      // 系数默认为1
-      const coefficient = 1;
-
-      // 计算总课时
-      const totalHours = weeklyHours * totalWeeks * coefficient;
-
-      items.push({
-        className: course.teachingClassName || '',
-        courseName: course.courseName ? course.courseName.substring(8) : '',
-        weeklyHours,
-        totalWeeks,
-        coefficient,
-        totalHours,
-      });
-    });
-
-    // 计算总工作量
-    const total = items.reduce((sum, item) => sum + item.totalHours, 0);
-
-    return { items, total };
+    return {
+      items,
+      total: data.totalHours || 0,
+    };
   };
 
+  // 获取工作量数据
   useEffect(() => {
     if (!semesterId || !staffInfo) return;
 
     setLoading(true);
 
-    // 直接使用传入的 scheduleData，不再发起请求
-    try {
-      const processedData = processWorkloadData(scheduleData);
-      setWorkloadData(processedData.items);
-      setTotalWorkload(processedData.total);
-    } catch (error) {
-      console.error('处理工作量数据失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [semesterId, staffInfo, scheduleData]); // 添加 scheduleData 作为依赖项
+    // 调用API获取工作量数据
+    getStaffWorkload({
+      semesterId,
+      staffId: staffInfo.id,
+    })
+      .then((res) => {
+        if (res) {
+          const convertedData = convertWorkloadData(res);
+          setWorkloadItems(convertedData.items);
+          setTotalWorkload(convertedData.total);
+        } else {
+          // 如果没有获取到工作量数据，则显示空数据
+          setWorkloadItems([]);
+          setTotalWorkload(0);
+        }
+      })
+      .catch((error) => {
+        console.error('获取工作量数据失败:', error);
+        // 出错时显示空数据
+        setWorkloadItems([]);
+        setTotalWorkload(0);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [semesterId, staffInfo]); // 删除 scheduleData 依赖
 
+  // 组件渲染部分保持不变
   return (
     <Card
       title={
@@ -127,9 +118,9 @@ const TeachingWorkloadTable: React.FC<TeachingWorkloadTableProps> = ({
       <div className={styles.workloadTable}>
         <table>
           <colgroup>
-            <col style={{ width: '8%' }} /> {/* 工号 */}
+            <col style={{ width: '6%' }} /> {/* 工号 */}
             <col style={{ width: '8%' }} /> {/* 姓名 */}
-            <col style={{ width: '12%' }} /> {/* 任课班级 - 调整为更合适的宽度 */}
+            <col style={{ width: '14%' }} /> {/* 任课班级 - 调整为更合适的宽度 */}
             <col style={{ width: '23%' }} /> {/* 课程 - 相应增加一些宽度 */}
             <col style={{ width: '10%' }} /> {/* 周课时 */}
             <col style={{ width: '10%' }} /> {/* 周数 */}
@@ -151,13 +142,13 @@ const TeachingWorkloadTable: React.FC<TeachingWorkloadTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {workloadData.map((item, index) => (
+            {workloadItems.map((item, index) => (
               <tr key={index} className={index % 2 === 1 ? styles.oddRow : ''}>
                 {index === 0 ? (
-                  <td rowSpan={workloadData.length}>{staffInfo?.jobId || ''}</td>
+                  <td rowSpan={workloadItems.length}>{staffInfo?.jobId || ''}</td>
                 ) : null}
                 {index === 0 ? (
-                  <td rowSpan={workloadData.length}>{staffInfo?.name || ''}</td>
+                  <td rowSpan={workloadItems.length}>{staffInfo?.name || ''}</td>
                 ) : null}
                 <td
                   className={styles.alignCenter}
@@ -169,13 +160,13 @@ const TeachingWorkloadTable: React.FC<TeachingWorkloadTableProps> = ({
                 <td className={styles.alignCenter}>{item.coefficient}</td>
                 <td className={styles.alignCenter}>{item.totalHours}</td>
                 {index === 0 ? (
-                  <td rowSpan={workloadData.length} className={styles.alignCenter}>
+                  <td rowSpan={workloadItems.length} className={styles.alignCenter}>
                     {totalWorkload}
                   </td>
                 ) : null}
               </tr>
             ))}
-            {workloadData.length === 0 && (
+            {workloadItems.length === 0 && (
               <tr>
                 <td colSpan={9} className={styles.noData}>
                   暂无数据

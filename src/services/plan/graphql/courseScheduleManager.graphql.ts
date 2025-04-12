@@ -111,3 +111,41 @@ export const queryBatchTeachingHours = gql`
     }
   }
 `;
+
+// 查询多个教师工作量
+export const queryStaffWorkloads = gql`
+  query staffWorkloads($input: StaffWorkloadInput!) {
+    staffWorkloads(input: $input) {
+      staffId
+      staffName
+      items {
+        courseName
+        teachingClassName
+        weeklyHours
+        weekCount
+        coefficient
+        workloadHours
+      }
+      totalHours
+    }
+  }
+`;
+
+// 查询单个教师工作量
+export const queryStaffWorkload = gql`
+  query staffWorkload($input: StaffWorkloadSingleInput!) {
+    staffWorkload(input: $input) {
+      staffId
+      staffName
+      items {
+        courseName
+        teachingClassName
+        weeklyHours
+        weekCount
+        coefficient
+        workloadHours
+      }
+      totalHours
+    }
+  }
+`;

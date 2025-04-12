@@ -172,3 +172,59 @@ export interface FlatCourseSchedule {
   periodEnd: number;
   weekType: string;
 }
+
+/**
+ * 教学工作量项目详细信息
+ */
+export interface TeachingWorkloadItem {
+  /** 课程名称 */
+  courseName: string;
+  /** 教学班级名称 */
+  teachingClassName: string;
+  /** 每周教学时数 */
+  weeklyHours: number;
+  /** 教学周数 */
+  weekCount: number;
+  /** 工作量系数 */
+  coefficient: number;
+  /** 工作量时数，计算公式：每周教学时数 × 教学周数 × 工作量系数 */
+  workloadHours: number;
+}
+
+/**
+ * 教职工工作量信息
+ */
+export interface StaffWorkload {
+  /** 教职工的唯一标识符 */
+  staffId: string | number;
+  /** 教职工姓名 */
+  staffName: string;
+  /** 教职工的教学工作量项目列表 */
+  items: TeachingWorkloadItem[];
+  /** 总工作时数 */
+  totalHours: number;
+}
+
+/**
+ * 多个教师工作量的筛选输入
+ */
+export interface StaffWorkloadFilter {
+  /** 学期ID */
+  semesterId: string | number;
+  /** 教师ID列表 */
+  staffIds?: number[];
+  /** SSTS教师ID列表 */
+  sstsTeacherIds?: string[];
+}
+
+/**
+ * 单个教师工作量查询输入（staffId、sstsTeacherId二选一）
+ */
+export interface StaffWorkloadSingleInput {
+  /** 学期ID */
+  semesterId: string | number;
+  /** 教师ID */
+  staffId?: number;
+  /** SSTS教师ID */
+  sstsTeacherId?: string;
+}
