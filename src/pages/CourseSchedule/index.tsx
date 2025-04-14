@@ -7,8 +7,8 @@ import { useModel } from '@umijs/max';
 import { Card, Dropdown, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
+import HolidayDeductionTable from './components/CancelledCoursesTable';
 import CourseTable from './components/CourseTable';
-import HolidayDeductionTable from './components/HolidayDeductionTable';
 import TeachingWorkloadTable from './components/TeachingWorkloadTable';
 import styles from './style.less';
 

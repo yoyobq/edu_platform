@@ -6,21 +6,26 @@ import {
   queryCancelledCourses,
   queryDailySchedule,
   queryFullScheduleByStaff,
-  queryTeachingHours,
-  queryStaffWorkloads,
+  queryStaffCancelledCourses,
+  queryStaffsCancelledCourses,
   queryStaffWorkload,
+  queryStaffWorkloads,
+  queryTeachingHours,
 } from './graphql/courseScheduleManager.graphql';
 import type {
   BatchTeachingHourFilter,
+  CancelledCoursesInput,
+  CancelledCoursesSingleInput,
   CancelledTeachingDate,
   // FlatCourseSchedule,
   FlatCourseSchedule,
-  TeachingDate,
-  TeachingDateInput,
-  TeachingHourSummary,
+  StaffCancelledCourses,
   StaffWorkload,
   StaffWorkloadFilter,
   StaffWorkloadSingleInput,
+  TeachingDate,
+  TeachingDateInput,
+  TeachingHourSummary,
 } from './types';
 
 /**
@@ -88,6 +93,8 @@ export function getActualTeachingDates(input: TeachingDateInput) {
 
 /**
  * 查询取消的课程（假期或调课）
+ * 这是旧版的 getStaffCancelledCourses，由于新版是先批量查询，后筛选出一个的策略
+ * 逻辑反而要比这个旧版复杂一些，因此保留。
  * @param input TeachingDateInput 输入参数，包含学期、教师、周次
  * @returns `Promise<CancelledTeachingDate[]>` 返回被取消或调课的日期与说明
  */
@@ -137,4 +144,34 @@ export function getStaffWorkload(input: StaffWorkloadSingleInput) {
   return graphqlRequest<StaffWorkload | null>('staffWorkload', queryStaffWorkload, {
     input,
   });
+}
+
+/**
+ * 获取多个教师的扣课信息
+ * @param input CancelledCoursesInput 输入参数，包含学期ID和教师ID列表
+ * @returns `Promise<StaffCancelledCourses[]>` 返回多个教师的扣课信息
+ */
+export function getStaffsCancelledCourses(input: CancelledCoursesInput) {
+  return graphqlRequest<StaffCancelledCourses[]>(
+    'staffsCancelledCourses',
+    queryStaffsCancelledCourses,
+    {
+      input,
+    },
+  );
+}
+
+/**
+ * 获取单个教师的扣课信息
+ * @param input CancelledCoursesSingleInput 输入参数，包含学期ID和教师ID
+ * @returns `Promise<StaffCancelledCourses | null>` 返回单个教师的扣课信息
+ */
+export function getStaffCancelledCourses(input: CancelledCoursesSingleInput) {
+  return graphqlRequest<StaffCancelledCourses | null>(
+    'staffCancelledCourses',
+    queryStaffCancelledCourses,
+    {
+      input,
+    },
+  );
 }

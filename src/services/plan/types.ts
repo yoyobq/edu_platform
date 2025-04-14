@@ -228,3 +228,83 @@ export interface StaffWorkloadSingleInput {
   /** SSTS教师ID */
   sstsTeacherId?: string;
 }
+
+// 扣课信息查询输入
+export interface CancelledCoursesInput {
+  semesterId: number | string;
+  staffIds?: number[];
+  sstsTeacherIds?: string[];
+  weeks?: number[];
+}
+
+// 单个教师扣课信息查询输入
+export interface CancelledCoursesSingleInput {
+  semesterId: number | string;
+  staffId?: number;
+  sstsTeacherId?: string;
+  weeks?: number[];
+}
+
+// 表示教师的扣课信息
+export interface StaffCancelledCourses {
+  // 教职工的唯一标识符
+  staffId: string | number;
+  // 校园网教师工号
+  sstsTeacherId?: string;
+  // 教职工姓名
+  staffName: string;
+  // 扣课日期列表
+  cancelledDates: CancelledDate[];
+  // 总扣课时数
+  totalCancelledHours: number;
+  // 教师课程安排列表（按课程ID分组后的简化信息）
+  flatSchedules?: CourseScheduleSummary[];
+}
+
+// 表示单个扣课日期的详细信息
+export interface CancelledDate {
+  // 日期，格式为 YYYY-MM-DD
+  date: string;
+  // 星期几 (1-7)
+  weekOfDay: number;
+  // 学期第几周
+  weekNumber: number;
+  // 该日期下被取消的课程列表
+  courses: CancelledCourse[];
+}
+
+// 表示单个被取消的课程
+export interface CancelledCourse {
+  // 课程安排ID
+  scheduleId: number;
+  // 课程名称
+  courseName: string;
+  // 课时ID
+  slotId: string | number;
+  // 开始节次
+  periodStart: number;
+  // 结束节次
+  periodEnd: number;
+  // 周类型 (ALL, ODD, EVEN)
+  weekType: string;
+  // 工作量系数
+  coefficient: string;
+  // 扣课时数
+  cancelledHours: number;
+  // 教学班级名称（可选）
+  teachingClassName?: string;
+}
+
+// 课程安排摘要信息
+export interface CourseScheduleSummary {
+  // 课程表ID
+  scheduleId: number;
+  // 课程名称
+  courseName: string;
+  // 教学班级名称
+  teachingClassName: string;
+  // 教学周数
+  weekCount: number;
+  // 每周教学时数
+  weeklyHours: number;
+}

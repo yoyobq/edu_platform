@@ -152,6 +152,34 @@ export default [
   //   component: './SelfTest',
   // },
   {
+    path: '/academic',
+    name: 'academic-management',
+    icon: 'book',
+    access: 'canAdmin',
+    routes: [
+      {
+        // 这一条的意义在于 /academic 的默认页
+        path: '/academic',
+        redirect: '/academic/cancelled-courses',
+      },
+      {
+        path: '/academic/cancelled-courses',
+        name: 'cancelled-courses',
+        component: './academic/CancelledCourses',
+      },
+      {
+        path: '/academic/workload-forecast',
+        name: 'workload-forecast',
+        component: './academic/WorkloadForecast',
+      },
+      {
+        path: '/academic/adjunct-payment',
+        name: 'external-adjunct-payment',
+        component: './academic/AdjunctPayment',
+      },
+    ],
+  },
+  {
     path: '/',
     redirect: '/welcome',
   },

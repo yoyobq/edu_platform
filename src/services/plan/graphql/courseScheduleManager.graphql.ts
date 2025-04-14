@@ -149,3 +149,73 @@ export const queryStaffWorkload = gql`
     }
   }
 `;
+
+// 查询多个教师的扣课信息
+export const queryStaffsCancelledCourses = gql`
+  query staffsCancelledCourses($input: CancelledCoursesInput!) {
+    staffsCancelledCourses(input: $input) {
+      staffId
+      sstsTeacherId
+      staffName
+      cancelledDates {
+        date
+        weekOfDay
+        weekNumber
+        courses {
+          scheduleId
+          courseName
+          slotId
+          periodStart
+          periodEnd
+          weekType
+          coefficient
+          cancelledHours
+          teachingClassName
+        }
+      }
+      totalCancelledHours
+      flatSchedules {
+        scheduleId
+        courseName
+        teachingClassName
+        weekCount
+        weeklyHours
+      }
+    }
+  }
+`;
+
+// 查询单个教师的扣课信息
+export const queryStaffCancelledCourses = gql`
+  query staffCancelledCourses($input: CancelledCoursesSingleInput!) {
+    staffCancelledCourses(input: $input) {
+      staffId
+      sstsTeacherId
+      staffName
+      cancelledDates {
+        date
+        weekOfDay
+        weekNumber
+        courses {
+          scheduleId
+          courseName
+          slotId
+          periodStart
+          periodEnd
+          weekType
+          coefficient
+          cancelledHours
+          teachingClassName
+        }
+      }
+      totalCancelledHours
+      flatSchedules {
+        scheduleId
+        courseName
+        teachingClassName
+        weekCount
+        weeklyHours
+      }
+    }
+  }
+`;
