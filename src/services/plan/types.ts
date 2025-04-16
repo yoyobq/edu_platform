@@ -247,6 +247,7 @@ export interface CancelledCoursesSingleInput {
 
 // 表示教师的扣课信息
 export interface StaffCancelledCourses {
+  cancelledCourses: any;
   // 教职工的唯一标识符
   staffId: string | number;
   // 校园网教师工号
@@ -263,6 +264,7 @@ export interface StaffCancelledCourses {
 
 // 表示单个扣课日期的详细信息
 export interface CancelledDate {
+  note?: string; // 修改为可选字段
   // 日期，格式为 YYYY-MM-DD
   date: string;
   // 星期几 (1-7)
@@ -297,6 +299,7 @@ export interface CancelledCourse {
 
 // 课程安排摘要信息
 export interface CourseScheduleSummary {
+  coefficient: string | number | undefined;
   // 课程表ID
   scheduleId: number;
   // 课程名称

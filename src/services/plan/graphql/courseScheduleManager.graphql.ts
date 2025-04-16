@@ -172,6 +172,7 @@ export const queryStaffsCancelledCourses = gql`
           cancelledHours
           teachingClassName
         }
+        note
       }
       totalCancelledHours
       flatSchedules {
@@ -180,6 +181,7 @@ export const queryStaffsCancelledCourses = gql`
         teachingClassName
         weekCount
         weeklyHours
+        coefficient
       }
     }
   }
@@ -207,6 +209,7 @@ export const queryStaffCancelledCourses = gql`
           cancelledHours
           teachingClassName
         }
+        note
       }
       totalCancelledHours
       flatSchedules {
@@ -215,6 +218,7 @@ export const queryStaffCancelledCourses = gql`
         teachingClassName
         weekCount
         weeklyHours
+        coefficient
       }
     }
   }

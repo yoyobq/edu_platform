@@ -1,9 +1,8 @@
-import Footer from '@/components/Footer';
 import { getStaffsCancelledCourses } from '@/services/plan/courseScheduleManager';
 import { getSemesters } from '@/services/plan/semester';
 import type { Semester, StaffCancelledCourses } from '@/services/plan/types';
 import { DownOutlined } from '@ant-design/icons';
-import { Card, Dropdown, Space, Spin, Table, Typography } from 'antd';
+import { Card, Checkbox, Col, Dropdown, Row, Space, Spin, Table, Tabs, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import './style.less';
@@ -24,6 +23,12 @@ interface FlattenedCancelledRecord {
   total?: number;
 }
 
+// 定义教师信息结构
+interface TeacherInfo {
+  sstsTeacherId: string;
+  staffName: string;
+}
+
 const CancelledCoursesPage: React.FC = () => {
   // 学期列表数组
   const [semesters, setSemesters] = useState<Semester[]>([]);
@@ -31,6 +36,42 @@ const CancelledCoursesPage: React.FC = () => {
   const [semesterId, setSemesterId] = useState<number | null>(null);
   const [cancelledCourses, setCancelledCourses] = useState<StaffCancelledCourses[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // 添加教师选择相关状态
+  const [allTeachers, setAllTeachers] = useState<TeacherInfo[]>([]);
+  const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
+  const [filteredCancelledCourses, setFilteredCancelledCourses] = useState<StaffCancelledCourses[]>(
+    [],
+  );
+
+  // 添加专任教师工号列表
+  const fullTimeTeacherIds = [
+    '2225',
+    '2236',
+    '2323',
+    '2332',
+    '2203',
+    '2223',
+    '2224',
+    '2232',
+    '2297',
+    '2226',
+    '2229',
+    '2237',
+    '2228',
+    '2314',
+    '3236',
+    '2230',
+    '2311',
+    '2235',
+    '2342',
+  ];
+
+  // 添加行政兼课工号列表
+  const adminTeacherIds = ['2221', '2270', '2062', '2066'];
+
+  // 公益性岗位数组
+  const publicWelfareTeacherIds = ['3322', '3600'];
 
   // 获取所有学期信息
   useEffect(() => {
@@ -55,9 +96,22 @@ const CancelledCoursesPage: React.FC = () => {
   useEffect(() => {
     if (!semesterId) return;
     setLoading(true);
-    getStaffsCancelledCourses({ semesterId, sstsTeacherIds: ['2225', '2236', '2226'] })
+    // const testSstsTeacherIds = ['3618', '3617', '3616', '3593', '3556', '3552', '3553', '3558'];
+    getStaffsCancelledCourses({ semesterId }) // , sstsTeacherIds: ['2225', '2236', '2226'] })
       .then((data) => {
         setCancelledCourses(data);
+
+        // 提取所有教师信息
+        const teachers: TeacherInfo[] = data.map((staff) => ({
+          sstsTeacherId: staff.sstsTeacherId!,
+          staffName: staff.staffName,
+        }));
+
+        setAllTeachers(teachers);
+        // 默认全选
+        setSelectedTeachers(teachers.map((t) => t.sstsTeacherId));
+        setFilteredCancelledCourses(data);
+
         console.log('获取扣课信息成功:', data);
       })
       .catch((error) => {
@@ -65,6 +119,139 @@ const CancelledCoursesPage: React.FC = () => {
       })
       .finally(() => setLoading(false));
   }, [semesterId]);
+
+  // 根据选中的教师过滤数据
+  useEffect(() => {
+    if (cancelledCourses.length === 0) return;
+
+    // 当没有选择任何教师时，显示所有数据
+    let filtered =
+      selectedTeachers.length === 0
+        ? cancelledCourses
+        : cancelledCourses.filter((staff) => selectedTeachers.includes(staff.sstsTeacherId || ''));
+
+    // 检查是否选择的是专任教师列表
+    const isFullTimeTeachersSelected =
+      selectedTeachers.length === fullTimeTeacherIds.length &&
+      selectedTeachers.every((id) => fullTimeTeacherIds.includes(id));
+
+    // 检查是否选择的是行政兼课列表
+    const isAdminTeachersSelected =
+      selectedTeachers.length === adminTeacherIds.length &&
+      selectedTeachers.every((id) => adminTeacherIds.includes(id));
+
+    // 检查是否选择的是公益性岗位列表
+    const isPublicWelfareTeachersSelected =
+      selectedTeachers.length === publicWelfareTeacherIds.length &&
+      selectedTeachers.every((id) => publicWelfareTeacherIds.includes(id));
+
+    // 如果是专任教师，按照fullTimeTeacherIds的顺序排序
+    if (isFullTimeTeachersSelected) {
+      // 创建一个映射，用于确定每个教师ID在fullTimeTeacherIds中的位置
+      const orderMap = new Map<string, number>();
+      fullTimeTeacherIds.forEach((id, index) => {
+        orderMap.set(id, index);
+      });
+
+      // 根据映射排序
+      filtered = [...filtered].sort((a, b) => {
+        const orderA = orderMap.get(a.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
+        const orderB = orderMap.get(b.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
+    }
+    // 如果是行政兼课，按照adminTeacherIds的顺序排序
+    else if (isAdminTeachersSelected) {
+      // 创建一个映射，用于确定每个教师ID在adminTeacherIds中的位置
+      const orderMap = new Map<string, number>();
+      adminTeacherIds.forEach((id, index) => {
+        orderMap.set(id, index);
+      });
+
+      // 根据映射排序
+      filtered = [...filtered].sort((a, b) => {
+        const orderA = orderMap.get(a.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
+        const orderB = orderMap.get(b.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
+    }
+    // 如果是公益性岗位，按照publicWelfareTeacherIds的顺序排序
+    else if (isPublicWelfareTeachersSelected) {
+      // 创建一个映射，用于确定每个教师ID在publicWelfareTeacherIds中的位置
+      const orderMap = new Map<string, number>();
+      publicWelfareTeacherIds.forEach((id, index) => {
+        orderMap.set(id, index);
+      });
+
+      // 根据映射排序
+      filtered = [...filtered].sort((a, b) => {
+        const orderA = orderMap.get(a.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
+        const orderB = orderMap.get(b.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
+    }
+
+    setFilteredCancelledCourses(filtered);
+  }, [
+    selectedTeachers,
+    cancelledCourses,
+    fullTimeTeacherIds,
+    adminTeacherIds,
+    publicWelfareTeacherIds,
+  ]);
+
+  // 处理教师选择变化
+  const handleTeacherChange = (teacherId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTeachers((prev) => [...prev, teacherId]);
+    } else {
+      setSelectedTeachers((prev) => prev.filter((id) => id !== teacherId));
+    }
+  };
+
+  // 处理全选/全不选
+  const handleSelectAllTeachers = (checked: boolean) => {
+    if (checked) {
+      setSelectedTeachers(allTeachers.map((t) => t.sstsTeacherId));
+    } else {
+      setSelectedTeachers([]);
+    }
+  };
+
+  // 处理选择专任教师
+  const handleSelectFullTimeTeachers = () => {
+    setSelectedTeachers(fullTimeTeacherIds);
+  };
+
+  // 处理选择行政兼课教师
+  const handleSelectAdminTeachers = () => {
+    setSelectedTeachers(adminTeacherIds);
+  };
+
+  // 处理选择公益性岗位教师
+  const handleSelectPublicWelfareTeachers = () => {
+    setSelectedTeachers(publicWelfareTeacherIds);
+  };
+
+  // 添加标签页切换处理函数
+  const handleTabChange = (activeKey: string) => {
+    switch (activeKey) {
+      case 'all':
+        handleSelectAllTeachers(true);
+        break;
+      case 'fullTime':
+        handleSelectFullTimeTeachers();
+        break;
+      case 'admin':
+        handleSelectAdminTeachers();
+        break;
+      case 'publicWelfare':
+        handleSelectPublicWelfareTeachers();
+        break;
+      default:
+        break;
+    }
+  };
 
   // 处理学期变更
   const handleSemesterChange = (newSemester: Semester) => {
@@ -244,7 +431,8 @@ const CancelledCoursesPage: React.FC = () => {
     const dateSet = new Set<string>();
     const dateInfoMap = new Map<string, { weekNumber: number | string; weekOfDay: number }>();
 
-    cancelledCourses.forEach((staff) => {
+    filteredCancelledCourses.forEach((staff) => {
+      // 使用过滤后的数据
       staff.cancelledDates.forEach((date) => {
         dateSet.add(date.date);
         if (!dateInfoMap.has(date.date)) {
@@ -288,7 +476,7 @@ const CancelledCoursesPage: React.FC = () => {
   // 动态生成表格列
   const generateColumns = () => {
     // 预处理数据，计算每个教师的行数和起始索引
-    const flattenedData = processData(cancelledCourses);
+    const flattenedData = processData(filteredCancelledCourses); // 使用过滤后的数据
     const teacherRowsMap = new Map<string, { count: number; indices: number[] }>();
 
     flattenedData.forEach((record, index) => {
@@ -312,6 +500,7 @@ const CancelledCoursesPage: React.FC = () => {
         render: (value: any, record: FlattenedCancelledRecord, index: number) => {
           const teacherInfo = teacherRowsMap.get(record.sstsTeacherId!);
           if (!teacherInfo) return { children: value, props: { rowSpan: 1 } };
+
           const isFirstRow = teacherInfo.indices[0] === index;
 
           return {
@@ -459,11 +648,19 @@ const CancelledCoursesPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* 数据表格 */}
-      <Card>
+      {/* 教师选择区域 - 使用标签页替换按钮 */}
+      <Card style={{ marginBottom: 16 }}>
+        <Tabs defaultActiveKey="all" onChange={handleTabChange}>
+          <Tabs.TabPane key="all" tab="全部教师" />
+          <Tabs.TabPane key="fullTime" tab="专任教师" />
+          <Tabs.TabPane key="admin" tab="行政兼课" />
+          <Tabs.TabPane key="publicWelfare" tab="公益性岗位" />
+        </Tabs>
+
+        {/* 表格只渲染一次，根据选中的教师显示数据 */}
         <Spin spinning={loading}>
           <Table
-            dataSource={processData(cancelledCourses)}
+            dataSource={processData(filteredCancelledCourses)}
             columns={generateColumns()}
             rowKey="key"
             pagination={false}
@@ -472,10 +669,20 @@ const CancelledCoursesPage: React.FC = () => {
             scroll={{ x: 'max-content' }}
           />
         </Spin>
-      </Card>
 
-      <div className="content-padding"></div>
-      <Footer />
+        <Row gutter={[16, 8]} style={{ display: 'none' }}>
+          {allTeachers.map((teacher) => (
+            <Col span={4} key={teacher.sstsTeacherId}>
+              <Checkbox
+                checked={selectedTeachers.includes(teacher.sstsTeacherId)}
+                onChange={(e) => handleTeacherChange(teacher.sstsTeacherId, e.target.checked)}
+              >
+                {teacher.staffName}
+              </Checkbox>
+            </Col>
+          ))}
+        </Row>
+      </Card>
     </div>
   );
 };
