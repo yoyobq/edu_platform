@@ -184,6 +184,7 @@ const AdjunctPaymentPage: React.FC = () => {
             adjustedHoursMap={adjustedHoursMap}
             onAdjustedHoursChange={handleAdjustedHoursChange}
             loading={loading}
+            specificTeacherIds={specificTeacherIds} // 显式传递
           />
         </Spin>
       </Card>

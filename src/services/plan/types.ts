@@ -311,3 +311,9 @@ export interface CourseScheduleSummary {
   // 每周教学时数
   weeklyHours: number;
 }
+
+// 添加到现有的 types.ts 文件中
+export interface TeacherInfo {
+  sstsTeacherId: string;
+  staffName: string;
+}
