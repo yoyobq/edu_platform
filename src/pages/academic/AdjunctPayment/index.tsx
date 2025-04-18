@@ -5,11 +5,16 @@ import type { Semester, StaffCancelledCourses } from '@/services/plan/types';
 import { DownOutlined } from '@ant-design/icons';
 import { Card, Dropdown, Space, Spin, Typography } from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import './style.less';
-import WeekRangeSlider from './components/WeekRangeSlider';
-import CancelledDatesInfo from './components/CancelledDatesInfo';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import AdjunctPaymentTable from './components/AdjunctPaymentTable';
+import CancelledDatesInfo from './components/CancelledDatesInfo';
+import WeekRangeSlider from './components/WeekRangeSlider';
+import './style.less';
+
+// 指定教师工号列表
+const specificTeacherIds = ['3553'];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// const r_specificTeacherIds = ['3618', '3617', '3616','3593','3556','3552','3553','3358',];
 
 const AdjunctPaymentPage: React.FC = () => {
   // 学期列表数组
@@ -27,20 +32,16 @@ const AdjunctPaymentPage: React.FC = () => {
   // 添加一个状态来存储增删课的值
   const [adjustedHoursMap, setAdjustedHoursMap] = useState<Record<string, number>>({});
 
-  // 指定教师工号列表
-  const specificTeacherIds = useMemo(() => ['3553'], []);
-
   // 计算学期的教学周数
-  const calculateTeachingWeeks = useCallback((semester: Semester): number => {
+  const calculateTeachingWeeks = (semester: Semester): number => {
     if (semester.firstTeachingDate && semester.examStartDate) {
       const startDate = dayjs(semester.firstTeachingDate);
       const endDate = dayjs(semester.examStartDate);
-      // 计算从教学开始日期到考试开始日期之间的周数
       const weeksDiff = Math.floor(endDate.diff(startDate, 'day') / 7);
       return weeksDiff;
     }
-    return 16; // 默认值
-  }, []);
+    return 16;
+  };
 
   // 处理增删课数值变化
   const handleAdjustedHoursChange = useCallback((value: number | null, recordKey: string) => {
@@ -73,7 +74,7 @@ const AdjunctPaymentPage: React.FC = () => {
         }
       })
       .catch((error) => console.error('获取学期列表失败:', error));
-  }, [calculateTeachingWeeks]);
+  }, []); // 移除 calculateTeachingWeeks 依赖
 
   // 获取扣课信息
   useEffect(() => {
@@ -87,28 +88,25 @@ const AdjunctPaymentPage: React.FC = () => {
         console.error('获取扣课信息失败:', error);
       })
       .finally(() => setLoading(false));
-  }, [semesterId, weekRange, specificTeacherIds]);
+  }, [semesterId, weekRange]); // 移除 specificTeacherIds 依赖
 
   // 处理学期变更
-  const handleSemesterChange = useCallback(
-    (newSemester: Semester) => {
-      // 清理相关状态数据
-      setCancelledCourses([]);
-      setLoading(true);
+  const handleSemesterChange = (newSemester: Semester) => {
+    // 清理相关状态数据
+    setCancelledCourses([]);
+    setLoading(true);
 
-      // 更新学期信息
-      setSemesterId(newSemester.id);
-      setSemester(newSemester);
+    // 更新学期信息
+    setSemesterId(newSemester.id);
+    setSemester(newSemester);
 
-      // 计算新学期的教学周数并更新范围
-      const weeks = calculateTeachingWeeks(newSemester);
-      setTotalWeeks(weeks);
-      const newRange: [number, number] = [1, weeks];
-      setWeekRange(newRange);
-      setTempWeekRange(newRange); // 同步更新临时状态
-    },
-    [calculateTeachingWeeks],
-  );
+    // 计算新学期的教学周数并更新范围
+    const weeks = calculateTeachingWeeks(newSemester);
+    setTotalWeeks(weeks);
+    const newRange: [number, number] = [1, weeks];
+    setWeekRange(newRange);
+    setTempWeekRange(newRange); // 同步更新临时状态
+  };
 
   // 处理周数范围变化（滑动过程中）
   const handleWeekRangeChange = useCallback((value: number[]) => {
@@ -145,9 +143,11 @@ const AdjunctPaymentPage: React.FC = () => {
   return (
     <div className="container">
       {/* 功能区卡片 */}
-      <Card className="header-card">
+      <Card className="header-card" bodyStyle={{ padding: '12px 16px' }}>
         <div className="header-content">
-          <Typography.Title level={4}>兼职教师扣课统计表</Typography.Title>
+          <Typography.Title level={4} style={{ margin: '0 0 0 0' }}>
+            兼职教师扣课统计表
+          </Typography.Title>
           <div>
             <Dropdown menu={{ items: menuItems, onClick: handleMenuClick }} trigger={['click']}>
               <Typography.Link className="semester-selector">
@@ -162,7 +162,7 @@ const AdjunctPaymentPage: React.FC = () => {
       </Card>
 
       {/* 周数选择滑动条 */}
-      <Card className="week-range-card">
+      <Card className="week-range-card" bodyStyle={{ padding: '12px 16px' }}>
         <WeekRangeSlider
           semester={semester}
           totalWeeks={totalWeeks}
@@ -176,7 +176,7 @@ const AdjunctPaymentPage: React.FC = () => {
       </Card>
 
       {/* 数据表格 */}
-      <Card>
+      <Card bodyStyle={{ padding: '12px 16px' }}>
         <Spin spinning={loading}>
           <AdjunctPaymentTable
             cancelledCourses={cancelledCourses}
@@ -184,12 +184,11 @@ const AdjunctPaymentPage: React.FC = () => {
             adjustedHoursMap={adjustedHoursMap}
             onAdjustedHoursChange={handleAdjustedHoursChange}
             loading={loading}
-            specificTeacherIds={specificTeacherIds} // 显式传递
+            specificTeacherIds={specificTeacherIds}
           />
         </Spin>
       </Card>
 
-      <div className="content-padding"></div>
       <Footer />
     </div>
   );

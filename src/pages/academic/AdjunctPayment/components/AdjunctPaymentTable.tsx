@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { Table, InputNumber } from 'antd';
 import type { StaffCancelledCourses } from '@/services/plan/types';
+import { InputNumber, Table } from 'antd';
+import React, { useMemo } from 'react';
 
 interface FlattenedCancelledRecord {
   key: string;
@@ -223,7 +223,7 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
           title: '任课班级',
           dataIndex: 'teachingClassName',
           key: 'teachingClassName',
-          width: '12%',
+          width: '15%',
           align: 'center' as const,
           render: (value: any) => {
             if (!value) return '—';
