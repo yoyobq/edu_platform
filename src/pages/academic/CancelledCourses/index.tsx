@@ -21,37 +21,37 @@ const CancelledCoursesPage: React.FC = () => {
   const [allTeachers, setAllTeachers] = useState<TeacherInfo[]>([]);
   const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
 
-  // 添加专任教师工号列表
-  const fullTimeTeacherIds = useMemo(
-    () => [
-      '2225',
-      '2236',
-      '2323',
-      '2332',
-      '2203',
-      '2223',
-      '2224',
-      '2232',
-      '2297',
-      '2226',
-      '2229',
-      '2237',
-      '2228',
-      '2314',
-      '3236',
-      '2230',
-      '2311',
-      '2235',
-      '2342',
-    ],
-    [],
-  );
+  // 专任教师工号列表
+  const fullTimeTeacherIds = [
+    '2225',
+    '2236',
+    '2323',
+    '2332',
+    '2203',
+    '2223',
+    '2224',
+    '2232',
+    '2297',
+    '2226',
+    '2229',
+    '2237',
+    '2228',
+    '2314',
+    '3236',
+    '2230',
+    '2311',
+    '2235',
+    '2342',
+  ];
 
-  // 添加行政兼课工号列表
-  const adminTeacherIds = useMemo(() => ['2221', '2270', '2062', '2066'], []);
+  // 行政兼课工号列表
+  const adminTeacherIds = ['2221', '2270', '2062', '2066'];
 
-  // 公益性岗位数组
-  const publicWelfareTeacherIds = useMemo(() => ['3322', '3600'], []);
+  // 公益性岗位工号列表
+  const publicWelfareTeacherIds = ['3322', '3600'];
+
+  // 外聘教师工号列表
+  const specificTeacherIds = ['3618', '3617', '3616', '3593', '3556', '3552', '3553', '3358'];
 
   // 获取所有学期信息
   useEffect(() => {
@@ -120,10 +120,27 @@ const CancelledCoursesPage: React.FC = () => {
       selectedTeachers.length === publicWelfareTeacherIds.length &&
       selectedTeachers.every((id) => publicWelfareTeacherIds.includes(id));
 
+    // 检查是否选择的是外聘教师列表
+    const isSpecificTeachersSelected =
+      selectedTeachers.length === specificTeacherIds.length &&
+      selectedTeachers.every((id) => specificTeacherIds.includes(id));
+
     // 如果是专任教师，按照fullTimeTeacherIds的顺序排序
     if (isFullTimeTeachersSelected) {
+      // 现有代码不变
+    }
+    // 如果是行政兼课，按照adminTeacherIds的顺序排序
+    else if (isAdminTeachersSelected) {
+      // 现有代码不变
+    }
+    // 如果是公益性岗位，按照publicWelfareTeacherIds的顺序排序
+    else if (isPublicWelfareTeachersSelected) {
+      // 现有代码不变
+    }
+    // 如果是外聘教师，按照specificTeacherIds的顺序排序
+    else if (isSpecificTeachersSelected) {
       const orderMap = new Map<string, number>();
-      fullTimeTeacherIds.forEach((id, index) => {
+      specificTeacherIds.forEach((id, index) => {
         orderMap.set(id, index);
       });
       filtered = [...filtered].sort((a, b) => {
@@ -133,29 +150,15 @@ const CancelledCoursesPage: React.FC = () => {
       });
     }
     // 如果是行政兼课，按照adminTeacherIds的顺序排序
-    else if (isAdminTeachersSelected) {
-      const orderMap = new Map<string, number>();
-      adminTeacherIds.forEach((id, index) => {
-        orderMap.set(id, index);
-      });
-      filtered = [...filtered].sort((a, b) => {
-        const orderA = orderMap.get(a.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
-        const orderB = orderMap.get(b.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
-        return orderA - orderB;
-      });
-    }
-    // 如果是公益性岗位，按照publicWelfareTeacherIds的顺序排序
-    else if (isPublicWelfareTeachersSelected) {
-      const orderMap = new Map<string, number>();
-      publicWelfareTeacherIds.forEach((id, index) => {
-        orderMap.set(id, index);
-      });
-      filtered = [...filtered].sort((a, b) => {
-        const orderA = orderMap.get(a.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
-        const orderB = orderMap.get(b.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
-        return orderA - orderB;
-      });
-    }
+    const orderMap = new Map<string, number>();
+    adminTeacherIds.forEach((id, index) => {
+      orderMap.set(id, index);
+    });
+    filtered = [...filtered].sort((a, b) => {
+      const orderA = orderMap.get(a.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
+      const orderB = orderMap.get(b.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
+      return orderA - orderB;
+    });
 
     return filtered;
   }, [
@@ -164,6 +167,7 @@ const CancelledCoursesPage: React.FC = () => {
     fullTimeTeacherIds,
     adminTeacherIds,
     publicWelfareTeacherIds,
+    specificTeacherIds,
   ]);
 
   // 处理全选/全不选
@@ -193,6 +197,11 @@ const CancelledCoursesPage: React.FC = () => {
     setSelectedTeachers(publicWelfareTeacherIds);
   }, [publicWelfareTeacherIds]);
 
+  // 添加处理选择外聘教师的函数
+  const handleSelectSpecificTeachers = useCallback(() => {
+    setSelectedTeachers(specificTeacherIds);
+  }, [specificTeacherIds]);
+
   // 添加标签页切换处理函数
   const handleTabChange = useCallback(
     (activeKey: string) => {
@@ -209,6 +218,9 @@ const CancelledCoursesPage: React.FC = () => {
         case 'publicWelfare':
           handleSelectPublicWelfareTeachers();
           break;
+        case 'specific': // 添加外聘教师的处理
+          handleSelectSpecificTeachers();
+          break;
         default:
           break;
       }
@@ -218,6 +230,7 @@ const CancelledCoursesPage: React.FC = () => {
       handleSelectFullTimeTeachers,
       handleSelectAdminTeachers,
       handleSelectPublicWelfareTeachers,
+      handleSelectSpecificTeachers, // 添加到依赖数组
     ],
   );
 

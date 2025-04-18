@@ -1,5 +1,5 @@
 import type { StaffCancelledCourses } from '@/services/plan/types';
-import { InputNumber, Table } from 'antd';
+import { Table } from 'antd';
 import React, { useMemo } from 'react';
 
 interface FlattenedCancelledRecord {
@@ -40,7 +40,7 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
     adjustedHoursMap,
     onAdjustedHoursChange,
     loading,
-    specificTeacherIds = ['3553'], // 默认值
+    specificTeacherIds, // 默认值
   }) => {
     // 数据处理和列生成全部用 useMemo，避免重复计算
     const { processedData, columns } = useMemo(() => {
@@ -63,8 +63,8 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
 
       // 按照specificTeacherIds的顺序对数据进行排序
       const sortedData = [...cancelledCourses].sort((a, b) => {
-        const indexA = specificTeacherIds.indexOf(a.sstsTeacherId!);
-        const indexB = specificTeacherIds.indexOf(b.sstsTeacherId!);
+        const indexA = specificTeacherIds!.indexOf(a.sstsTeacherId!);
+        const indexB = specificTeacherIds!.indexOf(b.sstsTeacherId!);
         if (indexA === -1) return 1;
         if (indexB === -1) return -1;
         return indexA - indexB;
@@ -215,7 +215,7 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
           title: '姓名',
           dataIndex: 'staffName',
           key: 'staffName',
-          width: '8%',
+          width: '9%',
           align: 'center' as const,
           render: renderMergedCell,
         },
@@ -227,15 +227,12 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
           align: 'center' as const,
           render: (value: any) => {
             if (!value) return '—';
-            return (
-              <>
-                {formatClassName(value).map((name, index) => (
-                  <React.Fragment key={index}>
-                    {index > 0 && <br />}
-                    {name}
-                  </React.Fragment>
-                ))}
-              </>
+            const classNames = formatClassName(value);
+            // 使用CSS样式让\n生效
+            return classNames.length > 0 ? (
+              <div style={{ whiteSpace: 'pre-line' }}>{classNames.join('\n')}</div>
+            ) : (
+              '—'
             );
           },
         },
@@ -243,7 +240,7 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
           title: '课程',
           dataIndex: 'courseName',
           key: 'courseName',
-          width: '16%',
+          width: '18%',
           align: 'center' as const,
           render: (value: any) => value || '—',
         },
@@ -258,7 +255,7 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
           title: '上课周数',
           dataIndex: 'totalWeeks',
           key: 'totalWeeks',
-          width: '6%',
+          width: '8%',
           align: 'center' as const,
         },
         {
@@ -266,26 +263,23 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
           key: 'adjustedHours',
           width: '8%',
           align: 'center' as const,
-          render: (_: any, record: FlattenedCancelledRecord) => (
-            <div className="no-select-input-wrapper">
-              <InputNumber
-                size="small"
-                min={-99}
-                max={99}
-                defaultValue={0}
-                value={adjustedHoursMap[record.key] || 0}
-                onChange={(value) => onAdjustedHoursChange(value, record.key)}
-                style={{ width: '100%' }}
-                className="no-select-input"
-              />
-            </div>
-          ),
+          render: (_: any, record: FlattenedCancelledRecord) => {
+            // 计算值：扣课课时除以系数
+            const coefficient =
+              record.coefficient !== undefined && record.coefficient !== null
+                ? Number(record.coefficient)
+                : 1.0;
+            const value = record.subtotal !== undefined ? record.subtotal / coefficient : 0;
+
+            // 直接显示数值，保留0位小数
+            return value.toFixed(0);
+          },
         },
         {
           title: '系数',
           dataIndex: 'coefficient',
           key: 'coefficient',
-          width: '6%',
+          width: '8%',
           align: 'center' as const,
           render: (value: any) => {
             if (value !== undefined && value !== null) {
@@ -297,24 +291,23 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
       ];
 
       const summaryColumns = [
-        {
-          title: '扣课课时',
-          dataIndex: 'subtotal',
-          key: 'subtotal',
-          width: '6%',
-          align: 'center' as const,
-          render: (value: any, record: FlattenedCancelledRecord) => {
-            if (value === undefined || value === null) {
-              return '—';
-            }
-            const coefficient = record.coefficient ? Number(record.coefficient) : 1.0;
-            const adjustedSubtotal = value / coefficient;
-            return adjustedSubtotal.toFixed(0);
-          },
-        },
+        // 学校表格中没有扣课课时列，保留代码方便调试
+        // {
+        //   title: '扣课课时',
+        //   dataIndex: 'subtotal',
+        //   key: 'subtotal',
+        //   width: '8%',
+        //   align: 'center' as const,
+        //   // 添加render函数处理浮点数精度问题
+        //   render: (value: any) => {
+        //     if (value === undefined || value === null) return '—';
+        //     return Number(value).toFixed(1);
+        //   },
+        // },
         {
           title: '实际课时',
           key: 'actualHours',
+          width: '8%',
           align: 'center' as const,
           render: (_: any, record: FlattenedCancelledRecord) => {
             if (
@@ -325,10 +318,17 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
               return '—';
             }
             const adjustedHours = adjustedHoursMap[record.key] || 0;
-            const coefficient = record.coefficient ? Number(record.coefficient) : 1.0;
+            // 扣课课时移除乘以系数的计算，因为后台返回的数据已经计算好了
+            // 确保系数存在，如果不存在则使用默认值1.0
+            const coefficient =
+              record.coefficient !== undefined && record.coefficient !== null
+                ? Number(record.coefficient)
+                : 1.0;
             const actualHours =
-              (record.weeklyHours * record.totalWeeks + adjustedHours + record.subtotal) *
-              coefficient;
+              record.weeklyHours * record.totalWeeks * coefficient +
+              adjustedHours +
+              record.subtotal;
+            // 虽然这里应该显示小数点后的数据，但学校表格中是整数，所以这里将错就错
             return actualHours.toFixed(0);
           },
         },
@@ -348,7 +348,8 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
         pagination={false}
         bordered
         size="small"
-        scroll={{ x: 'max-content', y: 600 }}
+        // 移除或修改 scroll 属性，防止出现滚动条
+        scroll={{ x: 'max-content' }}
         className="data-table"
         loading={loading}
       />

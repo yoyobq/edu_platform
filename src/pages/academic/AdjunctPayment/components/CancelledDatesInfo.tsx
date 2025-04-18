@@ -63,7 +63,8 @@ const CancelledDatesInfo: React.FC<CancelledDatesInfoProps> = ({ cancelledCourse
             if (dateInfo.note) {
               return (
                 <Typography.Text key={dateInfo.date} className="date-item date-with-note">
-                  第{dateInfo.weekNumber}周，{formattedDate}（周{weekMap[dateInfo.weekOfDay - 1]}）
+                  {formattedDate}（第{dateInfo.weekNumber}周）
+                  {/* ，（上周{weekMap[dateInfo.weekOfDay - 1]}的课） */}
                   <span className="date-note-text">：{dateInfo.note}</span>
                 </Typography.Text>
               );

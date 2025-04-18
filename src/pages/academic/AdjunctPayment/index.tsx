@@ -1,4 +1,3 @@
-import Footer from '@/components/Footer';
 import { getStaffsCancelledCourses } from '@/services/plan/courseScheduleManager';
 import { getSemesters } from '@/services/plan/semester';
 import type { Semester, StaffCancelledCourses } from '@/services/plan/types';
@@ -12,9 +11,9 @@ import WeekRangeSlider from './components/WeekRangeSlider';
 import './style.less';
 
 // 指定教师工号列表
-const specificTeacherIds = ['3553'];
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-// const r_specificTeacherIds = ['3618', '3617', '3616','3593','3556','3552','3553','3358',];
+// const specificTeacherIds = ['3553'];
+const specificTeacherIds = ['3618', '3617', '3616', '3593', '3556', '3552', '3553', '3358'];
 
 const AdjunctPaymentPage: React.FC = () => {
   // 学期列表数组
@@ -143,9 +142,9 @@ const AdjunctPaymentPage: React.FC = () => {
   return (
     <div className="container">
       {/* 功能区卡片 */}
-      <Card className="header-card" bodyStyle={{ padding: '12px 16px' }}>
+      <Card className="header-card">
         <div className="header-content">
-          <Typography.Title level={4} style={{ margin: '0 0 0 0' }}>
+          <Typography.Title level={4} className="page-title">
             兼职教师扣课统计表
           </Typography.Title>
           <div>
@@ -162,7 +161,7 @@ const AdjunctPaymentPage: React.FC = () => {
       </Card>
 
       {/* 周数选择滑动条 */}
-      <Card className="week-range-card" bodyStyle={{ padding: '12px 16px' }}>
+      <Card className="week-range-card">
         <WeekRangeSlider
           semester={semester}
           totalWeeks={totalWeeks}
@@ -176,7 +175,7 @@ const AdjunctPaymentPage: React.FC = () => {
       </Card>
 
       {/* 数据表格 */}
-      <Card bodyStyle={{ padding: '12px 16px' }}>
+      <Card className="data-table-card">
         <Spin spinning={loading}>
           <AdjunctPaymentTable
             cancelledCourses={cancelledCourses}
@@ -188,8 +187,6 @@ const AdjunctPaymentPage: React.FC = () => {
           />
         </Spin>
       </Card>
-
-      <Footer />
     </div>
   );
 };

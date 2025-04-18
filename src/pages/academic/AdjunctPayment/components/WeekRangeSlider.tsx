@@ -1,7 +1,7 @@
-import React from 'react';
+import type { Semester } from '@/services/plan/types';
 import { Col, Row, Slider, Typography } from 'antd';
 import dayjs from 'dayjs';
-import type { Semester } from '@/services/plan/types';
+import React from 'react';
 
 interface WeekRangeSliderProps {
   semester: Semester | null;
@@ -37,7 +37,7 @@ const WeekRangeSlider: React.FC<WeekRangeSliderProps> = ({
         <div className="date-hint">{startDate.add(totalWeeks - 1, 'week').format('MM/DD')}</div>
       </div>
     );
-    for (let i = 4; i < totalWeeks; i += 4) {
+    for (let i = 2; i < totalWeeks; i += 2) {
       sliderMarks[i] = (
         <div className="slider-mark">
           <div>{i}周</div>
