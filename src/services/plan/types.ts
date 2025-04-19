@@ -195,8 +195,10 @@ export interface TeachingWorkloadItem {
  * 教职工工作量信息
  */
 export interface StaffWorkload {
-  /** 教职工的唯一标识符 */
-  staffId: string | number;
+  /* 教职工的唯一标识符 */
+  staffId: number;
+  /* 校园网教师工号 */
+  sstsTeacherId: string;
   /** 教职工姓名 */
   staffName: string;
   /** 教职工的教学工作量项目列表 */
@@ -210,7 +212,7 @@ export interface StaffWorkload {
  */
 export interface StaffWorkloadFilter {
   /** 学期ID */
-  semesterId: string | number;
+  semesterId: number;
   /** 教师ID列表 */
   staffIds?: number[];
   /** SSTS教师ID列表 */

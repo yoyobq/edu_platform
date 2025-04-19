@@ -117,6 +117,7 @@ export const queryStaffWorkloads = gql`
   query staffWorkloads($input: StaffWorkloadInput!) {
     staffWorkloads(input: $input) {
       staffId
+      sstsTeacherId
       staffName
       items {
         courseName

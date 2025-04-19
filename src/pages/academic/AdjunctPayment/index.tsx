@@ -145,7 +145,7 @@ const AdjunctPaymentPage: React.FC = () => {
       <Card className="header-card">
         <div className="header-content">
           <Typography.Title level={4} className="page-title">
-            兼职教师扣课统计表
+            外聘教师兼课课时速算
           </Typography.Title>
           <div>
             <Dropdown menu={{ items: menuItems, onClick: handleMenuClick }} trigger={['click']}>

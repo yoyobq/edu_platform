@@ -5,23 +5,23 @@ import { DownOutlined } from '@ant-design/icons';
 import { Card, Dropdown, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import TeacherTabs from '../TeacherTabs';
 import CancelledCoursesTable from './components/CancelledCoursesTable';
-import TeacherTabs from './components/TeacherTabs';
 import './style.less';
 
+/**
+ * 外聘教师扣课统计页面
+ * 显示教师在特定学期内的扣课情况，提供标签页筛选功能，并支持动态切换学期。
+ */
 const CancelledCoursesPage: React.FC = () => {
-  // 学期列表数组
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [semester, setSemester] = useState<Semester | null>(null);
   const [semesterId, setSemesterId] = useState<number | null>(null);
   const [cancelledCourses, setCancelledCourses] = useState<StaffCancelledCourses[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
-  // 添加教师选择相关状态
   const [allTeachers, setAllTeachers] = useState<TeacherInfo[]>([]);
   const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
 
-  // 专任教师工号列表
   const fullTimeTeacherIds = [
     '2225',
     '2236',
@@ -43,17 +43,11 @@ const CancelledCoursesPage: React.FC = () => {
     '2235',
     '2342',
   ];
-
-  // 行政兼课工号列表
   const adminTeacherIds = ['2221', '2270', '2062', '2066'];
-
-  // 公益性岗位工号列表
   const publicWelfareTeacherIds = ['3322', '3600'];
-
-  // 外聘教师工号列表
   const specificTeacherIds = ['3618', '3617', '3616', '3593', '3556', '3552', '3553', '3358'];
 
-  // 获取所有学期信息
+  // 获取所有学期列表，并默认选择当前学期或最新一个
   useEffect(() => {
     getSemesters({})
       .then((data) => {
@@ -69,108 +63,38 @@ const CancelledCoursesPage: React.FC = () => {
           setSemester(initialSemester);
         }
       })
-      .catch((error) => console.error('获取学期列表失败:', error));
+      .catch(console.error);
   }, []);
 
-  // 获取扣课信息
+  // 获取扣课信息，并过滤掉调课类记录（note > 8），仅保留可视为假期的记录
   useEffect(() => {
     if (!semesterId) return;
     setLoading(true);
     getStaffsCancelledCourses({ semesterId })
       .then((data) => {
-        setCancelledCourses(data);
-
-        // 提取所有教师信息
-        const teachers: TeacherInfo[] = data.map((staff) => ({
+        const filtered = data.map((teacher) => ({
+          ...teacher,
+          cancelledDates: teacher.cancelledDates.filter((d) => !d.note || d.note.length <= 8),
+        }));
+        setCancelledCourses(filtered);
+        const teachers: TeacherInfo[] = filtered.map((staff) => ({
           sstsTeacherId: staff.sstsTeacherId!,
           staffName: staff.staffName,
         }));
-
         setAllTeachers(teachers);
-        // 默认全选
         setSelectedTeachers(teachers.map((t) => t.sstsTeacherId));
       })
-      .catch((error) => {
-        console.error('获取扣课信息失败:', error);
-      })
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, [semesterId]);
 
-  // 用 useMemo 计算 filteredCancelledCourses，避免多余 setState 和渲染
+  // 按 selectedTeachers 顺序，筛选出当前选中教师的扣课信息
   const filteredCancelledCourses = useMemo(() => {
-    if (cancelledCourses.length === 0) return [];
+    const map = new Map(cancelledCourses.map((s) => [s.sstsTeacherId, s]));
+    return selectedTeachers.map((id) => map.get(id)).filter(Boolean) as StaffCancelledCourses[];
+  }, [cancelledCourses, selectedTeachers]);
 
-    let filtered =
-      selectedTeachers.length === 0
-        ? cancelledCourses
-        : cancelledCourses.filter((staff) => selectedTeachers.includes(staff.sstsTeacherId || ''));
-
-    // 检查是否选择的是专任教师列表
-    const isFullTimeTeachersSelected =
-      selectedTeachers.length === fullTimeTeacherIds.length &&
-      selectedTeachers.every((id) => fullTimeTeacherIds.includes(id));
-
-    // 检查是否选择的是行政兼课列表
-    const isAdminTeachersSelected =
-      selectedTeachers.length === adminTeacherIds.length &&
-      selectedTeachers.every((id) => adminTeacherIds.includes(id));
-
-    // 检查是否选择的是公益性岗位列表
-    const isPublicWelfareTeachersSelected =
-      selectedTeachers.length === publicWelfareTeacherIds.length &&
-      selectedTeachers.every((id) => publicWelfareTeacherIds.includes(id));
-
-    // 检查是否选择的是外聘教师列表
-    const isSpecificTeachersSelected =
-      selectedTeachers.length === specificTeacherIds.length &&
-      selectedTeachers.every((id) => specificTeacherIds.includes(id));
-
-    // 如果是专任教师，按照fullTimeTeacherIds的顺序排序
-    if (isFullTimeTeachersSelected) {
-      // 现有代码不变
-    }
-    // 如果是行政兼课，按照adminTeacherIds的顺序排序
-    else if (isAdminTeachersSelected) {
-      // 现有代码不变
-    }
-    // 如果是公益性岗位，按照publicWelfareTeacherIds的顺序排序
-    else if (isPublicWelfareTeachersSelected) {
-      // 现有代码不变
-    }
-    // 如果是外聘教师，按照specificTeacherIds的顺序排序
-    else if (isSpecificTeachersSelected) {
-      const orderMap = new Map<string, number>();
-      specificTeacherIds.forEach((id, index) => {
-        orderMap.set(id, index);
-      });
-      filtered = [...filtered].sort((a, b) => {
-        const orderA = orderMap.get(a.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
-        const orderB = orderMap.get(b.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
-        return orderA - orderB;
-      });
-    }
-    // 如果是行政兼课，按照adminTeacherIds的顺序排序
-    const orderMap = new Map<string, number>();
-    adminTeacherIds.forEach((id, index) => {
-      orderMap.set(id, index);
-    });
-    filtered = [...filtered].sort((a, b) => {
-      const orderA = orderMap.get(a.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
-      const orderB = orderMap.get(b.sstsTeacherId || '') ?? Number.MAX_SAFE_INTEGER;
-      return orderA - orderB;
-    });
-
-    return filtered;
-  }, [
-    selectedTeachers,
-    cancelledCourses,
-    fullTimeTeacherIds,
-    adminTeacherIds,
-    publicWelfareTeacherIds,
-    specificTeacherIds,
-  ]);
-
-  // 处理全选/全不选
+  // 处理全选 / 取消全选教师的操作
   const handleSelectAllTeachers = useCallback(
     (checked: boolean) => {
       if (checked) {
@@ -182,30 +106,30 @@ const CancelledCoursesPage: React.FC = () => {
     [allTeachers],
   );
 
-  // 处理选择专任教师
+  // 切换专任教师标签页时设置选中教师
   const handleSelectFullTimeTeachers = useCallback(() => {
     setSelectedTeachers(fullTimeTeacherIds);
   }, [fullTimeTeacherIds]);
 
-  // 处理选择行政兼课教师
+  // 切换行政兼课标签页时设置选中教师
   const handleSelectAdminTeachers = useCallback(() => {
     setSelectedTeachers(adminTeacherIds);
   }, [adminTeacherIds]);
 
-  // 处理选择公益性岗位教师
+  // 切换公益性岗位标签页时设置选中教师
   const handleSelectPublicWelfareTeachers = useCallback(() => {
     setSelectedTeachers(publicWelfareTeacherIds);
   }, [publicWelfareTeacherIds]);
 
-  // 添加处理选择外聘教师的函数
+  // 切换外聘教师标签页时设置选中教师
   const handleSelectSpecificTeachers = useCallback(() => {
     setSelectedTeachers(specificTeacherIds);
   }, [specificTeacherIds]);
 
-  // 添加标签页切换处理函数
+  // 处理标签页变化，根据不同类型设置选中教师
   const handleTabChange = useCallback(
-    (activeKey: string) => {
-      switch (activeKey) {
+    (key: string) => {
+      switch (key) {
         case 'all':
           handleSelectAllTeachers(true);
           break;
@@ -218,10 +142,8 @@ const CancelledCoursesPage: React.FC = () => {
         case 'publicWelfare':
           handleSelectPublicWelfareTeachers();
           break;
-        case 'specific': // 添加外聘教师的处理
+        case 'specific':
           handleSelectSpecificTeachers();
-          break;
-        default:
           break;
       }
     },
@@ -230,22 +152,19 @@ const CancelledCoursesPage: React.FC = () => {
       handleSelectFullTimeTeachers,
       handleSelectAdminTeachers,
       handleSelectPublicWelfareTeachers,
-      handleSelectSpecificTeachers, // 添加到依赖数组
+      handleSelectSpecificTeachers,
     ],
   );
 
-  // 处理学期变更
+  // 学期切换时，重置扣课数据和加载状态
   const handleSemesterChange = useCallback((newSemester: Semester) => {
-    // 清理相关状态数据
     setCancelledCourses([]);
     setLoading(true);
-
-    // 更新学期信息
     setSemesterId(newSemester.id);
     setSemester(newSemester);
   }, []);
 
-  // 菜单点击切换学期
+  // 下拉菜单点击切换学期
   const handleMenuClick = useCallback(
     (e: any) => {
       const selectedSemester = semesters.find((s) => s.id === parseInt(e.key, 10));
@@ -256,18 +175,14 @@ const CancelledCoursesPage: React.FC = () => {
     [semesters, semesterId, handleSemesterChange],
   );
 
+  // 将所有学期转换为菜单项格式
   const menuItems = useMemo(
-    () =>
-      semesters.map((s) => ({
-        key: s.id.toString(),
-        label: s.name,
-      })),
+    () => semesters.map((s) => ({ key: s.id.toString(), label: s.name })),
     [semesters],
   );
 
   return (
     <div className="container">
-      {/* 功能区卡片 */}
       <Card style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography.Title level={4}>扣课统计表</Typography.Title>
@@ -284,11 +199,8 @@ const CancelledCoursesPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* 教师选择区域 - 使用标签页替换按钮 */}
       <Card style={{ marginBottom: 16 }}>
         <TeacherTabs onTabChange={handleTabChange} />
-
-        {/* 表格组件 */}
         <CancelledCoursesTable
           filteredCancelledCourses={filteredCancelledCourses}
           loading={loading}

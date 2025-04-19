@@ -2,9 +2,10 @@
 .container {
   display: flex; /* 使用 flex 布局，使子元素更灵活 */
   flex-direction: column; /* 子元素垂直排列 */
-  height: 100vh; /* 容器高度占满整个视口 */
   overflow: auto; /* 启用滚动以显示超出内容 */
   background-size: 100% 100%; /* 背景图片填满容器 */
+  height: auto !important; // 强制覆盖可能存在的 100vh 设置
+  min-height: initial !important; // 重置最小高度
 }
 
 .content-padding {
