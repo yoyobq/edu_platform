@@ -348,9 +348,9 @@ const AdjunctPaymentTable: React.FC<AdjunctPaymentTableProps> = React.memo(
         pagination={false}
         bordered
         size="small"
-        // 移除或修改 scroll 属性，防止出现滚动条
         scroll={{ x: 'max-content' }}
-        className="data-table"
+        sticky={{ offsetHeader: 0 }}
+        className="adjunct-payment-table"
         loading={loading}
       />
     );

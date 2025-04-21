@@ -177,14 +177,16 @@ const AdjunctPaymentPage: React.FC = () => {
       {/* 数据表格 */}
       <Card className="data-table-card">
         <Spin spinning={loading}>
-          <AdjunctPaymentTable
-            cancelledCourses={cancelledCourses}
-            weekRange={weekRange}
-            adjustedHoursMap={adjustedHoursMap}
-            onAdjustedHoursChange={handleAdjustedHoursChange}
-            loading={loading}
-            specificTeacherIds={specificTeacherIds}
-          />
+          <div className="table-container">
+            <AdjunctPaymentTable
+              cancelledCourses={cancelledCourses}
+              weekRange={weekRange}
+              adjustedHoursMap={adjustedHoursMap}
+              onAdjustedHoursChange={handleAdjustedHoursChange}
+              loading={loading}
+              specificTeacherIds={specificTeacherIds}
+            />
+          </div>
         </Spin>
       </Card>
     </div>

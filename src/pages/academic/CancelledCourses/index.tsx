@@ -66,18 +66,14 @@ const CancelledCoursesPage: React.FC = () => {
       .catch(console.error);
   }, []);
 
-  // 获取扣课信息，并过滤掉调课类记录（note > 8），仅保留可视为假期的记录
+  // 获取扣课信息
   useEffect(() => {
     if (!semesterId) return;
     setLoading(true);
     getStaffsCancelledCourses({ semesterId })
       .then((data) => {
-        const filtered = data.map((teacher) => ({
-          ...teacher,
-          cancelledDates: teacher.cancelledDates.filter((d) => !d.note || d.note.length <= 8),
-        }));
-        setCancelledCourses(filtered);
-        const teachers: TeacherInfo[] = filtered.map((staff) => ({
+        setCancelledCourses(data);
+        const teachers: TeacherInfo[] = data.map((staff) => ({
           sstsTeacherId: staff.sstsTeacherId!,
           staffName: staff.staffName,
         }));

@@ -1,5 +1,5 @@
 import type { CancelledDate, StaffCancelledCourses } from '@/services/plan/types';
-import { Col, Typography } from 'antd';
+import { Col, Tag, Tooltip, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 
@@ -55,24 +55,24 @@ const CancelledDatesInfo: React.FC<CancelledDatesInfoProps> = ({ cancelledCourse
 
   return (
     <Col span={24} className="cancelled-dates-container">
-      <div>
-        <Typography.Text strong>选定周数内存在扣课记录：</Typography.Text>
-        <div className="dates-list">
+      <div style={{ marginTop: 8, marginBottom: 8 }}>
+        <Typography.Text strong style={{ marginRight: 8 }}>
+          扣课记录:
+        </Typography.Text>
+        <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '8px' }}>
           {sortedDates.map((dateInfo) => {
-            const formattedDate = dayjs(dateInfo.date).format('M月D日');
-            if (dateInfo.note) {
-              return (
-                <Typography.Text key={dateInfo.date} className="date-item date-with-note">
-                  {formattedDate}（第{dateInfo.weekNumber}周）
-                  {/* ，（上周{weekMap[dateInfo.weekOfDay - 1]}的课） */}
-                  <span className="date-note-text">：{dateInfo.note}</span>
-                </Typography.Text>
-              );
-            }
+            const formattedDate = dayjs(dateInfo.date).format('MM/DD');
+            const weekDay = `周${weekMap[dateInfo.weekOfDay - 1]}`;
+            const tooltipTitle = `第${dateInfo.weekNumber}周，${weekDay}，${dayjs(dateInfo.date).format('YYYY-MM-DD')}${
+              dateInfo.note ? `，${dateInfo.note}` : ''
+            }`;
+
             return (
-              <Typography.Text key={dateInfo.date} className="date-item">
-                第{dateInfo.weekNumber}周，{formattedDate}（周{weekMap[dateInfo.weekOfDay - 1]}）
-              </Typography.Text>
+              <Tooltip key={dateInfo.date} title={tooltipTitle}>
+                <Tag className="date-tag" color={dateInfo.note ? 'orange' : 'blue'}>
+                  {formattedDate}（{weekDay}）
+                </Tag>
+              </Tooltip>
             );
           })}
         </div>

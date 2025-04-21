@@ -123,3 +123,45 @@
     -ms-user-select: none;
   }
 }
+
+// 扣课日期标签样式
+.cancelled-dates-container {
+  margin: 8px 0;
+
+  .date-tag {
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// 周数选择器样式
+.week-range-card {
+  margin-bottom: 8px;
+
+  .ant-card-body {
+    padding: 12px 16px;
+  }
+}
+
+// 外聘教师兼课表格样式
+.adjunct-payment-table {
+  .ant-table-thead > tr > th {
+    background-color: #f0f2f5;
+    font-weight: 700;
+  }
+
+  .ant-table-sticky-header {
+    z-index: 2;
+  }
+
+  .ant-table-body {
+    max-height: 55vh;
+    overflow-y: auto !important;
+  }
+}
