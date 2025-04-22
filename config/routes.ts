@@ -93,6 +93,11 @@ export default [
         name: 'log-mate',
         component: './MySSTS/LogAutoMate',
       },
+      {
+        path: '/MySSTS/log-automate-new',
+        name: 'log-mate-new',
+        component: './MySSTS/LogAutoMateNew',
+      },
     ],
   },
   // {
