@@ -107,7 +107,7 @@ const TeachingWorkloadTable: React.FC<TeachingWorkloadTableProps> = ({
   return (
     <Card
       title={
-        <Typography.Title level={4} style={{ margin: 0 }}>
+        <Typography.Title level={5} style={{ margin: 0 }}>
           教师工作量预报表
           <span className={styles.workloadNoteText}>(不扣除节假日)</span>
         </Typography.Title>

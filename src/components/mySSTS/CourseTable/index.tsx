@@ -1,3 +1,4 @@
+import { getFullScheduleByStaff } from '@/services/plan/courseScheduleManager';
 import type { FlatCourseSchedule, Semester } from '@/services/plan/types';
 import { Card, message, Switch, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -18,6 +19,8 @@ const CourseTable: React.FC<CourseTableProps> = ({
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [courseTable, setCourseTable] = useState<any[][]>([]);
+  // 删除未使用的状态变量
+  // const [internalScheduleData, setInternalScheduleData] = useState<FlatCourseSchedule[]>([]);
   // 在组件顶部添加状态初始化逻辑
   const [splitMode, setSplitMode] = useState<boolean>(() => {
     // 从localStorage读取用户之前的选择，如果没有则默认为true（不合并）
@@ -179,19 +182,40 @@ const CourseTable: React.FC<CourseTableProps> = ({
     );
   };
 
+  // 获取课表数据
   useEffect(() => {
     if (!semesterId || !staffId) return;
 
     setLoading(true);
 
-    // 直接使用传入的 scheduleData，不再发起请求
-    try {
-      setCourseTable(processCourseData(scheduleData));
-    } catch (error) {
-      console.error('处理课表数据失败:', error);
-    } finally {
-      setLoading(false);
+    // 如果传入了 scheduleData 且不为空数组，则直接使用
+    if (scheduleData && scheduleData.length > 0) {
+      try {
+        // 移除这一行
+        // setInternalScheduleData(scheduleData);
+        setCourseTable(processCourseData(scheduleData));
+      } catch (error) {
+        console.error('处理课表数据失败:', error);
+      } finally {
+        setLoading(false);
+      }
+      return;
     }
+
+    // 否则从后台获取数据
+    getFullScheduleByStaff(staffId, semesterId)
+      .then((res) => {
+        // 移除这一行
+        // setInternalScheduleData(res);
+        setCourseTable(processCourseData(res));
+      })
+      .catch((error) => {
+        console.error('获取课表数据失败:', error);
+        message.error('获取课表数据失败，请稍后重试');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [semesterId, staffId, scheduleData]); // 添加 scheduleData 作为依赖项
 
   // 在组件内添加一个函数来检查特定时间段是否有课程
@@ -206,7 +230,7 @@ const CourseTable: React.FC<CourseTableProps> = ({
   return (
     <Card
       title={
-        <Typography.Title level={4} style={{ margin: 0 }}>
+        <Typography.Title level={5} style={{ margin: 0 }}>
           {semester?.name}课表
         </Typography.Title>
       }

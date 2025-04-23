@@ -189,7 +189,7 @@ const CancelledCoursesTable: React.FC<CancelledCoursesTableProps> = ({ semesterI
   return (
     <Card
       title={
-        <Typography.Title level={4} style={{ margin: 0 }}>
+        <Typography.Title level={5} style={{ margin: 0 }}>
           节假日扣课时统计表
           <span className={styles.workloadNoteText}>(扣课课时已乘以课时系数)</span>
         </Typography.Title>

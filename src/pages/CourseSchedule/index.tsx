@@ -127,11 +127,7 @@ const CourseSchedulePage: React.FC = () => {
       <TeachingWorkloadTable semesterId={semesterId} staffInfo={staffInfo} />
 
       {/* 添加节假日扣课时统计表 */}
-      <HolidayDeductionTable
-        semesterId={semesterId}
-        staffInfo={staffInfo}
-        scheduleData={scheduleData}
-      />
+      <HolidayDeductionTable semesterId={semesterId} staffInfo={staffInfo} />
 
       <div className={styles.contentPadding}></div>
     </div>

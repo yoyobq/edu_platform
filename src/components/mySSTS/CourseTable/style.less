@@ -11,7 +11,7 @@
     th,
     td {
       border: 1px solid #e8e8e8;
-      padding: 8px;
+      padding: 1vh;
       text-align: center;
       box-sizing: border-box; // 确保padding不会增加元素宽度
     }
@@ -32,11 +32,11 @@
 
     .courseContent {
       vertical-align: top;
-      height: 40px;
+      height: 3vh;
     }
 
     .emptyCell {
-      height: 40px;
+      height: 3vh;
     }
   }
 }
@@ -50,19 +50,19 @@
   align-items: center;
 
   .courseName {
-    font-size: 11px;
+    font-size: 0.8rem;
     margin-bottom: 2px;
     text-align: center;
   }
 
   .courseClass {
-    font-size: 11px;
-    color: #ff4d4f;
+    font-size: 0.7rem;
+    color: #ed3d3d;
     text-align: center;
   }
 
   .courseRoom {
-    font-size: 11px;
+    font-size: 0.7rem;
     color: #666;
     margin-top: 2px;
     text-align: center;
@@ -73,45 +73,37 @@
   border-bottom: 3px double #d9d9d9;
 }
 
-.courseWatermark {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  font-size: 12px;
-  opacity: 0.7;
-  font-weight: bold;
-}
-
 /* 通用水印样式 */
 .courseWatermark {
   position: absolute;
   overflow: hidden;
-  bottom: 5px;
-  right: 2px;
-  font-size: 18px;
+  bottom: 1.2vh;
+  right: 0.1vw;
+  font-size: 1.5rem;
   font-weight: bold;
   white-space: nowrap;
   transform: rotate(-30deg);
   pointer-events: none;
   user-select: none;
   line-height: 1;
+  overflow: hidden;
 }
 
 /* 课程类型颜色定义 */
 .otherCourse {
   .courseWatermark {
-    color: rgba(82, 196, 26, 0.15);
+    color: rgba(82, 196, 26, 0.1);
   }
 }
 
 .theoryPracticeCourse {
   .courseWatermark {
-    color: rgba(24, 144, 255, 0.15);
+    color: rgba(24, 144, 255, 0.1);
   }
 }
 
 .integratedCourse {
   .courseWatermark {
-    color: rgba(250, 140, 22, 0.15);
+    color: rgba(250, 140, 22, 0.1);
   }
 }
