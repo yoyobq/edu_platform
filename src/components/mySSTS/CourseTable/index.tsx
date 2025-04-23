@@ -1,7 +1,7 @@
 import type { FlatCourseSchedule, Semester } from '@/services/plan/types';
 import { Card, message, Switch, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
-import styles from '../style.less';
+import styles from './style.less';
 
 interface CourseTableProps {
   semesterId: number | null;

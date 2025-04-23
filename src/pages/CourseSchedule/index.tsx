@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import CourseTable from '@/components/mySSTS/CourseTable';
 import { getFullScheduleByStaff } from '@/services/plan/courseScheduleManager';
 import { getSemesters } from '@/services/plan/semester';
 import type { FlatCourseSchedule, Semester } from '@/services/plan/types';
@@ -8,7 +9,6 @@ import { Card, Dropdown, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import HolidayDeductionTable from './components/CancelledCoursesTable';
-import CourseTable from './components/CourseTable';
 import TeachingWorkloadTable from './components/TeachingWorkloadTable';
 import styles from './style.less';
 
