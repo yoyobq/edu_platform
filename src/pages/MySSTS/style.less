@@ -2,8 +2,6 @@
 .container {
   display: flex; /* 使用 flex 布局，使子元素更灵活 */
   flex-direction: column; /* 子元素垂直排列 */
-  // height: 80vh; /* 容器高度占满整个视口 */
-  // overflow: auto; /* 启用滚动以显示超出内容 */
   background-size: 100% 100%; /* 背景图片填满容器 */
   margin-top: 2vh;
   width: 100%;
@@ -14,8 +12,6 @@
   flex-direction: column;
   align-items: center; /* 居中对齐 */
   margin-top: -2vh;
-  // background-color: #f5f5f5;
-  // border-bottom: 1px solid #d9d9d9; /* 表单下方的分隔线 */
 }
 
 .card-container {
@@ -37,13 +33,8 @@
   padding: 4px 8px !important; /* 设置单元格内边距 */
 }
 
-// .ant-table-thead > tr > th {
-//   padding: 4px 8px !important; /* 表头单元格内边距 */
-//   font-size: 12px !important; /* 表头字体大小 */
-// }
-
 .ant-table-cell {
-  font-size: 14px !important; /* 表格内容字体大小 */
+  font-size: 0.875rem !important; /* 表格内容字体大小 */
 }
 
 /* 限制表格最大宽度并居中显示 */
@@ -56,8 +47,113 @@
   width: 100%;
 }
 
-.ant-col {
-  height: 100%;
-  // display: flex;
-  align-items: start;
+/* 日志自动化页面样式 */
+// 整体容器
+.log-automate-container {
+  padding: 16px;
+  position: relative; // 添加相对定位，作为固定定位卡片的参考
+
+  .two-column-layout {
+    display: flex;
+    gap: 16px;
+
+    .left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-right: 190px; // 为右侧固定卡片留出空间
+    }
+
+    .right-column {
+      position: fixed; // 改为固定定位
+      right: 24px; // 距离右侧边缘的距离
+      top: 100px; // 距离顶部的距离，偏上位置
+      width: 200px; // 固定宽度
+      z-index: 10; // 确保在其他元素之上
+
+      .operation-card {
+        margin-top: 15vh;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); // 增强阴影效果
+        border-radius: 6px; // 圆角更明显
+      }
+    }
+  }
+
+  // 登录状态显示
+  .login-status {
+    .logged-in-container {
+      .user-info {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+
+        .status-icon {
+          color: #1890ff;
+          margin-right: 8px;
+        }
+      }
+
+      .action-button {
+        width: calc(30% - 4px);
+      }
+    }
+  }
+
+  // 获取日志按钮
+  .action-buttons {
+    margin-top: 16px;
+  }
+
+  // 操作指南和课程表勘误链接样式
+  .operation-guide {
+    margin-top: 24px;
+
+    .guide-link {
+      display: flex;
+      align-items: center;
+
+      .guide-icon {
+        font-size: 1rem;
+        margin-right: 4px;
+      }
+    }
+
+    // 课程表勘误链接样式
+    .correction-link-container {
+      margin-top: 12px;
+
+      .correction-link {
+        display: flex;
+        align-items: center;
+        color: rgba(0, 0, 0, 0.45);
+
+        .correction-icon {
+          font-size: 1rem;
+          margin-right: 4px;
+        }
+
+        span {
+          font-size: 0.75rem; // 课程表勘误字号更小
+        }
+      }
+    }
+  }
+}
+
+// 响应式布局
+@media (max-width: 1200px) {
+  .log-automate-container {
+    .two-column-layout {
+      .left-column {
+        margin-right: 0; // 在小屏幕上取消右侧边距
+      }
+
+      .right-column {
+        position: static; // 在小屏幕上恢复正常定位
+        width: 100%; // 宽度占满
+        margin-bottom: 16px; // 添加底部间距
+      }
+    }
+  }
 }

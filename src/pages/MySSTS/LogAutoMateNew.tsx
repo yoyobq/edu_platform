@@ -1,9 +1,20 @@
+import CourseTable from '@/components/mySSTS/CourseTable';
 import LoginModal, { LoginModalRef } from '@/components/mySSTS/LoginModal';
 import { sstsGetCurriPlan, sstsSubmitTeachingLog } from '@/services/my-ssts/getCurriPlan'; // 教学日志相关
 import { SstsSessionManager } from '@/services/my-ssts/sessionManager'; // 会话管理服务
-import { CheckCircleOutlined, DownOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { getSemesters } from '@/services/plan/semester';
+import type { Semester } from '@/services/plan/types';
+import {
+  CheckCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  LogoutOutlined,
+  QuestionCircleOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import { useModel } from '@umijs/max'; // 用于访问全局状态管理的钩子
-import { Button, Dropdown, Empty, Flex, message, Modal, Space, Table, Typography } from 'antd';
+import { Button, Card, Empty, Flex, message, Modal, Tooltip, Typography } from 'antd';
+import dayjs from 'dayjs';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
 import TeachingLogCard from './components/TeachingLogCard';
@@ -18,16 +29,40 @@ const LogAutoMate: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]); // 存储表格数据
   const [curriDetails, setCurriDetails] = useState<CurriDetails[] | null>(null); // 存储需要填写的日志数据
+
+  // 学期相关状态 - 简化为只获取默认学期
+  const [semester, setSemester] = useState<Semester | null>(null);
+  const [semesterId, setSemesterId] = useState<number | null>(null);
+
   // 添加一个状态来跟踪会话状态变化
   const [sessionValid, setSessionValid] = useState(SstsSessionManager.isSessionValid());
   const loginModalRef = useRef<LoginModalRef>(null);
 
   const jobId: number | null = initialState?.currentUser?.staffInfo?.jobId ?? null;
+  const staffInfo = initialState?.currentUser?.staffInfo;
   const accessGroup: string[] = initialState?.currentUser?.accessGroup ?? ['guest'];
   const isAdmin = accessGroup.includes('admin');
 
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().split('T')[0];
+
+  // 获取默认学期信息
+  useEffect(() => {
+    getSemesters({})
+      .then((data) => {
+        const sorted = [...data].sort(
+          (a, b) => dayjs(b.startDate).unix() - dayjs(a.startDate).unix(),
+        );
+        const current = sorted.find((s) => s.isCurrent);
+        const latest = sorted[0];
+        const defaultSemester = current || latest;
+        if (defaultSemester) {
+          setSemesterId(defaultSemester.id);
+          setSemester(defaultSemester);
+        }
+      })
+      .catch((error) => console.error('获取学期信息失败:', error));
+  }, []);
 
   /**
    * 处理登录成功事件
@@ -156,20 +191,17 @@ const LogAutoMate: React.FC = () => {
     }
   };
 
-  // 定义表格列
-  const columns = [
-    { title: '课程', dataIndex: 'courseName', key: 'courseName' },
-    { title: '班级', dataIndex: 'className', key: 'className' },
-    { title: '起止周', dataIndex: 'teachingWeeksRange', key: 'teachingWeeksRange' },
-    { title: '周数', dataIndex: 'teachingWeeksCount', key: 'teachingWeeksCount' },
-    { title: '周学时', dataIndex: 'weeklyHours', key: 'weeklyHours' },
-  ];
-
   // 添加一个清除会话的函数
   const clearSessionStatus = () => {
     SstsSessionManager.clearSession();
     message.success('已清除登录状态');
     setSessionValid(false);
+  };
+
+  // 添加一个清除本地凭据的函数
+  const clearSavedCredentials = () => {
+    SstsSessionManager.clearCredentials();
+    message.success('已清除本地保存的凭据');
   };
 
   // 添加一个定期检查会话状态的效果
@@ -189,145 +221,169 @@ const LogAutoMate: React.FC = () => {
   }, [sessionValid]);
 
   return (
-    <>
-      {/* 顶部操作区域 */}
-      <div className="top-form card-container">
-        <Flex align="center" justify="space-between">
-          <Flex gap="middle">
-            {sessionValid ? (
-              <Dropdown
-                menu={{
-                  items: [
-                    {
-                      key: '1',
-                      icon: <LogoutOutlined />,
-                      label: '清除登录状态',
-                      danger: true,
-                      onClick: clearSessionStatus,
-                    },
-                  ],
-                }}
-              >
-                <Button type="default" style={{ color: '#52c41a', borderColor: '#52c41a' }}>
-                  <Space>
-                    <CheckCircleOutlined />
-                    {SstsSessionManager.getUserName() || '未知用户'}老师已登录
-                    <DownOutlined />
-                  </Space>
-                </Button>
-              </Dropdown>
-            ) : (
-              <Button
-                type="primary"
-                onClick={showLoginModal}
-                loading={loading}
-                disabled={loading}
-                icon={<UserOutlined />}
-              >
-                登录校园网
-              </Button>
-            )}
+    <div className="log-automate-container">
+      {/* 两栏布局容器 */}
+      <div className="two-column-layout">
+        {/* 左侧栏 - 课表和日志 */}
+        <div className="left-column">
+          {/* 课程表区域 */}
+          {/* <div className="course-table-container"> */}
+          <CourseTable
+            semesterId={semesterId}
+            semester={semester}
+            staffId={staffInfo?.id}
+            scheduleData={data}
+          />
+          {/* </div> */}
 
-            <Button
-              type="primary"
-              loading={loading}
-              disabled={loading || !sessionValid}
-              onClick={getCurriPlan}
-              style={!sessionValid ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
-            >
-              获取日志
-            </Button>
-          </Flex>
-        </Flex>
-      </div>
-
-      <div className="container">
-        <Flex gap="middle">
-          {/* 操作提示区域 */}
-          <div
-            className="card-container"
-            style={{
-              width: '28vw',
-              paddingTop: '2vh',
-              maxHeight: '75',
-              overflowY: 'auto',
-            }}
-          >
-            <Typography>
-              <Typography.Text strong>操作提示：</Typography.Text>
-              <ol style={{ marginTop: '8px' }}>
-                <li>点击【登录校园网】按钮，输入工号和密码登录。</li>
-                <li>点击【获取日志】查看教学计划。</li>
-                <li>务必核对计划是否与实际一致。</li>
-                <li>根据计划和日志的填写情况，会出现日志信息确认卡片。</li>
-                <li>核对日志内容并补充信息后【保存到校园网】。</li>
-                <li>保存按钮只会在校园网生成日志信息但不会提交。</li>
-                <li>自动化流程完毕后，请登录校园网检查并补完数据后正式提交。</li>
-              </ol>
-              <Typography.Text strong>安全提示：</Typography.Text>
-              <ol style={{ marginTop: '8px' }}>
-                <li>若本页面在同台设备上多开并同时填写，可能会导致无法追踪的错误，应尽量避免。</li>
-                <li>系统不会以任何形式记录用户校园网密码。</li>
-                <li>密码的明文会随登录流程发送给校园网。</li>
-                <li>自动化流程进行中的所有数据，都是从校园网实时抓取。</li>
-                <li>请登录后尽快完成操作，如果长时间未操作，建议重新抓取数据后再继续。</li>
-              </ol>
-            </Typography>
-            <Typography.Text strong style={{ color: '#ff4d4f', fontSize: '1.2rem' }}>
-              运动会，新生入学等情况会导致计划和日志不符，请注意修正。
-            </Typography.Text>
-          </div>
-
-          <Flex vertical style={{ flexBasis: '68vw' }}>
-            {/* 表格区域 */}
-            <Table
-              columns={columns}
-              dataSource={data}
-              rowKey="curriPlanId"
-              size="small"
-              pagination={{ pageSize: 10, hideOnSinglePage: true }}
-              style={{ width: '66vw', marginBottom: '1vh', paddingRight: '1vw' }}
+          {/* 日志填写区域 */}
+          {curriDetails === null ? (
+            <Empty description="请先获取日志数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          ) : curriDetails.length === 0 ? (
+            <Empty
+              description={
+                <span>
+                  截止 {formattedDate}，所有需要填写的日志都在校园网找到已填写并保存的记录。
+                </span>
+              }
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
+          ) : (
+            <AnimatePresence>
+              {curriDetails.map((detail) => (
+                <motion.div
+                  key={`${detail.teaching_date}-${detail.section_id.charAt(0)}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{
+                    opacity: 0,
+                    scale: 0.9,
+                    y: 10,
+                  }}
+                  transition={{
+                    duration: 0.6,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  <TeachingLogCard {...detail} onSubmitTeachingLog={handleSubmitTeachingLog} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
+        </div>
 
-            {/* TeachingLogCards 区域 */}
-            <div style={{ maxHeight: '61vh', overflowY: 'auto', paddingRight: '0.5vw' }}>
-              {curriDetails === null ? (
-                // curriDetails 为 null 时，不显示任何内容
-                <></> // 返回空的片段
-              ) : curriDetails.length === 0 ? (
-                <Empty
-                  description={
-                    <span>
-                      截止 {formattedDate}，所有需要填写的日志都在校园网找到已填写并保存的记录。
-                    </span>
-                  }
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                />
+        {/* 右侧栏 - 操作卡片 */}
+        <div className="right-column">
+          <Card title="日志伴侣" className="operation-card">
+            {/* 登录状态显示 */}
+            <div className="login-status">
+              {sessionValid ? (
+                <div className="logged-in-container">
+                  <div className="user-info">
+                    <CheckCircleOutlined className="status-icon" />
+                    <Typography.Text strong>
+                      {SstsSessionManager.getUserName() || '未知用户'}老师已登录
+                    </Typography.Text>
+                  </div>
+                  <Flex gap="large" justify="center">
+                    <Tooltip title="从校园网注销">
+                      <Button
+                        icon={<LogoutOutlined />}
+                        onClick={clearSessionStatus}
+                        type="dashed"
+                        className="action-button"
+                        size="small"
+                      />
+                    </Tooltip>
+                    <Tooltip title="清除本地保存的凭据">
+                      <Button
+                        icon={<DeleteOutlined />}
+                        onClick={clearSavedCredentials}
+                        type="dashed"
+                        className="action-button"
+                        size="small"
+                      />
+                    </Tooltip>
+                  </Flex>
+                </div>
               ) : (
-                <AnimatePresence>
-                  {curriDetails.map((detail) => (
-                    <motion.div
-                      key={`${detail.teaching_date}-${detail.section_id.charAt(0)}`}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{
-                        opacity: 0,
-                        scale: 0.9,
-                        y: 10,
-                      }}
-                      transition={{
-                        duration: 0.6,
-                        ease: 'easeInOut',
-                      }}
-                    >
-                      <TeachingLogCard {...detail} onSubmitTeachingLog={handleSubmitTeachingLog} />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                <Button
+                  type="primary"
+                  onClick={showLoginModal}
+                  loading={loading}
+                  disabled={loading}
+                  icon={<UserOutlined />}
+                  block
+                >
+                  登录校园网
+                </Button>
               )}
             </div>
-          </Flex>
-        </Flex>
+
+            {/* 获取日志按钮 */}
+            <div className="action-buttons">
+              <Button
+                type="primary"
+                loading={loading}
+                disabled={loading || !sessionValid}
+                onClick={getCurriPlan}
+                block
+              >
+                获取日志
+              </Button>
+            </div>
+
+            {/* 操作提示 - 使用 Tooltip 替代直接显示 */}
+            <div className="operation-guide">
+              <Tooltip
+                title={
+                  <div>
+                    <Typography.Title level={5} style={{ color: 'white', margin: '0 0 8px 0' }}>
+                      操作提示：
+                    </Typography.Title>
+                    <ol style={{ paddingLeft: '16px', margin: 0 }}>
+                      <li>点击【登录校园网】按钮，输入工号和密码登录。</li>
+                      <li>点击【获取日志】查看教学计划。</li>
+                      <li>根据计划和日志的填写情况，会出现日志信息确认卡片。</li>
+                      <li>核对日志内容并补充信息后【保存到校园网】。</li>
+                    </ol>
+                    <Typography.Title level={5} style={{ color: 'white', margin: '16px 0 8px 0' }}>
+                      安全提示：
+                    </Typography.Title>
+                    <ul style={{ paddingLeft: '16px', margin: 0 }}>
+                      <li>本站服务端不会以任何形式记录用户校园网密码。</li>
+                      <li>密码的明文会随登录流程发送给校园网。</li>
+                      <li>自动化流程进行中的所有数据，都是从校园网实时抓取。</li>
+                    </ul>
+                  </div>
+                }
+                placement="left"
+                color="#1f1f1f"
+                overlayStyle={{ maxWidth: '400px' }}
+              >
+                <a className="guide-link">
+                  <QuestionCircleOutlined className="guide-icon" />
+                  <span>操作指南</span>
+                </a>
+              </Tooltip>
+
+              {/* 添加课程表勘误链接 */}
+              <div className="correction-link-container">
+                <a
+                  className="correction-link"
+                  onClick={() =>
+                    message.info(
+                      '课程表勘误功能正在制作中，敬请期待！目前如发现课程表错误，请直接联系管理员。',
+                    )
+                  }
+                >
+                  <EditOutlined className="correction-icon" />
+                  <span>课程表勘误</span>
+                </a>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
 
       {/* 登录 Modal 组件 */}
@@ -337,7 +393,7 @@ const LogAutoMate: React.FC = () => {
         isAdmin={isAdmin}
         onLoginSuccess={handleLoginSuccess}
       />
-    </>
+    </div>
   );
 };
 
