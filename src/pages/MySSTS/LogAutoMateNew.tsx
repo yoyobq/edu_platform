@@ -1,82 +1,55 @@
+import LoginModal, { LoginModalRef } from '@/components/mySSTS/LoginModal';
 import { sstsGetCurriPlan, sstsSubmitTeachingLog } from '@/services/my-ssts/getCurriPlan'; // 教学日志相关
 import { SstsSessionManager } from '@/services/my-ssts/sessionManager'; // 会话管理服务
+import { CheckCircleOutlined, DownOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { useModel } from '@umijs/max'; // 用于访问全局状态管理的钩子
-import { Button, Empty, Flex, Form, Input, message, Modal, Table, Typography } from 'antd';
+import { Button, Dropdown, Empty, Flex, message, Modal, Space, Table, Typography } from 'antd';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useState } from 'react';
-import { flushSync } from 'react-dom'; // React DOM 的同步刷新函数
+import React, { useEffect, useRef, useState } from 'react';
 import TeachingLogCard from './components/TeachingLogCard';
 import './style.less'; // 引入样式文件，包含页面整体布局的样式
 
 /**
- * LogAutoMate 组件：用于 Edu Platform 的新页面模板，结构清晰，方便快速创建和定制
+ * LogAutoMate 组件：用于 Edu Platform 的新页面模板，方便快速创建和定制
  */
 const LogAutoMate: React.FC = () => {
   // 使用 useModel 钩子访问 initialState，包含全局的初始化数据
-  const { initialState, setInitialState } = useModel('@@initialState');
+  const { initialState } = useModel('@@initialState');
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]); // 存储表格数据
-
   const [curriDetails, setCurriDetails] = useState<CurriDetails[] | null>(null); // 存储需要填写的日志数据
-  // const [sstsUserName, setSstsUserName] = useState(false);
-  const [form] = Form.useForm();
+  // 添加一个状态来跟踪会话状态变化
+  const [sessionValid, setSessionValid] = useState(SstsSessionManager.isSessionValid());
+  const loginModalRef = useRef<LoginModalRef>(null);
+
   const jobId: number | null = initialState?.currentUser?.staffInfo?.jobId ?? null;
   const accessGroup: string[] = initialState?.currentUser?.accessGroup ?? ['guest'];
+  const isAdmin = accessGroup.includes('admin');
 
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().split('T')[0];
+
   /**
-   * 示例函数 exampleUpdate: 使用 flushSync 来强制同步更新 initialState 中的 currentUser 数据
-   * flushSync 是 React 的同步刷新函数，确保更新立即生效
+   * 处理登录成功事件
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const exampleUpdate: any = () => {
-    flushSync(() => {
-      setInitialState((s: any) => ({
-        ...s,
-        currentUser: initialState?.currentUser,
-      }));
-    });
+  const handleLoginSuccess = (userName: string) => {
+    const currentUserName = initialState?.currentUser?.staffInfo?.name;
+
+    // 校验用户名是否一致，非 admin 用户需确保一致
+    if (userName !== currentUserName && !isAdmin) {
+      message.error('出于校园网数据安全的考虑，非本人禁止操作此工具，请勿跳过安全检查。');
+    }
+
+    // 更新会话状态
+    setSessionValid(true);
   };
 
   /**
-   * 登录测试，提交 SSTS 的登陆表单，尝试获取 token 和 session
-   * 根据后台返回的成功/失败状态显示相应的提示
+   * 显示登录对话框或自动登录
    */
-  const handleSstsLogin = async (values: { userId: string; password: string }) => {
+  const showLoginModal = () => {
     // 检查会话是否有效
     const isSessionValid = SstsSessionManager.isSessionValid();
-
-    const executeLogin = async (values: { userId: string; password: string }) => {
-      setLoading(true);
-      const hide = message.loading('正在登录，请稍候...', 0);
-      try {
-        // 使用会话管理服务登录
-        const result = await SstsSessionManager.login({
-          userId: values.userId,
-          password: values.password,
-        });
-
-        if (result.success) {
-          const sstsUserName = result.userName;
-          const currentUserName = initialState?.currentUser?.staffInfo?.name;
-
-          // 校验用户名是否一致，非 admin 用户需确保一致
-          if (sstsUserName !== currentUserName && !accessGroup.includes('admin')) {
-            message.error('出于校园网数据安全的考虑，非本人禁止操作此工具，请勿跳过安全检查。');
-          } else {
-            message.success(`你好，${sstsUserName}老师，登录成功！可以进行日志抓取。`);
-          }
-        } else {
-          message.error(result.message || '登录失败，请检查工号或密码。');
-        }
-      } catch (error) {
-        message.error('登录过程中断，请稍后重试。');
-      } finally {
-        hide();
-        setLoading(false);
-      }
-    };
 
     if (isSessionValid) {
       Modal.confirm({
@@ -85,24 +58,60 @@ const LogAutoMate: React.FC = () => {
           '检测到您已经成功登录过校园网。如果自动化流程正常，请勿短时间内重复登录，是否坚持重新登录？',
         okText: '坚持更新会话',
         cancelText: '取消',
-        onOk: async () => {
-          await executeLogin(values); // 如果用户选择"坚持重新测试"，则执行登录操作
+        onOk: () => {
+          loginModalRef.current?.showModal();
         },
       });
-      return; // 防止继续执行
+    } else {
+      // 检查是否有保存的凭据
+      const savedCredentials = SstsSessionManager.loadCredentials();
+
+      if (savedCredentials) {
+        // 有保存的凭据，直接登录
+        const hide = message.loading('正在使用保存的凭据登录...', 0);
+        setLoading(true);
+
+        SstsSessionManager.login({
+          userId: savedCredentials.jobId,
+          password: savedCredentials.password,
+        })
+          .then((result) => {
+            if (result.success) {
+              message.success('自动登录成功！');
+              setSessionValid(true);
+
+              // 调用成功回调
+              if (result.userName) {
+                handleLoginSuccess(result.userName);
+              }
+            } else {
+              message.error(result.message || '自动登录失败，请手动登录');
+              // 自动登录失败，显示登录模态框
+              loginModalRef.current?.showModal();
+            }
+          })
+          .catch((error) => {
+            console.error('自动登录失败:', error);
+            message.error('自动登录失败，请手动登录');
+            // 自动登录失败，显示登录模态框
+            loginModalRef.current?.showModal();
+          })
+          .finally(() => {
+            hide();
+            setLoading(false);
+          });
+      } else {
+        // 没有保存的凭据，显示登录模态框
+        loginModalRef.current?.showModal();
+      }
     }
-    // 如果不存在有效会话，则直接执行登录操作
-    await executeLogin(values);
   };
 
   const handleSubmitTeachingLog = async (teachingLogData: TeachingLogData) => {
-    const formData = form.getFieldsValue();
-    const userId = formData.userId;
-
     try {
       // 不再传递密码，只传递用户ID和日志数据
       await sstsSubmitTeachingLog({
-        userId,
+        userId: jobId?.toString() || '',
         teachingLogData,
       });
 
@@ -122,15 +131,19 @@ const LogAutoMate: React.FC = () => {
   };
 
   const getCurriPlan = async () => {
-    const hide = message.loading('正在获取日志数据，受限于校园网的访问速度，请耐心等待...', 0); // 第二个参数 0 表示不自动关闭
+    // 检查会话是否有效
+    if (!SstsSessionManager.isSessionValid()) {
+      message.warning('请先登录校园网');
+      showLoginModal();
+      return;
+    }
+
+    const hide = message.loading('正在获取日志数据，受限于校园网的访问速度，请耐心等待...', 0);
     setLoading(true);
 
     try {
-      const formData = form.getFieldsValue();
-      const userId = formData.userId;
-
       // 不再传递密码，只传递用户ID
-      const curriPlan = await sstsGetCurriPlan({ userId });
+      const curriPlan = await sstsGetCurriPlan({ userId: jobId?.toString() || '' });
       setData(curriPlan.planList);
       setCurriDetails(curriPlan.curriDetails);
 
@@ -147,58 +160,87 @@ const LogAutoMate: React.FC = () => {
   const columns = [
     { title: '课程', dataIndex: 'courseName', key: 'courseName' },
     { title: '班级', dataIndex: 'className', key: 'className' },
-    // { title: '任课老师', dataIndex: 'teacherName', key: 'teacherName' },
     { title: '起止周', dataIndex: 'teachingWeeksRange', key: 'teachingWeeksRange' },
     { title: '周数', dataIndex: 'teachingWeeksCount', key: 'teachingWeeksCount' },
     { title: '周学时', dataIndex: 'weeklyHours', key: 'weeklyHours' },
   ];
 
+  // 添加一个清除会话的函数
+  const clearSessionStatus = () => {
+    SstsSessionManager.clearSession();
+    message.success('已清除登录状态');
+    setSessionValid(false);
+  };
+
+  // 添加一个定期检查会话状态的效果
+  useEffect(() => {
+    // 初始检查
+    setSessionValid(SstsSessionManager.isSessionValid());
+
+    // 设置定时器，每分钟检查一次会话状态
+    const timer = setInterval(() => {
+      const isValid = SstsSessionManager.isSessionValid();
+      if (sessionValid !== isValid) {
+        setSessionValid(isValid);
+      }
+    }, 60000); // 每分钟检查一次
+
+    return () => clearInterval(timer);
+  }, [sessionValid]);
+
   return (
     <>
-      {/* 顶部表单区域 */}
+      {/* 顶部操作区域 */}
       <div className="top-form card-container">
-        {/* <Card className={`${styles.topCardForm} top-form`} > */}
-        <Form
-          form={form}
-          layout="inline"
-          onFinish={handleSstsLogin}
-          initialValues={{ userId: jobId }} // 设置 JobId 默认值
-        >
-          <Form.Item
-            label="工号"
-            name="userId"
-            rules={[{ required: true, message: '请输入您的工号' }]}
-          >
-            <Input
-              placeholder="输入工号"
-              readOnly={!accessGroup.includes('admin')}
-              style={{ width: 120 }}
-              onFocus={() => {
-                if (!accessGroup.includes('admin')) {
-                  message.warning('为了数据安全，您只可以查询本人信息');
-                }
-              }}
-            />
-          </Form.Item>
-          <Form.Item
-            label="密码"
-            name="password"
-            rules={[{ required: true, message: '请输入您的密码' }]}
-          >
-            <Input.Password placeholder="输入密码" style={{ width: 120 }} />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} disabled={loading}>
-              登录校园网
-            </Button>
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" loading={loading} disabled={loading} onClick={getCurriPlan}>
+        <Flex align="center" justify="space-between">
+          <Flex gap="middle">
+            {sessionValid ? (
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: '1',
+                      icon: <LogoutOutlined />,
+                      label: '清除登录状态',
+                      danger: true,
+                      onClick: clearSessionStatus,
+                    },
+                  ],
+                }}
+              >
+                <Button type="default" style={{ color: '#52c41a', borderColor: '#52c41a' }}>
+                  <Space>
+                    <CheckCircleOutlined />
+                    {SstsSessionManager.getUserName() || '未知用户'}老师已登录
+                    <DownOutlined />
+                  </Space>
+                </Button>
+              </Dropdown>
+            ) : (
+              <Button
+                type="primary"
+                onClick={showLoginModal}
+                loading={loading}
+                disabled={loading}
+                icon={<UserOutlined />}
+              >
+                登录校园网
+              </Button>
+            )}
+
+            <Button
+              type="primary"
+              loading={loading}
+              disabled={loading || !sessionValid}
+              onClick={getCurriPlan}
+              style={!sessionValid ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+            >
               获取日志
             </Button>
-          </Form.Item>
-        </Form>
+          </Flex>
+        </Flex>
       </div>
+
       <div className="container">
         <Flex gap="middle">
           {/* 操作提示区域 */}
@@ -206,7 +248,6 @@ const LogAutoMate: React.FC = () => {
             className="card-container"
             style={{
               width: '28vw',
-              // minWidth: '130px',
               paddingTop: '2vh',
               maxHeight: '75',
               overflowY: 'auto',
@@ -215,7 +256,7 @@ const LogAutoMate: React.FC = () => {
             <Typography>
               <Typography.Text strong>操作提示：</Typography.Text>
               <ol style={{ marginTop: '8px' }}>
-                <li>填写校园网工号和密码，点击【登录校园网】获取会话。</li>
+                <li>点击【登录校园网】按钮，输入工号和密码登录。</li>
                 <li>点击【获取日志】查看教学计划。</li>
                 <li>务必核对计划是否与实际一致。</li>
                 <li>根据计划和日志的填写情况，会出现日志信息确认卡片。</li>
@@ -246,7 +287,6 @@ const LogAutoMate: React.FC = () => {
               size="small"
               pagination={{ pageSize: 10, hideOnSinglePage: true }}
               style={{ width: '66vw', marginBottom: '1vh', paddingRight: '1vw' }}
-              // scroll={{ x: 'max-content' }}
             />
 
             {/* TeachingLogCards 区域 */}
@@ -268,16 +308,16 @@ const LogAutoMate: React.FC = () => {
                   {curriDetails.map((detail) => (
                     <motion.div
                       key={`${detail.teaching_date}-${detail.section_id.charAt(0)}`}
-                      initial={{ opacity: 0, scale: 0.95 }} // 初始状态：不透明且稍微缩小
-                      animate={{ opacity: 1, scale: 1 }} // 动画结束：完全透明且恢复原始大小
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       exit={{
-                        opacity: 0, // 退出时完全透明
-                        scale: 0.9, // 退出时缩小
-                        y: 10, // 退出时稍微下移
+                        opacity: 0,
+                        scale: 0.9,
+                        y: 10,
                       }}
                       transition={{
-                        duration: 0.6, // 增加退出动画时间
-                        ease: 'easeInOut', // 使用更平滑的过渡效果
+                        duration: 0.6,
+                        ease: 'easeInOut',
                       }}
                     >
                       <TeachingLogCard {...detail} onSubmitTeachingLog={handleSubmitTeachingLog} />
@@ -289,9 +329,14 @@ const LogAutoMate: React.FC = () => {
           </Flex>
         </Flex>
       </div>
-      <div className="content-padding"></div>
-      {/* 页面底部组件 */}
-      {/* <Footer /> */}
+
+      {/* 登录 Modal 组件 */}
+      <LoginModal
+        ref={loginModalRef}
+        jobId={jobId}
+        isAdmin={isAdmin}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </>
   );
 };
