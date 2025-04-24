@@ -38,10 +38,40 @@ const LogAutoMate: React.FC = () => {
   const [sessionValid, setSessionValid] = useState(SstsSessionManager.isSessionValid());
   const loginModalRef = useRef<LoginModalRef>(null);
 
-  const jobId: number | null = initialState?.currentUser?.staffInfo?.jobId ?? null;
-  const staffInfo = initialState?.currentUser?.staffInfo;
   const accessGroup: string[] = initialState?.currentUser?.accessGroup ?? ['guest'];
   const isAdmin = accessGroup.includes('admin');
+
+  const savedCredentials = SstsSessionManager.loadCredentials();
+
+  /**
+   * 获取用户工号
+   * 管理员用户优先使用保存的凭据中的工号，如果无效则尝试使用当前用户的工号
+   * 普通用户直接使用当前用户的工号
+   * @returns 工号或null
+   */
+  const getJobId = (): number | null => {
+    // 普通用户逻辑：从当前用户的 staffInfo 中获取 jobId
+    let jobId = initialState?.currentUser?.staffInfo?.jobId ?? null;
+
+    // 管理员用户逻辑：如果是管理员且有保存的凭据，则使用保存的凭据中的 jobId
+    if (isAdmin && savedCredentials?.jobId) {
+      const adminJobId = Number(savedCredentials.jobId);
+      // 确保转换后的 jobId 是有效的数字
+      if (!isNaN(adminJobId)) {
+        jobId = adminJobId;
+      }
+    }
+
+    // 如果获取失败，显示错误信息
+    if (jobId === null) {
+      message.error('无法获取有效的工号信息，请确保已正常登录系统或保存了有效凭据');
+    }
+
+    return jobId;
+  };
+
+  const jobId = getJobId();
+  const staffInfo = initialState?.currentUser?.staffInfo;
 
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().split('T')[0];
@@ -342,18 +372,18 @@ const LogAutoMate: React.FC = () => {
                       操作提示：
                     </Typography.Title>
                     <ol style={{ paddingLeft: '16px', margin: 0 }}>
-                      <li>点击【登录校园网】按钮，输入工号和密码登录。</li>
-                      <li>点击【获取日志】查看教学计划。</li>
-                      <li>根据计划和日志的填写情况，会出现日志信息确认卡片。</li>
-                      <li>核对日志内容并补充信息后【保存到校园网】。</li>
+                      <li>1. 点击【登录校园网】按钮，输入工号和密码登录。</li>
+                      <li>2. 点击【获取日志】查看未填日志列表。</li>
+                      <li>3. 核对日志内容并补充信息后【保存到校园网】。</li>
                     </ol>
                     <Typography.Title level={5} style={{ color: 'white', margin: '16px 0 8px 0' }}>
                       安全提示：
                     </Typography.Title>
                     <ul style={{ paddingLeft: '16px', margin: 0 }}>
-                      <li>本站服务端不会以任何形式记录用户校园网密码。</li>
-                      <li>密码的明文会随登录流程发送给校园网。</li>
-                      <li>自动化流程进行中的所有数据，都是从校园网实时抓取。</li>
+                      <li>1. 本站服务端不会以任何形式记录用户校园网密码。</li>
+                      <li>2. 密码的明文会随登录流程发送给校园网。</li>
+                      <li>3. 自动化流程进行中的所有数据，都是从校园网实时抓取。</li>
+                      <li>4. 应尽量避免页面多开后提交。</li>
                     </ul>
                   </div>
                 }

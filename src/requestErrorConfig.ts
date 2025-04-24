@@ -32,7 +32,7 @@ export const errorConfig: RequestConfig = {
     errorThrower: (res) => {
       const { success, data, errorCode, errorMessage, showType } =
         res as unknown as ResponseStructure;
-      console.log(res);
+      // console.log(res);
       if (!success) {
         const error: any = new Error(errorMessage);
         error.name = 'BizError';
@@ -46,8 +46,22 @@ export const errorConfig: RequestConfig = {
       // 我们的 errorThrower 抛出的错误。
       if (error.name === 'BizError') {
         const errorInfo: ResponseStructure | undefined = error.info;
+
         if (errorInfo) {
           const { errorMessage, errorCode } = errorInfo;
+
+          // 先检查是否是需要跳转到登录页的错误码
+          if (errorCode === 1001 || errorCode === 1002 || errorCode === 1003) {
+            // 检查当前是否已经在登录页
+            const isLoginPage = window.location.pathname.includes('/user/login');
+            if (!isLoginPage) {
+              // 只有不在登录页时，才跳转并显示错误
+              message.error(errorMessage);
+              history.push('/user/login');
+            }
+            return; // 已处理，直接返回
+          }
+
           switch (errorInfo.showType) {
             case ErrorShowType.SILENT:
               // do nothing
@@ -120,29 +134,14 @@ export const errorConfig: RequestConfig = {
   // 响应拦截器
   responseInterceptors: [
     (response) => {
+      // console.log('response:', response);
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
 
-      if (data?.err === false) {
-        console.log('后台报告异常！');
+      if (data?.success === false) {
+        console.log('响应拦截器报告异常！');
       }
 
-      switch (data?.errorCode) {
-        case 1001:
-          // token 未提交
-          history.push('/user/login');
-          break;
-        case 1002:
-          // token 无效
-          history.push('/user/login');
-          break;
-        case 1003:
-          // token 已过期
-          history.push('/user/login');
-          break;
-        default:
-          break;
-      }
       return response;
     },
   ],

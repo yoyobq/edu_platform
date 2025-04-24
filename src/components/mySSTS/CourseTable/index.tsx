@@ -7,7 +7,7 @@ import styles from './style.less';
 interface CourseTableProps {
   semesterId: number | null;
   semester: Semester | null;
-  staffId?: number;
+  staffId?: number | null;
   scheduleData?: FlatCourseSchedule[]; // 添加课表数据作为可选属性
 }
 
