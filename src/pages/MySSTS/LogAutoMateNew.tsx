@@ -39,7 +39,7 @@ const LogAutoMate: React.FC = () => {
   const [semester, setSemester] = useState<Semester | null>(null);
   const [semesterId, setSemesterId] = useState<number | null>(null);
 
-  // 添加一个状态来跟踪会话状态变化
+  // 添加一个状态来跟踪会话状态变化，请注意，这个状态仅用于 UI 显示，不代表实际的会话状态
   const [sessionValid, setSessionValid] = useState(SstsSessionManager.isSessionValid());
   const loginModalRef = useRef<LoginModalRef>(null);
 
@@ -99,9 +99,7 @@ const LogAutoMate: React.FC = () => {
       .catch((error) => console.error('获取学期信息失败:', error));
   }, []);
 
-  /**
-   * 处理登录成功事件
-   */
+  //处理登录成功事件
   const handleLoginSuccess = (userName: string) => {
     const currentUserName = initialState?.currentUser?.staffInfo?.name;
 
@@ -114,10 +112,8 @@ const LogAutoMate: React.FC = () => {
     setSessionValid(true);
   };
 
-  /**
-   * 显示登录对话框或自动登录
-   */
-  const showLoginModal = () => {
+  // 显示登录对话框或自动登录
+  const showLoginModal = async () => {
     // 检查会话是否有效
     const isSessionValid = SstsSessionManager.isSessionValid();
 
@@ -137,39 +133,13 @@ const LogAutoMate: React.FC = () => {
       const savedCredentials = SstsSessionManager.loadCredentials();
 
       if (savedCredentials) {
-        // 有保存的凭据，直接登录
-        const hide = message.loading('正在使用保存的凭据登录...', 0);
-        setLoading(true);
-
-        SstsSessionManager.login({
-          userId: savedCredentials.jobId,
-          password: savedCredentials.password,
-        })
-          .then((result) => {
-            if (result.success) {
-              message.success('自动登录成功！');
-              setSessionValid(true);
-
-              // 调用成功回调
-              if (result.userName) {
-                handleLoginSuccess(result.userName);
-              }
-            } else {
-              message.error(result.message || '自动登录失败，请手动登录');
-              // 自动登录失败，显示登录模态框
-              loginModalRef.current?.showModal();
-            }
-          })
-          .catch((error) => {
-            console.error('自动登录失败:', error);
-            message.error('自动登录失败，请手动登录');
-            // 自动登录失败，显示登录模态框
-            loginModalRef.current?.showModal();
-          })
-          .finally(() => {
-            hide();
-            setLoading(false);
-          });
+        // 有保存的凭据，调用自动登录函数
+        await SstsSessionManager.autoLoginWithCredentials(
+          savedCredentials,
+          handleLoginSuccess,
+          () => loginModalRef.current?.showModal(),
+          setLoading,
+        );
       } else {
         // 没有保存的凭据，显示登录模态框
         loginModalRef.current?.showModal();
@@ -178,6 +148,13 @@ const LogAutoMate: React.FC = () => {
   };
 
   const handleSubmitTeachingLog = async (teachingLogData: TeachingLogData) => {
+    await SstsSessionManager.checkSessionAndAutoLogin(
+      setSessionValid,
+      handleLoginSuccess,
+      () => loginModalRef.current?.showModal(),
+      setLoading,
+    );
+
     try {
       // 不再传递密码，只传递用户ID和日志数据
       await sstsSubmitTeachingLog({
@@ -196,11 +173,18 @@ const LogAutoMate: React.FC = () => {
           : [],
       );
     } catch (error) {
-      message.error('上传失败，请稍后再试');
+      message.error('上传失败，请根据提示操作或稍后再试');
     }
   };
 
   const handleSubmitIntegratedTeachingLog = async (teachingLogData: TeachingLogData) => {
+    await SstsSessionManager.checkSessionAndAutoLogin(
+      setSessionValid,
+      handleLoginSuccess,
+      () => loginModalRef.current?.showModal(),
+      setLoading,
+    );
+
     try {
       // 不再传递密码，只传递用户ID和日志数据
       await sstsSubmitIntegratedTeachingLog({
@@ -221,7 +205,7 @@ const LogAutoMate: React.FC = () => {
           : [],
       );
     } catch (error) {
-      message.error('上传失败，请稍后再试');
+      message.error('上传失败，请根据提示操作或稍后再试');
     }
   };
 
@@ -263,18 +247,20 @@ const LogAutoMate: React.FC = () => {
     message.success('已清除本地保存的凭据');
   };
 
-  // 添加一个定期检查会话状态的效果
+  // 定期检查会话状态的效果
   useEffect(() => {
     // 初始检查
     setSessionValid(SstsSessionManager.isSessionValid());
 
     // 设置定时器，每分钟检查一次会话状态
     const timer = setInterval(() => {
-      const isValid = SstsSessionManager.isSessionValid();
-      if (sessionValid !== isValid) {
-        setSessionValid(isValid);
-      }
-    }, 60000); // 每分钟检查一次
+      SstsSessionManager.checkSessionAndAutoLogin(
+        setSessionValid,
+        handleLoginSuccess,
+        () => loginModalRef.current?.showModal(),
+        setLoading,
+      );
+    }, 120000); // 每两分钟检查一次
 
     return () => clearInterval(timer);
   }, [sessionValid]);

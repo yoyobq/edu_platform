@@ -1,3 +1,4 @@
+import { message } from 'antd';
 import { sstsLogin } from './login';
 
 /**
@@ -165,5 +166,100 @@ export class SstsSessionManager {
    */
   static clearCredentials(): void {
     localStorage.removeItem(this.CREDENTIALS_KEY);
+  }
+
+  /**
+   * 使用保存的凭据自动登录
+   * @param credentials 登录凭据，包含 jobId 和 password
+   * @param onSuccess 登录成功回调
+   * @param onFailure 登录失败回调
+   * @param setLoading 设置加载状态的函数（可选）
+   * @returns Promise<{success: boolean, userName?: string, message?: string}>
+   */
+  static async autoLoginWithCredentials(
+    credentials: { jobId: string; password: string },
+    onSuccess?: (userName: string) => void,
+    onFailure?: () => void,
+    setLoading?: (loading: boolean) => void,
+  ) {
+    const hide = message.loading('正在使用保存的凭据登录...', 0);
+    if (setLoading) setLoading(true);
+
+    try {
+      const result = await this.login({
+        userId: credentials.jobId,
+        password: credentials.password,
+      });
+
+      if (result.success) {
+        message.success('自动登录成功！');
+
+        // 调用成功回调
+        if (result.userName && onSuccess) {
+          onSuccess(result.userName);
+        }
+      } else {
+        message.error(result.message || '自动登录失败，请手动登录');
+        // 自动登录失败，调用失败回调
+        if (onFailure) {
+          onFailure();
+        }
+      }
+
+      return result;
+    } catch (error) {
+      console.error('自动登录失败:', error);
+      message.error('自动登录失败，请手动登录');
+      // 自动登录失败，调用失败回调
+      if (onFailure) {
+        onFailure();
+      }
+      return {
+        success: false,
+        message: '登录过程中断，请稍后重试。',
+      };
+    } finally {
+      hide();
+      if (setLoading) setLoading(false);
+    }
+  }
+
+  /**
+   * 检查会话状态并在需要时自动重新登录
+   * @param currentSessionValid 当前会话状态
+   * @param setSessionValid 设置会话状态的函数
+   * @param onSuccess 登录成功回调
+   * @param onFailure 登录失败回调
+   * @param setLoading 设置加载状态的函数（可选）
+   * @returns 当前会话是否有效
+   */
+  static async checkSessionAndAutoLogin(
+    setSessionValid: (valid: boolean) => void,
+    onSuccess?: (userName: string) => void,
+    onFailure?: () => void,
+    setLoading?: (loading: boolean) => void,
+  ) {
+    const isValid = this.isSessionValid();
+
+    // 如果会话失效且有保存的凭据，尝试自动重新登录
+    if (!isValid) {
+      const savedCreds = this.loadCredentials();
+      if (savedCreds) {
+        const loginResult = await this.autoLoginWithCredentials(
+          savedCreds,
+          onSuccess,
+          onFailure,
+          setLoading,
+        );
+        // 根据登录结果更新会话状态
+        setSessionValid(loginResult.success);
+        return true;
+      } else {
+        // 如果没有保存的凭据，确保设置会话状态为无效
+        message.warning('校园网登陆已超时，请先重新登录校园网');
+        setSessionValid(false);
+      }
+    }
+    return isValid;
   }
 }
