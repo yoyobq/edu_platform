@@ -151,3 +151,50 @@
     }
   }
 }
+
+/* 教学日志卡片响应式布局 */
+.teaching-log-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .form-item-content {
+    flex: 3;
+    min-width: 300px;
+  }
+
+  .form-item-homework {
+    flex: 2;
+    min-width: 250px;
+  }
+
+  .form-item-record {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+/* 媒体查询 - 当屏幕宽度小于 1200px 时，课堂情况记录换行 */
+@media (max-width: 1200px) {
+  .teaching-log-form {
+    .form-item-record {
+      flex-basis: 100%;
+      order: 3;
+    }
+  }
+}
+
+/* 媒体查询 - 当屏幕宽度小于 900px 时，作业布置情况也换行 */
+@media (max-width: 900px) {
+  .teaching-log-form {
+    .form-item-homework {
+      flex-basis: 100%;
+      order: 2;
+    }
+
+    .form-item-content {
+      flex-basis: 100%;
+      order: 1;
+    }
+  }
+}
