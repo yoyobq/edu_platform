@@ -11,7 +11,7 @@ interface CurriDetails {
   topic_record: string;
   section_id: string;
   section_name: string;
-  journal_type: string;
+  journal_type: number;
   className: string;
   courseName: string;
 }
@@ -24,7 +24,7 @@ interface TeachingLogData {
   lesson_hours: number;
   section_id: string;
   section_name: string;
-  journal_type: string;
+  journal_type: number;
   topic_record: string;
   homework_assignment: string;
   course_content: string;

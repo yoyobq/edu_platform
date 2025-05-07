@@ -1,3 +1,4 @@
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import {
   Button,
   Card,
@@ -55,7 +56,7 @@ type TeachingLogCardProps = {
   topic_record: string;
   section_id: string;
   section_name: string;
-  journal_type: string;
+  journal_type: number;
   className: string;
   courseName: string;
   onSubmitTeachingLog: (teachingLogData: TeachingLogData) => Promise<void>;
@@ -156,7 +157,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
         lesson_hours,
         section_id,
         section_name,
-        journal_type,
+        journal_type: Number(journal_type),
         // 虽然有简便写法，但这么写更容易阅读
         //...formValues
         topic_record: formValues.topic_record,
@@ -193,6 +194,9 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
           <Text strong style={{ color: '#2d3e50' }}>
             第{chineseNumbers[parseInt(week_number)]}周 星期{chineseNumbers[parseInt(day_of_week)]}{' '}
             {section_name ? ` ${section_id}节` : ''}
+            <QuestionCircleOutlined
+              style={{ fontSize: '14px', color: '#FFF', paddingLeft: '0.5vw' }}
+            />
           </Text>
           <Text style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#3A5FCD' }}>
             <Space size="large">
@@ -216,9 +220,6 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
             <Button type="primary" onClick={uploadToSSTS} loading={loading} disabled={loading}>
               保存到校园网
             </Button>
-            <Button type="primary" hidden danger>
-              提交
-            </Button>
           </Space>
         </Flex>
 
@@ -230,7 +231,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
             name="course_content"
             // initialValue={course_content}
             rules={[{ required: true, message: '请输入课程内容' }]}
-            // style={{width: '30vw'}}
+            // style={{width: '40vw'}}
           >
             <Input.TextArea
               maxLength={200}
@@ -250,7 +251,7 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
               maxLength={200}
               placeholder="输入作业布置情况"
               autoSize={{ minRows: 1 }}
-              style={{ width: '10vw', marginRight: '1vw' }}
+              style={{ width: '20vw', marginRight: '1vw' }}
             />
           </Form.Item>
 

@@ -73,6 +73,7 @@ const CancelledCoursesPage: React.FC = () => {
     getStaffsCancelledCourses({ semesterId })
       .then((data) => {
         setCancelledCourses(data);
+        console.log(data);
         const teachers: TeacherInfo[] = data.map((staff) => ({
           sstsTeacherId: staff.sstsTeacherId!,
           staffName: staff.staffName,

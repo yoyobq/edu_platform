@@ -78,12 +78,8 @@ export async function sstsGetCurriPlan({ userId }: { userId: string }): Promise<
   }
 }
 
-/**
- * 提交教学日志服务
- * 注意：此函数不再需要密码，只需要用户ID用于API调用
- */
+// 提交教学日志服务
 export async function sstsSubmitTeachingLog({
-  // userId,
   teachingLogData,
 }: {
   userId: string;

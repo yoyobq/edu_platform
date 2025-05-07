@@ -17,6 +17,7 @@ import { Button, Card, Empty, Flex, message, Modal, Tooltip, Typography } from '
 import dayjs from 'dayjs';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
+import IntegratedTeachingLogCard from './components/IntegratedTeachingLogCard';
 import TeachingLogCard from './components/TeachingLogCard';
 import './style.less'; // 引入样式文件，包含页面整体布局的样式
 
@@ -295,7 +296,14 @@ const LogAutoMate: React.FC = () => {
                     ease: 'easeInOut',
                   }}
                 >
-                  <TeachingLogCard {...detail} onSubmitTeachingLog={handleSubmitTeachingLog} />
+                  {detail.journal_type === 3 ? (
+                    <IntegratedTeachingLogCard
+                      {...detail}
+                      onSubmitTeachingLog={handleSubmitTeachingLog}
+                    />
+                  ) : (
+                    <TeachingLogCard {...detail} onSubmitTeachingLog={handleSubmitTeachingLog} />
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>
