@@ -1,5 +1,6 @@
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import {
+  Alert,
   Button,
   Card,
   Divider,
@@ -86,7 +87,9 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
   week_number,
   day_of_week,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  listening_teacher_id,
   listening_teacher_name,
+  lecture_plan_detail_id,
   lesson_hours,
   section_id,
   shift,
@@ -101,6 +104,9 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+
+  // 生成唯一ID前缀，用于区分不同卡片的表单项
+  const uniqueIdPrefix = `i_${teaching_class_id?.slice(-4)}`;
 
   useEffect(() => {
     form.setFieldsValue({
@@ -211,6 +217,9 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
         teaching_date,
         week_number,
         day_of_week,
+        listening_teacher_id,
+        listening_teacher_name,
+        lecture_plan_detail_id,
         lesson_hours,
         section_id,
         journal_type: 3, // 确保 journal_type 是 number 类型
@@ -249,6 +258,12 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
         border: '1px solid #f0f0f0', // 增加浅色边框
       }}
     >
+      <Alert
+        message="一体化课程填写功能测试中，尚未对所有的情景考虑完备，填写后务必检查校园网中的数据，若遇 BUG，请积极提交，万分感谢"
+        type="warning"
+        showIcon
+        style={{ marginBottom: '12px' }}
+      />
       <Form
         form={form}
         layout="vertical"
@@ -311,11 +326,13 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
             name="problem_and_solve"
             rules={[{ required: true, message: '请输入问题与解决方案' }]}
             style={{ width: '48%' }}
+            id={`${uniqueIdPrefix}_problem_solve`}
           >
             <Input.TextArea
               maxLength={200}
               placeholder="输入问题与解决方案"
               autoSize={{ minRows: 2 }}
+              id={`${uniqueIdPrefix}_problem_solve_input`}
             />
           </Form.Item>
 
@@ -324,11 +341,13 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
             name="complete_and_summary"
             rules={[{ required: true, message: '请输入完成情况与总结' }]}
             style={{ width: '48%' }}
+            id={`${uniqueIdPrefix}_complete_summary`}
           >
             <Input.TextArea
               maxLength={200}
               placeholder="输入完成情况与总结"
               autoSize={{ minRows: 2 }}
+              id={`${uniqueIdPrefix}_complete_summary_input`}
             />
           </Form.Item>
         </Flex>
@@ -339,8 +358,14 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
             name="discipline_situation"
             rules={[{ required: true, message: '请输入纪律情况' }]}
             style={{ width: '30%' }}
+            id={`${uniqueIdPrefix}_discipline`}
           >
-            <Input.TextArea maxLength={100} placeholder="输入纪律情况" autoSize={{ minRows: 1 }} />
+            <Input.TextArea
+              maxLength={100}
+              placeholder="输入纪律情况"
+              autoSize={{ minRows: 1 }}
+              id={`${uniqueIdPrefix}_discipline_input`}
+            />
           </Form.Item>
 
           <Form.Item
@@ -348,11 +373,13 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
             name="security_and_maintain"
             rules={[{ required: true, message: '请输入安全与保养情况' }]}
             style={{ width: '30%' }}
+            id={`${uniqueIdPrefix}_security`}
           >
             <Input.TextArea
               maxLength={100}
               placeholder="输入安全与保养情况"
               autoSize={{ minRows: 1 }}
+              id={`${uniqueIdPrefix}_security_input`}
             />
           </Form.Item>
 
@@ -361,10 +388,15 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
             name="shift"
             rules={[{ required: true, message: '请选择班次' }]}
             style={{ width: '30%' }}
+            id={`${uniqueIdPrefix}_shift`}
           >
-            <Radio.Group buttonStyle="solid" size="small">
+            <Radio.Group buttonStyle="solid" size="small" id={`${uniqueIdPrefix}_shift_group`}>
               {shiftOptions.map((option) => (
-                <Radio.Button key={option.value} value={option.value}>
+                <Radio.Button
+                  key={option.value}
+                  value={option.value}
+                  id={`${uniqueIdPrefix}_shift_${option.value}`}
+                >
                   {option.label}
                 </Radio.Button>
               ))}

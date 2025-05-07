@@ -86,6 +86,9 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
+  // 生成唯一ID前缀，用于区分不同卡片的表单项
+  const uniqueIdPrefix = `t_${teaching_class_id?.slice(-4)}`;
+
   useEffect(() => {
     form.setFieldsValue({ course_content, homework_assignment });
   }, [form, course_content, homework_assignment]);
@@ -232,12 +235,14 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
             // initialValue={course_content}
             rules={[{ required: true, message: '请输入课程内容' }]}
             // style={{width: '40vw'}}
+            id={`${uniqueIdPrefix}_course_content`}
           >
             <Input.TextArea
               maxLength={200}
               placeholder="输入课程内容"
               autoSize={{ minRows: 1 }}
               style={{ width: '30vw', marginRight: '1vw' }}
+              id={`${uniqueIdPrefix}_course_content_input`}
             />
           </Form.Item>
 
@@ -246,24 +251,28 @@ const TeachingLogCard: React.FC<TeachingLogCardProps> = ({
             name="homework_assignment"
             // initialValue={homework_assignment}
             rules={[{ required: true, message: '请输入作业布置情况' }]}
+            id={`${uniqueIdPrefix}_homework`}
           >
             <Input.TextArea
               maxLength={200}
               placeholder="输入作业布置情况"
               autoSize={{ minRows: 1 }}
               style={{ width: '20vw', marginRight: '1vw' }}
+              id={`${uniqueIdPrefix}_homework_input`}
             />
           </Form.Item>
 
           <Form.Item
             label="课堂情况记录"
             name="topic_record"
-            initialValue="优" // 默认选中“良”
+            initialValue="优" // 默认选中"优"
             rules={[{ required: true }]}
+            id={`${uniqueIdPrefix}_topic_record`}
           >
             <Radio.Group
               buttonStyle="solid"
               size="small"
+              id={`${uniqueIdPrefix}_topic_record_group`}
               // style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}
             >
               <Radio.Button value="优">优</Radio.Button>

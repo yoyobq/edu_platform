@@ -1,6 +1,10 @@
 import CourseTable from '@/components/mySSTS/CourseTable';
 import LoginModal, { LoginModalRef } from '@/components/mySSTS/LoginModal';
-import { sstsGetCurriPlan, sstsSubmitTeachingLog } from '@/services/my-ssts/getCurriPlan'; // 教学日志相关
+import {
+  sstsGetCurriPlan,
+  sstsSubmitIntegratedTeachingLog,
+  sstsSubmitTeachingLog,
+} from '@/services/my-ssts/getCurriPlan'; // 教学日志相关
 import { SstsSessionManager } from '@/services/my-ssts/sessionManager'; // 会话管理服务
 import { getSemesters } from '@/services/plan/semester';
 import type { Semester } from '@/services/plan/types';
@@ -196,6 +200,31 @@ const LogAutoMate: React.FC = () => {
     }
   };
 
+  const handleSubmitIntegratedTeachingLog = async (teachingLogData: TeachingLogData) => {
+    try {
+      // 不再传递密码，只传递用户ID和日志数据
+      await sstsSubmitIntegratedTeachingLog({
+        userId: jobId?.toString() || '',
+        teachingLogData,
+      });
+
+      console.log('上传到校园网的数据:', teachingLogData);
+
+      // 更新 curriDetails，移除成功上传的日志项
+      setCurriDetails((prevDetails) =>
+        prevDetails
+          ? prevDetails.filter(
+              (detail) =>
+                detail.teaching_date !== teachingLogData.teaching_date ||
+                detail.section_id !== teachingLogData.section_id,
+            )
+          : [],
+      );
+    } catch (error) {
+      message.error('上传失败，请稍后再试');
+    }
+  };
+
   const getCurriPlan = async () => {
     // 检查会话是否有效
     if (!SstsSessionManager.isSessionValid()) {
@@ -212,7 +241,6 @@ const LogAutoMate: React.FC = () => {
       const curriPlan = await sstsGetCurriPlan({ userId: jobId?.toString() || '' });
       setData(curriPlan.planList);
       setCurriDetails(curriPlan.curriDetails);
-
       message.success('日志数据获取成功！');
     } catch (error) {
       message.error('日志数据获取失败，请稍后重试。');
@@ -299,7 +327,7 @@ const LogAutoMate: React.FC = () => {
                   {detail.journal_type === 3 ? (
                     <IntegratedTeachingLogCard
                       {...detail}
-                      onSubmitTeachingLog={handleSubmitTeachingLog}
+                      onSubmitTeachingLog={handleSubmitIntegratedTeachingLog}
                     />
                   ) : (
                     <TeachingLogCard {...detail} onSubmitTeachingLog={handleSubmitTeachingLog} />

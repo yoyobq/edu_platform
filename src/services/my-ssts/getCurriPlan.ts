@@ -1,6 +1,10 @@
 import { request } from '@umijs/max';
 import { print } from 'graphql';
-import { mutationSstsSubmitTeachingLog, querySstsGetCurriPlan } from './graphql/curriPlan.graphql';
+import {
+  mutationSstsSubmitIntegratedTeachingLog,
+  mutationSstsSubmitTeachingLog,
+  querySstsGetCurriPlan,
+} from './graphql/curriPlan.graphql';
 import { SstsSessionManager } from './sessionManager';
 
 /**
@@ -38,7 +42,6 @@ export async function sstsGetCurriPlanApi(params: {
 }): Promise<any> {
   return graphqlRequest('sstsGetCurriPlan', querySstsGetCurriPlan, { input: params });
 }
-
 /**
  * 提交教学日志 API
  */
@@ -48,6 +51,21 @@ export async function sstsSubmitTeachingLogApi(params: {
   token: string;
 }): Promise<any> {
   return graphqlRequest('sstsSubmitTeachingLog', mutationSstsSubmitTeachingLog, { input: params });
+}
+
+/**
+ * 提交一体化教学日志 API
+ */
+export async function sstsSubmitIntegratedTeachingLogApi(params: {
+  teachingLogData: TeachingLogData;
+  JSESSIONID_A: string;
+  token: string;
+}): Promise<any> {
+  return graphqlRequest(
+    'sstsSubmitIntegratedTeachingLog',
+    mutationSstsSubmitIntegratedTeachingLog,
+    { input: params },
+  );
 }
 
 /**
@@ -106,5 +124,36 @@ export async function sstsSubmitTeachingLog({
   } catch (error) {
     console.error(error);
     throw new Error('教学日志提交失败，请稍后重试。');
+  }
+}
+
+// 提交教学日志服务
+export async function sstsSubmitIntegratedTeachingLog({
+  teachingLogData,
+}: {
+  userId: string;
+  teachingLogData: TeachingLogData;
+}): Promise<any> {
+  // 检查会话是否有效
+  if (!SstsSessionManager.isSessionValid()) {
+    throw new Error('会话信息缺失或已过期，请先点击登录校园网按钮并重新获取日志');
+  }
+
+  const { JSESSIONID_A, token } = SstsSessionManager.getSessionInfo();
+
+  if (!JSESSIONID_A || !token) {
+    throw new Error('会话信息缺失，请先点击登录校园网按钮并重新获取日志');
+  }
+
+  try {
+    // 调用 API 提交教学日志
+    return await sstsSubmitIntegratedTeachingLogApi({
+      teachingLogData,
+      JSESSIONID_A,
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    throw new Error('一体化教学日志提交失败，请稍后重试。');
   }
 }

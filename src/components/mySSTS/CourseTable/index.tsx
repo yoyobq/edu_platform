@@ -191,8 +191,6 @@ const CourseTable: React.FC<CourseTableProps> = ({
     // 如果传入了 scheduleData 且不为空数组，则直接使用
     if (scheduleData && scheduleData.length > 0) {
       try {
-        // 移除这一行
-        // setInternalScheduleData(scheduleData);
         setCourseTable(processCourseData(scheduleData));
       } catch (error) {
         console.error('处理课表数据失败:', error);
