@@ -252,12 +252,18 @@ const CourseTable: React.FC<CourseTableProps> = ({
       <div className={styles.scheduleTable}>
         <table>
           <colgroup>
-            <col style={{ width: '8%' }} /> {/* 第一列 */}
-            <col style={{ width: '18.4%' }} /> {/* 周一 */}
-            <col style={{ width: '18.4%' }} /> {/* 周二 */}
-            <col style={{ width: '18.4%' }} /> {/* 周三 */}
-            <col style={{ width: '18.4%' }} /> {/* 周四 */}
-            <col style={{ width: '18.4%' }} /> {/* 周五 */}
+            <col style={{ width: '8%' }} />
+            {/* 第一列 */}
+            <col style={{ width: '18.4%' }} />
+            {/* 周一 */}
+            <col style={{ width: '18.4%' }} />
+            {/* 周二 */}
+            <col style={{ width: '18.4%' }} />
+            {/* 周三 */}
+            <col style={{ width: '18.4%' }} />
+            {/* 周四 */}
+            <col style={{ width: '18.4%' }} />
+            {/* 周五 */}
           </colgroup>
           <thead>
             <tr>
