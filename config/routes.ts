@@ -80,11 +80,11 @@ export default [
   {
     path: '/MySSTS',
     name: 'MySSTS',
-    icon: 'crown',
+    icon: 'robot',
     access: 'canTeacher',
     routes: [
       {
-        // 这一条的意义在于 /admin 的默认页
+        // 这一条的意义在于二级菜单的的默认页
         path: '/MySSTS',
         redirect: '/MySSTS/log-automate',
       },
@@ -94,9 +94,9 @@ export default [
         component: './MySSTS/LogAutoMate',
       },
       {
-        path: '/MySSTS/log-automate-new',
-        name: 'log-mate-new',
-        component: './MySSTS/LogAutoMateNew',
+        path: '/MySSTS/log-automate-old',
+        name: 'log-mate-old',
+        component: './MySSTS/LogAutoMateOld',
       },
     ],
   },
@@ -119,6 +119,7 @@ export default [
     path: '/selfTest',
     component: './SelfTest',
   },
+  // {
   //   path: '/exercises',
   //   // layout: false,
   //   routes: [
