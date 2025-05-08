@@ -161,7 +161,7 @@ export default [
     path: '/academic',
     name: 'academic-management',
     icon: 'book',
-    access: 'canAdmin',
+    access: 'canAcademicAssistant',
     routes: [
       {
         // 这一条的意义在于 /academic 的默认页
