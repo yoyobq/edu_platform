@@ -362,9 +362,6 @@ export async function registerUser({
     variables,
   };
 
-  console.log(data);
-  console.log(variables);
-
   // 使用 request 发送请求
   return request<API.ResponseData>('/graphql/register', {
     method: 'POST',

@@ -136,8 +136,31 @@ export async function currentUser(options: { [key: string]: any }) {
 }
 
 /** 退出登录接口 POST /api/login/outLogin */
-export async function outLogin() {
+export async function outLogin(clearSavedCredentials = false) {
+  // 清除 cookie 中的 token
   Cookies.remove('token');
+
+  // 清除会话存储中的所有信息
+  sessionStorage.clear();
+
+  // 如果用户选择清除保存的凭据，则执行清除
+  if (clearSavedCredentials) {
+    try {
+      // 导入 SstsSessionManager 并清除当前用户的凭据
+      const { SstsSessionManager } = await import('../my-ssts/sessionManager');
+      SstsSessionManager.clearCredentials(); // 只清除当前用户的凭据
+    } catch (error) {
+      console.warn('无法清除保存的凭据:', error);
+    }
+  }
+
+  // TODO：更安全的做法，向服务器发送登出请求
+  // try {
+  //   fetch('/api/logout', { method: 'POST', credentials: 'include' })
+  //     .catch(err => console.warn('服务器登出请求失败:', err));
+  // } catch (error) {
+  //   console.error('服务器登出请求失败:', error);
+  // }
 }
 
 /** 发送验证码 POST /api/login/captcha */
