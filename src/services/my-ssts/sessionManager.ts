@@ -37,6 +37,8 @@ export class SstsSessionManager {
         // 存储用户名
         if (response.userInfo?.userName) {
           sessionStorage.setItem(this.SESSION_KEYS.USER_NAME, response.userInfo.userName);
+        } else {
+          sessionStorage.setItem(this.SESSION_KEYS.USER_NAME, '未知用户');
         }
 
         // 设置过期时间（例如2小时后）
@@ -117,41 +119,49 @@ export class SstsSessionManager {
   }
 
   /**
-   * 清除会话信息
-   */
-  static clearSession(): void {
-    Object.values(this.SESSION_KEYS).forEach((key) => {
-      sessionStorage.removeItem(key);
-    });
-  }
-
-  /**
    * 获取用户名
    */
   static getUserName(): string | null {
     return sessionStorage.getItem(this.SESSION_KEYS.USER_NAME);
   }
 
-  private static readonly CREDENTIALS_KEY = 'ssts_credentials';
+  private static readonly CREDENTIALS_KEY_PREFIX = 'ssts_credentials_';
 
   /**
-   * 保存用户凭证到 localStorage
+   * 保存用户凭证到 localStorage，与用户名关联
    * TODO: 后端加密存储
    */
   static saveCredentials(jobId: string, password: string): void {
+    const userName = this.getUserName();
+    if (!userName) {
+      console.warn('无法保存凭据：未找到用户名');
+      return;
+    }
+
+    // 使用用户特定的键名
+    const storageKey = `${this.CREDENTIALS_KEY_PREFIX}${userName}`;
     const data = JSON.stringify({ jobId, password });
     // 使用 encodeURIComponent 替代 escape
     const encoded = btoa(encodeURIComponent(data));
-    localStorage.setItem(this.CREDENTIALS_KEY, encoded);
+    localStorage.setItem(storageKey, encoded);
   }
 
   /**
-   * 从 localStorage 读取用户凭证
+   * 从 localStorage 读取当前用户的凭证
    * TODO: 后端解密
    */
   static loadCredentials(): { jobId: string; password: string } | null {
-    const encoded = localStorage.getItem(this.CREDENTIALS_KEY);
+    const userName = this.getUserName();
+    if (!userName) {
+      // 如果没有用户名，则无法获取特定用户的凭据
+      return null;
+    }
+
+    // 使用用户特定的键名
+    const storageKey = `${this.CREDENTIALS_KEY_PREFIX}${userName}`;
+    const encoded = localStorage.getItem(storageKey);
     if (!encoded) return null;
+
     try {
       // 使用 decodeURIComponent 替代 unescape
       const decoded = decodeURIComponent(atob(encoded));
@@ -162,10 +172,39 @@ export class SstsSessionManager {
   }
 
   /**
-   * 清除本地保存的凭证
+   * 清除当前用户的本地保存的凭证
    */
   static clearCredentials(): void {
-    localStorage.removeItem(this.CREDENTIALS_KEY);
+    const userName = this.getUserName();
+    if (userName) {
+      // 只清除当前用户的凭据
+      localStorage.removeItem(`${this.CREDENTIALS_KEY_PREFIX}${userName}`);
+    }
+  }
+
+  /**
+   * 清除所有用户的凭证（用于安全清理）
+   */
+  static clearAllCredentials(): void {
+    // 遍历 localStorage 并删除所有以凭据前缀开头的项
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith(this.CREDENTIALS_KEY_PREFIX)) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
+
+  /**
+   * 清除会话信息，同时清除当前用户的凭证
+   */
+  static clearSession(): void {
+    // 先清除当前用户的凭证
+    this.clearCredentials();
+
+    // 再清除会话信息
+    Object.values(this.SESSION_KEYS).forEach((key) => {
+      sessionStorage.removeItem(key);
+    });
   }
 
   /**
