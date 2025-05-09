@@ -105,6 +105,8 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
+  console.log('teaching_date: ', teaching_date);
+
   // 生成唯一ID前缀，用于区分不同卡片的表单项
   const uniqueIdPrefix = `i_${teaching_class_id?.slice(-4)}`;
 
@@ -310,10 +312,14 @@ const IntegratedTeachingLogCard: React.FC<IntegratedTeachingLogCardProps> = ({
               type="primary"
               onClick={uploadToSSTS}
               loading={loading}
-              disabled={loading}
-              style={{ backgroundColor: '#FA8C16', borderColor: '#FA8C16' }}
+              disabled={loading || teaching_date === null}
+              style={
+                teaching_date === null
+                  ? undefined
+                  : { backgroundColor: '#FA8C16', borderColor: '#FA8C16' }
+              }
             >
-              保存到校园网
+              {teaching_date === null ? '计划与实际课时冲突' : '保存到校园网'}
             </Button>
           </Space>
         </Flex>
