@@ -38,45 +38,37 @@ const LogAutoMate: React.FC = () => {
   // 学期相关状态 - 简化为只获取默认学期
   const [semester, setSemester] = useState<Semester | null>(null);
   const [semesterId, setSemesterId] = useState<number | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [staffId, setStaffId] = useState<number | null>(null); // 存储员工 ID
 
   // 添加一个状态来跟踪会话状态变化，请注意，这个状态仅用于 UI 显示，不代表实际的会话状态
   const [sessionValid, setSessionValid] = useState(SstsSessionManager.isSessionValid());
   const loginModalRef = useRef<LoginModalRef>(null);
 
   const accessGroup: string[] = initialState?.currentUser?.accessGroup ?? ['guest'];
-  const isAdmin = accessGroup.includes('admin');
+  const isAdmin = accessGroup.includes('admin') || accessGroup.includes('superAdmin');
 
   const savedCredentials = SstsSessionManager.loadCredentials();
-
   /**
    * 获取用户工号
    * 管理员用户优先使用保存的凭据中的工号，如果无效则尝试使用当前用户的工号
    * 普通用户直接使用当前用户的工号
-   * @returns 工号或null
    */
-  const getJobId = (): number | null => {
+  useEffect(() => {
+    // StaffId 置0，默认从 jobId 获取课程表
+    setStaffId(0);
     // 普通用户逻辑：从当前用户的 staffInfo 中获取 jobId
-    let jobId = initialState?.currentUser?.staffInfo?.jobId ?? null;
-
-    // 管理员用户逻辑：如果是管理员且有保存的凭据，则使用保存的凭据中的 jobId
-    if (isAdmin && savedCredentials?.jobId) {
-      const adminJobId = Number(savedCredentials.jobId);
-      // 确保转换后的 jobId 是有效的数字
-      if (!isNaN(adminJobId)) {
-        jobId = adminJobId;
-      }
-    }
+    let currentJobId = initialState?.currentUser?.staffInfo?.jobId ?? null;
 
     // 如果获取失败，显示错误信息
-    if (jobId === null) {
+    if (currentJobId === null) {
       message.error('无法获取有效的工号信息，请确保已正常登录系统或保存了有效凭据');
+    } else {
+      setJobId(currentJobId.toString());
     }
+  }, [initialState?.currentUser?.staffInfo?.jobId, savedCredentials]);
 
-    return jobId;
-  };
-
-  const jobId = getJobId();
-  const staffInfo = initialState?.currentUser?.staffInfo;
+  // const staffInfo = initialState?.currentUser?.staffInfo;
 
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().split('T')[0];
@@ -100,12 +92,18 @@ const LogAutoMate: React.FC = () => {
   }, []);
 
   //处理登录成功事件
-  const handleLoginSuccess = (userName: string) => {
+  const handleLoginSuccess = (userName: string, jobId?: string) => {
     const currentUserName = initialState?.currentUser?.staffInfo?.name;
 
     // 校验用户名是否一致，非 admin 用户需确保一致
     if (userName !== currentUserName && !isAdmin) {
       message.error('出于校园网数据安全的考虑，非本人禁止操作此工具，请勿跳过安全检查。');
+    }
+
+    // 管理员用户逻辑：如果是管理员且调用了 loginModal，则使用 loginModal 中的 jobId
+    if (isAdmin && jobId) {
+      // 清除课表数据，确保切换工号时重新获取
+      setJobId(jobId);
     }
 
     // 更新会话状态
@@ -274,9 +272,11 @@ const LogAutoMate: React.FC = () => {
           {/* 课程表区域 */}
           {/* <div className="course-table-container"> */}
           <CourseTable
+            key={`course-table-${jobId}`} // 添加 key 属性，确保 jobId 变化时组件重新渲染
             semesterId={semesterId}
             semester={semester}
-            staffId={staffInfo?.id}
+            staffId={staffId}
+            jobId={jobId ? Number(jobId) : null}
             scheduleData={data}
           />
           {/* </div> */}
@@ -441,7 +441,7 @@ const LogAutoMate: React.FC = () => {
       {/* 登录 Modal 组件 */}
       <LoginModal
         ref={loginModalRef}
-        jobId={jobId}
+        jobId={jobId ? Number(jobId) : null}
         isAdmin={isAdmin}
         onLoginSuccess={handleLoginSuccess}
       />

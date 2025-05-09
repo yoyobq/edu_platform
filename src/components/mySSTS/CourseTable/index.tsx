@@ -8,6 +8,7 @@ interface CourseTableProps {
   semesterId: number | null;
   semester: Semester | null;
   staffId?: number | null;
+  jobId?: number | null | undefined;
   scheduleData?: FlatCourseSchedule[]; // 添加课表数据作为可选属性
 }
 
@@ -15,6 +16,7 @@ const CourseTable: React.FC<CourseTableProps> = ({
   semesterId,
   semester,
   staffId,
+  jobId,
   scheduleData = [], // 设置默认值为空数组
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -184,8 +186,9 @@ const CourseTable: React.FC<CourseTableProps> = ({
 
   // 获取课表数据
   useEffect(() => {
-    if (!semesterId || !staffId) return;
+    if (!semesterId) return;
 
+    // 重置状态，确保每次 staffId 变化时都会清除旧数据
     setLoading(true);
 
     // 如果传入了 scheduleData 且不为空数组，则直接使用
@@ -200,11 +203,19 @@ const CourseTable: React.FC<CourseTableProps> = ({
       return;
     }
 
+    // 处理 staffId 和 jobId，确保类型正确
+    // 如果 staffId 为 null 或 undefined，则转换为 undefined
+    // 如果 jobId 为 null 或 undefined，则转换为 undefined
+    const effectiveStaffId = staffId === null ? undefined : staffId;
+    const effectiveJobId = jobId === null ? undefined : jobId;
+
     // 否则从后台获取数据
-    getFullScheduleByStaff(staffId, semesterId)
+    getFullScheduleByStaff({
+      staffId: effectiveStaffId,
+      jobId: effectiveJobId,
+      semesterId,
+    })
       .then((res) => {
-        // 移除这一行
-        // setInternalScheduleData(res);
         setCourseTable(processCourseData(res));
       })
       .catch((error) => {
@@ -214,7 +225,7 @@ const CourseTable: React.FC<CourseTableProps> = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [semesterId, staffId, scheduleData]); // 添加 scheduleData 作为依赖项
+  }, [semesterId, staffId, jobId, scheduleData]); // 添加 jobId 作为依赖项
 
   // 在组件内添加一个函数来检查特定时间段是否有课程
   const hasCourseInPeriod = (period: number) => {

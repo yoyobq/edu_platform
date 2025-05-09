@@ -58,9 +58,11 @@ const CourseSchedulePage: React.FC = () => {
 
     setLoading(true);
 
-    getFullScheduleByStaff(staffInfo.id, semesterId)
+    getFullScheduleByStaff({
+      staffId: staffInfo.id,
+      semesterId,
+    })
       .then((res) => {
-        console.log(res);
         setScheduleData(res);
       })
       .catch((error) => console.error('获取课表数据失败:', error))

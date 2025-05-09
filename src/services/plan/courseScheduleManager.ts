@@ -58,13 +58,23 @@ async function graphqlRequest<T>(
 
 /**
  * 查询教师某学期完整课表
- * @param staffId 教师 ID
- * @param semesterId 学期 ID
+ * @param params 查询参数对象
+ * @param params.staffId 教师 ID
+ * @param params.jobId 工号 ID
+ * @param params.semesterId 学期 ID
  * @returns `Promise<CourseSchedule[]>` 返回该教师该学期的完整课程表
  */
-export function getFullScheduleByStaff(staffId: number, semesterId: number) {
+export function getFullScheduleByStaff(params: {
+  staffId?: number;
+  jobId?: number;
+  semesterId: number;
+}) {
   return graphqlRequest<FlatCourseSchedule[]>('getFullScheduleByStaff', queryFullScheduleByStaff, {
-    input: { staffId, semesterId },
+    input: {
+      staffId: params.staffId,
+      jobId: params.jobId,
+      semesterId: params.semesterId,
+    },
   });
 }
 

@@ -226,7 +226,7 @@ export class SstsSessionManager {
 
     try {
       const result = await this.login({
-        userId: credentials.jobId,
+        jobId: credentials.jobId,
         password: credentials.password,
       });
 

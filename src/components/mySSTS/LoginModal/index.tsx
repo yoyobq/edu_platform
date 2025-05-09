@@ -18,7 +18,7 @@ export interface LoginModalRef {
 interface LoginModalProps {
   jobId?: number | null;
   isAdmin?: boolean;
-  onLoginSuccess?: (userName: string) => void;
+  onLoginSuccess?: (userName: string, userId?: string) => void;
 }
 
 const LoginModal = forwardRef<LoginModalRef, LoginModalProps>((props, ref) => {
@@ -39,7 +39,7 @@ const LoginModal = forwardRef<LoginModalRef, LoginModalProps>((props, ref) => {
 
   // 执行登录操作
   const performLogin = async (
-    values: { userId: string; password: string; remember?: boolean },
+    values: { jobId: string; password: string; remember?: boolean },
     saveCredentials: boolean,
   ) => {
     setLoading(true);
@@ -48,22 +48,22 @@ const LoginModal = forwardRef<LoginModalRef, LoginModalProps>((props, ref) => {
     try {
       // 使用会话管理服务登录
       const result = await SstsSessionManager.login({
-        userId: values.userId,
+        jobId: values.jobId,
         password: values.password,
       });
 
       if (result.success) {
         // 如果用户确认了保存凭据
         if (saveCredentials) {
-          SstsSessionManager.saveCredentials(values.userId, values.password);
+          SstsSessionManager.saveCredentials(values.jobId, values.password);
         }
 
         message.success(`登录成功！`);
         setVisible(false);
 
-        // 调用成功回调
+        // 调用成功回调，传递用户名和用户ID
         if (onLoginSuccess && result.userName) {
-          onLoginSuccess(result.userName);
+          onLoginSuccess(result.userName, values.jobId);
         }
       } else {
         message.error(result.message || '登录失败，请检查工号或密码。');
@@ -77,7 +77,7 @@ const LoginModal = forwardRef<LoginModalRef, LoginModalProps>((props, ref) => {
   };
 
   // 登录处理函数
-  const handleLogin = (values: { userId: string; password: string; remember?: boolean }) => {
+  const handleLogin = (values: { jobId: string; password: string; remember?: boolean }) => {
     // 如果用户选择了记住密码，显示安全警告确认弹窗
     if (values.remember) {
       // 创建一个Modal实例，以便我们可以更新它的属性
@@ -202,7 +202,7 @@ const LoginModal = forwardRef<LoginModalRef, LoginModalProps>((props, ref) => {
 
     if (credentials) {
       form.setFieldsValue({
-        userId: credentials.jobId,
+        jobId: credentials.jobId,
         password: credentials.password,
         remember: true,
       });
@@ -245,11 +245,11 @@ const LoginModal = forwardRef<LoginModalRef, LoginModalProps>((props, ref) => {
         form={form}
         layout="vertical"
         onFinish={handleLogin}
-        initialValues={{ userId: jobId, remember: false }}
+        initialValues={{ jobId: jobId, remember: false }}
         className={styles['login-form']}
         size="large"
       >
-        <Form.Item name="userId" rules={[{ required: true, message: '请输入您的工号' }]}>
+        <Form.Item name="jobId" rules={[{ required: true, message: '请输入您的工号' }]}>
           <Input
             prefix={<UserOutlined className={styles['input-prefix-icon']} />}
             placeholder="校园网工号"

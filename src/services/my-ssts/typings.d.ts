@@ -1,6 +1,6 @@
 // services/my-ssts/typings.d.ts
 interface SstsLoginParams {
-  userId: string;
+  jobId: string;
   password: string;
 }
 

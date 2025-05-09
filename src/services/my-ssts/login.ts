@@ -2,11 +2,11 @@ import { request } from '@umijs/max';
 import { gql } from 'graphql-tag';
 
 /** 登录校园网 */
-export async function sstsLogin({ userId, password }: SstsLoginParams): Promise<SstsLoginResponse> {
+export async function sstsLogin({ jobId, password }: SstsLoginParams): Promise<SstsLoginResponse> {
   // 构造 GraphQL 变量
   const variables = {
     input: {
-      userId,
+      userId: jobId,
       password,
     },
   };
