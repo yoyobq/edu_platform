@@ -18,6 +18,7 @@ import './index.less';
 const Login: React.FC = () => {
   const formRef = useRef<FormInstance>(null); // 创建 formRef
   // 用于滑块验证
+  // @ts-ignore
   const actionRef = useRef<ActionType>();
 
   // 记录登录状态及登录方式，用于切换登录方式或显示错误提示

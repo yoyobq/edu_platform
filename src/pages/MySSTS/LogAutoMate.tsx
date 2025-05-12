@@ -40,6 +40,8 @@ const LogAutoMate: React.FC = () => {
   const [semesterId, setSemesterId] = useState<number | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [staffId, setStaffId] = useState<number | null>(null); // 存储员工 ID
+  // 添加 savedCredentials 状态
+  const [savedCredentials, setSavedCredentials] = useState({});
 
   // 添加一个状态来跟踪会话状态变化，请注意，这个状态仅用于 UI 显示，不代表实际的会话状态
   const [sessionValid, setSessionValid] = useState(SstsSessionManager.isSessionValid());
@@ -48,7 +50,6 @@ const LogAutoMate: React.FC = () => {
   const accessGroup: string[] = initialState?.currentUser?.accessGroup ?? ['guest'];
   const isAdmin = accessGroup.includes('admin') || accessGroup.includes('superAdmin');
 
-  const savedCredentials = SstsSessionManager.loadCredentials();
   /**
    * 获取用户工号
    * 管理员用户优先使用保存的凭据中的工号，如果无效则尝试使用当前用户的工号
@@ -66,7 +67,17 @@ const LogAutoMate: React.FC = () => {
     } else {
       setJobId(currentJobId.toString());
     }
-  }, [initialState?.currentUser?.staffInfo?.jobId, savedCredentials]);
+  }, [initialState?.currentUser?.staffInfo?.jobId]);
+
+  // 添加一个新的 useEffect 来处理 jobId 变化时加载凭据
+  useEffect(() => {
+    if (jobId) {
+      const credentials = SstsSessionManager.loadCredentials(jobId);
+      if (credentials) {
+        setSavedCredentials(credentials);
+      }
+    }
+  }, [jobId]);
 
   // const staffInfo = initialState?.currentUser?.staffInfo;
 
@@ -92,11 +103,13 @@ const LogAutoMate: React.FC = () => {
   }, []);
 
   //处理登录成功事件
-  const handleLoginSuccess = (userName: string, jobId?: string) => {
+  const handleLoginSuccess = (userName: string, jobId: string) => {
     const currentUserName = initialState?.currentUser?.staffInfo?.name;
 
     // 校验用户名是否一致，非 admin 用户需确保一致
     if (userName !== currentUserName && !isAdmin) {
+      console.log(userName);
+      console.log(currentUserName);
       message.error('出于校园网数据安全的考虑，非本人禁止操作此工具，请勿跳过安全检查。');
     }
 
@@ -127,13 +140,11 @@ const LogAutoMate: React.FC = () => {
         },
       });
     } else {
-      // 检查是否有保存的凭据
-      const savedCredentials = SstsSessionManager.loadCredentials();
-
-      if (savedCredentials) {
+      // 使用 state 中的 savedCredentials
+      if (savedCredentials && 'jobId' in savedCredentials && 'password' in savedCredentials) {
         // 有保存的凭据，调用自动登录函数
         await SstsSessionManager.autoLoginWithCredentials(
-          savedCredentials,
+          savedCredentials as { jobId: string; password: string },
           handleLoginSuccess,
           () => loginModalRef.current?.showModal(),
           setLoading,
@@ -147,6 +158,7 @@ const LogAutoMate: React.FC = () => {
 
   const handleSubmitTeachingLog = async (teachingLogData: TeachingLogData) => {
     await SstsSessionManager.checkSessionAndAutoLogin(
+      jobId,
       setSessionValid,
       handleLoginSuccess,
       () => loginModalRef.current?.showModal(),
@@ -156,7 +168,7 @@ const LogAutoMate: React.FC = () => {
     try {
       // 不再传递密码，只传递用户ID和日志数据
       await sstsSubmitTeachingLog({
-        userId: jobId?.toString() || '',
+        // userId: jobId?.toString() || '',
         teachingLogData,
       });
 
@@ -177,6 +189,7 @@ const LogAutoMate: React.FC = () => {
 
   const handleSubmitIntegratedTeachingLog = async (teachingLogData: TeachingLogData) => {
     await SstsSessionManager.checkSessionAndAutoLogin(
+      jobId,
       setSessionValid,
       handleLoginSuccess,
       () => loginModalRef.current?.showModal(),
@@ -186,7 +199,7 @@ const LogAutoMate: React.FC = () => {
     try {
       // 不再传递密码，只传递用户ID和日志数据
       await sstsSubmitIntegratedTeachingLog({
-        userId: jobId?.toString() || '',
+        // userId: jobId?.toString() || '',
         teachingLogData,
       });
 
@@ -220,7 +233,7 @@ const LogAutoMate: React.FC = () => {
 
     try {
       // 不再传递密码，只传递用户ID
-      const curriPlan = await sstsGetCurriPlan({ userId: jobId?.toString() || '' });
+      const curriPlan = await sstsGetCurriPlan({ jobId: jobId?.toString() || '' });
       setData(curriPlan.planList);
       setCurriDetails(curriPlan.curriDetails);
       message.success('日志数据获取成功！');
@@ -253,6 +266,7 @@ const LogAutoMate: React.FC = () => {
     // 设置定时器，每分钟检查一次会话状态
     const timer = setInterval(() => {
       SstsSessionManager.checkSessionAndAutoLogin(
+        jobId,
         setSessionValid,
         handleLoginSuccess,
         () => loginModalRef.current?.showModal(),
@@ -441,7 +455,7 @@ const LogAutoMate: React.FC = () => {
       {/* 登录 Modal 组件 */}
       <LoginModal
         ref={loginModalRef}
-        jobId={jobId ? Number(jobId) : null}
+        jobId={jobId ? jobId : ''}
         isAdmin={isAdmin}
         onLoginSuccess={handleLoginSuccess}
       />

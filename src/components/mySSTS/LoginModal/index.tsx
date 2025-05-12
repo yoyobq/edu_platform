@@ -16,9 +16,9 @@ export interface LoginModalRef {
 }
 
 interface LoginModalProps {
-  jobId?: number | null;
+  jobId?: string;
   isAdmin?: boolean;
-  onLoginSuccess?: (userName: string, userId?: string) => void;
+  onLoginSuccess?: (userName: string, jobId: string) => void;
 }
 
 const LoginModal = forwardRef<LoginModalRef, LoginModalProps>((props, ref) => {
@@ -197,8 +197,8 @@ const LoginModal = forwardRef<LoginModalRef, LoginModalProps>((props, ref) => {
   };
 
   // 加载保存的凭据
-  const loadSavedCredentials = () => {
-    const credentials = SstsSessionManager.loadCredentials();
+  const loadSavedCredentials = (jobId: string) => {
+    const credentials = SstsSessionManager.loadCredentials(jobId);
 
     if (credentials) {
       form.setFieldsValue({
@@ -211,9 +211,9 @@ const LoginModal = forwardRef<LoginModalRef, LoginModalProps>((props, ref) => {
 
   // 组件挂载时加载保存的凭据
   React.useEffect(() => {
-    if (visible) {
+    if (visible && jobId) {
       // 尝试加载保存的凭据
-      loadSavedCredentials();
+      loadSavedCredentials(jobId);
 
       // 设置默认工号
       if (jobId) {

@@ -72,7 +72,7 @@ export async function sstsSubmitIntegratedTeachingLogApi(params: {
  * 获取教学计划服务
  * 注意：此函数不再需要密码，只需要用户ID用于API调用
  */
-export async function sstsGetCurriPlan({ userId }: { userId: string }): Promise<any> {
+export async function sstsGetCurriPlan({ jobId }: { jobId: string }): Promise<any> {
   // 检查会话是否有效
   if (!SstsSessionManager.isSessionValid()) {
     throw new Error('会话信息缺失或已过期，请先点击登录校园网按钮');
@@ -88,7 +88,7 @@ export async function sstsGetCurriPlan({ userId }: { userId: string }): Promise<
     // 调用 API 获取教学计划
     return await sstsGetCurriPlanApi({
       JSESSIONID_A,
-      userId,
+      userId: jobId,
       token,
     });
   } catch (error) {
@@ -100,7 +100,7 @@ export async function sstsGetCurriPlan({ userId }: { userId: string }): Promise<
 export async function sstsSubmitTeachingLog({
   teachingLogData,
 }: {
-  userId: string;
+  // userId: string;
   teachingLogData: TeachingLogData;
 }): Promise<any> {
   // 检查会话是否有效
@@ -131,7 +131,7 @@ export async function sstsSubmitTeachingLog({
 export async function sstsSubmitIntegratedTeachingLog({
   teachingLogData,
 }: {
-  userId: string;
+  // userId: string;
   teachingLogData: TeachingLogData;
 }): Promise<any> {
   // 检查会话是否有效

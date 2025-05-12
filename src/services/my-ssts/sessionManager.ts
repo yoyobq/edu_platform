@@ -13,6 +13,7 @@ export class SstsSessionManager {
     REFRESH_TOKEN: 'ssts_refreshToken',
     EXPIRATION: 'sessionExpiration',
     USER_NAME: 'ssts_userName',
+    JOB_ID: 'ssts_jobId',
   };
 
   /**
@@ -21,6 +22,7 @@ export class SstsSessionManager {
   static async login(credentials: SstsLoginParams): Promise<{
     success: boolean;
     userName?: string;
+    jobId?: string;
     message?: string;
   }> {
     try {
@@ -34,8 +36,9 @@ export class SstsSessionManager {
           response.jsessionCookie.split(';')[0].split('=')[1],
         );
 
-        // 存储用户名
-        if (response.userInfo?.userName) {
+        // 存储用户名和工号
+        if (response.userInfo?.userId && response.userInfo?.userName) {
+          sessionStorage.setItem(this.SESSION_KEYS.JOB_ID, response.userInfo.userId);
           sessionStorage.setItem(this.SESSION_KEYS.USER_NAME, response.userInfo.userName);
         } else {
           sessionStorage.setItem(this.SESSION_KEYS.USER_NAME, '未知用户');
@@ -47,6 +50,7 @@ export class SstsSessionManager {
 
         return {
           success: true,
+          jobId: response.userInfo?.userId,
           userName: response.userInfo?.userName,
         };
       } else {
@@ -75,6 +79,7 @@ export class SstsSessionManager {
       refreshToken: sessionStorage.getItem(this.SESSION_KEYS.REFRESH_TOKEN),
       expirationTime: sessionStorage.getItem(this.SESSION_KEYS.EXPIRATION),
       userName: sessionStorage.getItem(this.SESSION_KEYS.USER_NAME),
+      jobId: sessionStorage.getItem(this.SESSION_KEYS.JOB_ID),
     };
   }
 
@@ -125,6 +130,13 @@ export class SstsSessionManager {
     return sessionStorage.getItem(this.SESSION_KEYS.USER_NAME);
   }
 
+  /**
+   * 获取用户Id
+   */
+  static getJobId(): string | null {
+    return sessionStorage.getItem(this.SESSION_KEYS.JOB_ID);
+  }
+
   private static readonly CREDENTIALS_KEY_PREFIX = 'ssts_credentials_';
 
   /**
@@ -132,14 +144,8 @@ export class SstsSessionManager {
    * TODO: 后端加密存储
    */
   static saveCredentials(jobId: string, password: string): void {
-    const userName = this.getUserName();
-    if (!userName) {
-      console.warn('无法保存凭据：未找到用户名');
-      return;
-    }
-
     // 使用用户特定的键名
-    const storageKey = `${this.CREDENTIALS_KEY_PREFIX}${userName}`;
+    const storageKey = `${this.CREDENTIALS_KEY_PREFIX}${jobId}`;
     const data = JSON.stringify({ jobId, password });
     // 使用 encodeURIComponent 替代 escape
     const encoded = btoa(encodeURIComponent(data));
@@ -150,15 +156,14 @@ export class SstsSessionManager {
    * 从 localStorage 读取当前用户的凭证
    * TODO: 后端解密
    */
-  static loadCredentials(): { jobId: string; password: string } | null {
-    const userName = this.getUserName();
-    if (!userName) {
-      // 如果没有用户名，则无法获取特定用户的凭据
+  static loadCredentials(jobId: string | null): { jobId: string; password: string } | null {
+    if (!jobId) {
+      // 如果没有工号，则无法获取特定用户的凭据
       return null;
     }
 
     // 使用用户特定的键名
-    const storageKey = `${this.CREDENTIALS_KEY_PREFIX}${userName}`;
+    const storageKey = `${this.CREDENTIALS_KEY_PREFIX}${jobId}`;
     const encoded = localStorage.getItem(storageKey);
     if (!encoded) return null;
 
@@ -175,10 +180,11 @@ export class SstsSessionManager {
    * 清除当前用户的本地保存的凭证
    */
   static clearCredentials(): void {
-    const userName = this.getUserName();
-    if (userName) {
+    const jobId = this.getJobId();
+    console.log(jobId);
+    if (jobId) {
       // 只清除当前用户的凭据
-      localStorage.removeItem(`${this.CREDENTIALS_KEY_PREFIX}${userName}`);
+      localStorage.removeItem(`${this.CREDENTIALS_KEY_PREFIX}${jobId}`);
     }
   }
 
@@ -195,13 +201,10 @@ export class SstsSessionManager {
   }
 
   /**
-   * 清除会话信息，同时清除当前用户的凭证
+   * 清除会话信息，但不清除用户凭据
    */
   static clearSession(): void {
-    // 先清除当前用户的凭证
-    this.clearCredentials();
-
-    // 再清除会话信息
+    // 清除会话信息
     Object.values(this.SESSION_KEYS).forEach((key) => {
       sessionStorage.removeItem(key);
     });
@@ -213,11 +216,11 @@ export class SstsSessionManager {
    * @param onSuccess 登录成功回调
    * @param onFailure 登录失败回调
    * @param setLoading 设置加载状态的函数（可选）
-   * @returns Promise<{success: boolean, userName?: string, message?: string}>
+   * @returns Promise<{success: boolean, jobId?: string, message?: string}>
    */
   static async autoLoginWithCredentials(
     credentials: { jobId: string; password: string },
-    onSuccess?: (userName: string) => void,
+    onSuccess?: (userName: string, jobId: string) => void,
     onFailure?: () => void,
     setLoading?: (loading: boolean) => void,
   ) {
@@ -233,13 +236,13 @@ export class SstsSessionManager {
       if (result.success) {
         message.success('自动登录成功！');
 
-        // 调用成功回调
-        if (result.userName && onSuccess) {
-          onSuccess(result.userName);
+        // 调用成功回调，传递用户名和工号
+        if (onSuccess) {
+          const userName = this.getUserName() || '';
+          onSuccess(userName, result.jobId || credentials.jobId);
         }
       } else {
         message.error(result.message || '自动登录失败，请手动登录');
-        // 自动登录失败，调用失败回调
         if (onFailure) {
           onFailure();
         }
@@ -247,16 +250,10 @@ export class SstsSessionManager {
 
       return result;
     } catch (error) {
-      console.error('自动登录失败:', error);
-      message.error('自动登录失败，请手动登录');
-      // 自动登录失败，调用失败回调
-      if (onFailure) {
-        onFailure();
-      }
-      return {
-        success: false,
-        message: '登录过程中断，请稍后重试。',
-      };
+      console.error('自动登录过程中发生错误:', error);
+      message.error('登录过程中断，请稍后重试');
+      if (onFailure) onFailure();
+      return { success: false, message: '登录过程中断，请稍后重试' };
     } finally {
       hide();
       if (setLoading) setLoading(false);
@@ -273,8 +270,9 @@ export class SstsSessionManager {
    * @returns 当前会话是否有效
    */
   static async checkSessionAndAutoLogin(
+    jobId: string | null,
     setSessionValid: (valid: boolean) => void,
-    onSuccess?: (userName: string) => void,
+    onSuccess?: (userName: string, jobId: string) => void,
     onFailure?: () => void,
     setLoading?: (loading: boolean) => void,
   ) {
@@ -282,7 +280,7 @@ export class SstsSessionManager {
 
     // 如果会话失效且有保存的凭据，尝试自动重新登录
     if (!isValid) {
-      const savedCreds = this.loadCredentials();
+      const savedCreds = this.loadCredentials(jobId);
       if (savedCreds) {
         const loginResult = await this.autoLoginWithCredentials(
           savedCreds,
