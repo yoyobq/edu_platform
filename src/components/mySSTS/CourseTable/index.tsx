@@ -316,8 +316,11 @@ const CourseTable: React.FC<CourseTableProps> = ({
                       }
                     } else {
                       // 合并模式下的原有逻辑
-                      if (!course || course.isOccupied) {
+                      if (!course) {
                         return <td key={day} className={styles.emptyCell}></td>;
+                      }
+                      if (course.isOccupied) {
+                        return null;
                       }
                       return (
                         <td key={day} rowSpan={course.rowSpan} className={styles.courseContent}>
