@@ -11,6 +11,7 @@ export default {
   'menu.register-result': 'Register Result',
   'menu.MySSTS': 'MySSTS',
   'menu.MySSTS.log-mate': 'logMate',
+  'menu.MySSTS.plan-asst': 'PlanAssistant',
   'menu.dashboard': 'Dashboard',
   'menu.dashboard.analysis': 'Analysis',
   'menu.dashboard.monitor': 'Monitor',

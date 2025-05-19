@@ -86,12 +86,17 @@ export default [
       {
         // 这一条的意义在于二级菜单的的默认页
         path: '/MySSTS',
-        redirect: '/MySSTS/log-automate',
+        redirect: '/MySSTS/log-mate',
       },
       {
-        path: '/MySSTS/log-automate',
+        path: '/MySSTS/log-mate',
         name: 'log-mate',
-        component: './MySSTS/LogAutoMate',
+        component: './MySSTS/LogMate',
+      },
+      {
+        path: '/MySSTS/plan-asst',
+        name: 'plan-asst',
+        component: './MySSTS/PlanAsst',
       },
     ],
   },
@@ -177,6 +182,11 @@ export default [
         path: '/academic/adjunct-payment',
         name: 'external-adjunct-payment',
         component: './academic/AdjunctPayment',
+      },
+      {
+        path: '/academic/course-manager',
+        name: 'course-manager',
+        component: './academic/CourseManager',
       },
     ],
   },
