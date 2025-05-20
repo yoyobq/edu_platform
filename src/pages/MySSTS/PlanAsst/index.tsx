@@ -11,7 +11,8 @@ import { useModel } from '@umijs/max';
 import { Button, Card, Dropdown, message, Space, Spin, Tag, Tooltip, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { exportToExcel } from './components/ExcelExporter';
+// 移除静态导入
+// import { exportToExcel } from './components/ExcelExporter';
 import './style.less';
 
 // 将星期几转换为中文
@@ -331,6 +332,18 @@ const PlanAsst: React.FC = () => {
     }
   };
 
+  // 添加懒加载导出Excel的函数
+  const lazyExportToExcel = async (courseName: string, className: string, scheduleDetails: any) => {
+    try {
+      // 动态导入导出函数
+      const { exportToExcel } = await import('./components/ExcelExporter');
+      await exportToExcel(courseName, className, scheduleDetails);
+    } catch (error) {
+      console.error('导出Excel失败:', error);
+      message.error('导出Excel失败，请稍后重试');
+    }
+  };
+
   // 定义 ProTable 的列
   const columns: ProColumns<ProcessedCourse>[] = [
     {
@@ -490,7 +503,8 @@ const PlanAsst: React.FC = () => {
                     .then((detailData) => {
                       // 直接使用返回的详细数据，而不是从processedCourses中查找
                       if (detailData) {
-                        exportToExcel(
+                        // 使用懒加载的导出函数
+                        lazyExportToExcel(
                           record.courseName,
                           record.teachingClassName,
                           detailData.scheduleDetails,
@@ -533,8 +547,8 @@ const PlanAsst: React.FC = () => {
                     ),
                   );
 
-                  // 导出Excel
-                  exportToExcel(
+                  // 使用懒加载的导出Excel
+                  lazyExportToExcel(
                     record.courseName,
                     record.teachingClassName,
                     record.detailData.scheduleDetails,

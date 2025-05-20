@@ -1,6 +1,7 @@
 import { Button } from 'antd';
 import React from 'react';
-import * as XLSX from 'xlsx';
+// 移除静态导入
+// import * as XLSX from 'xlsx';
 
 interface ScheduleDetail {
   date: string;
@@ -23,6 +24,9 @@ export const exportToExcel = async (
   onExport?: () => void,
 ) => {
   try {
+    // 动态导入 xlsx 库
+    const XLSX = await import('xlsx');
+
     // 获取Excel模板文件
     const response = await fetch('/templates/xls/teaching-plan-template.xls');
     const templateArrayBuffer = await response.arrayBuffer();
