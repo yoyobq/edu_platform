@@ -7,22 +7,12 @@ import type { FlatCourseSchedule, TeachingDate } from '@/services/plan/types';
 import { DownOutlined, LoadingOutlined } from '@ant-design/icons';
 import type { ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import { useModel } from '@umijs/max'; // 用于访问全局状态管理的钩子
-import {
-  Alert,
-  Button,
-  Card,
-  Dropdown,
-  message,
-  Space,
-  Spin,
-  Tag,
-  Tooltip,
-  Typography,
-} from 'antd';
+import { useModel } from '@umijs/max';
+import { Button, Card, Dropdown, message, Space, Spin, Tag, Tooltip, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import './style.less'; // 引入样式文件，包含页面整体布局的样式
+import { exportToExcel } from './components/ExcelExporter';
+import './style.less';
 
 // 将星期几转换为中文
 const getDayOfWeekText = (day: number): string => {
@@ -83,21 +73,15 @@ const PlanAsst: React.FC = () => {
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [semester, setSemester] = useState<Semester | null>(null);
   const [semesterId, setSemesterId] = useState<number | null>(null);
-  const [jobId] = useState<number | null>(null);
-  const [staffIdState, setStaffId] = useState<number | null>(null); // 存储员工 ID
+  const [staffIdState, setStaffId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  // 添加课表数据状态
-  // const [scheduleData, setScheduleData] = useState<FlatCourseSchedule[]>([]);
-  // 添加教学日期状态
   const [teachingDates, setTeachingDates] = useState<TeachingDate[]>([]);
-  // 添加处理后的课程数据状态
   const [processedCourses, setProcessedCourses] = useState<ProcessedCourse[]>([]);
 
   // 使用 useEffect 初始化 staffId
   useEffect(() => {
     if (staffId) {
       setStaffId(staffId);
-      console.log('员工ID已设置:', staffId);
     }
   }, [staffId]);
 
@@ -127,10 +111,8 @@ const PlanAsst: React.FC = () => {
 
     setLoading(true);
 
-    // 处理 staffId 和 jobId，确保类型正确
+    // 处理 staffId，确保类型正确
     const effectiveStaffId = staffIdState === null ? undefined : staffIdState;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const effectiveJobId = jobId === null ? undefined : jobId;
 
     // 处理课表数据，将相同scheduleId的课程合并
     const processScheduleData = (data: FlatCourseSchedule[]) => {
@@ -174,12 +156,11 @@ const PlanAsst: React.FC = () => {
       // 转换为数组
       const processed = Array.from(courseMap.values());
       setProcessedCourses(processed);
-      console.log('处理后的课程数据:', processed);
     };
+
     // 从后台获取数据
     getFullScheduleByStaff({
       staffId: effectiveStaffId,
-      // jobId: effectiveJobId,
       semesterId,
     })
       .then((res) => {
@@ -192,21 +173,18 @@ const PlanAsst: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [semesterId, staffIdState, jobId]); // 添加依赖项
+  }, [semesterId, staffIdState]);
 
   // 当学期变更时，清空教学日期数据
   const handleSemesterChange = useCallback((newSemester: Semester) => {
     // 清理相关状态数据
     setLoading(true);
-    // setScheduleData([]); // 清空课表数据
-    setProcessedCourses([]); // 清空处理后的课程数据
-    setTeachingDates([]); // 清空教学日期数据，这样切换学期后会重新获取
+    setProcessedCourses([]);
+    setTeachingDates([]);
 
     // 更新学期信息
     setSemesterId(newSemester.id);
     setSemester(newSemester);
-    console.log('学期已切换:', newSemester);
-    // 这里可以添加其他与学期相关的数据加载逻辑
 
     setLoading(false);
   }, []);
@@ -251,16 +229,10 @@ const PlanAsst: React.FC = () => {
         const teachingDateInput = {
           semesterId: semesterId!,
           staffId: staffIdState!,
-          // 不需要提供 weeks 参数，获取所有周次的数据
         };
 
         const teachingDateData = await getActualTeachingDates(teachingDateInput);
-        console.log('获取到的教学日期数据:', teachingDateData);
-
-        // 保存教学日期数据到state中
         setTeachingDates(teachingDateData);
-
-        // 使用刚获取的数据，而不是等待状态更新
         currentTeachingDates = teachingDateData;
       }
 
@@ -295,7 +267,7 @@ const PlanAsst: React.FC = () => {
         if (num >= 1 && num <= 10) {
           return chineseNumbers[num - 1];
         }
-        return num.toString(); // 超出范围返回原数字
+        return num.toString();
       };
 
       // 将节次范围转换为详细列表（如 "1-3" 转换为 "第一节，第二节，第三节"）
@@ -312,19 +284,26 @@ const PlanAsst: React.FC = () => {
         scheduleDetails: courseTeachingDates.flatMap((date) => {
           // 将每个时间段单独作为一条记录
           return date.courses.map(
-            (course: { periodStart: number; periodEnd: number; weekType: string }) => ({
-              week: date.week,
-              date: date.date,
-              content: `${getDayOfWeekText(date.weekOfDay)} ${periodRangeToDetailedList(course.periodStart, course.periodEnd)}${
-                course.weekType !== 'ALL'
-                  ? course.weekType === 'ODD'
-                    ? '(单周)'
-                    : course.weekType === 'EVEN'
-                      ? '(双周)'
-                      : ''
-                  : ''
-              }`,
-            }),
+            (course: { periodStart: number; periodEnd: number; weekType: string }) => {
+              // 计算学时数 - 根据课程节次计算
+              const periodCount = course.periodEnd - course.periodStart + 1;
+              const hours = periodCount > 0 ? periodCount : 2;
+
+              return {
+                week: date.week,
+                date: date.date,
+                content: `${getDayOfWeekText(date.weekOfDay)} ${periodRangeToDetailedList(course.periodStart, course.periodEnd)}${
+                  course.weekType !== 'ALL'
+                    ? course.weekType === 'ODD'
+                      ? '(单周)'
+                      : course.weekType === 'EVEN'
+                        ? '(双周)'
+                        : ''
+                    : ''
+                }`,
+                hours: hours,
+              };
+            },
           );
         }),
       };
@@ -337,6 +316,9 @@ const PlanAsst: React.FC = () => {
             : item,
         ),
       );
+
+      // 返回详细数据，这样调用者可以直接使用
+      return detailData;
     } catch (error) {
       console.error('获取详细数据失败:', error);
       // 更新加载状态
@@ -345,27 +327,36 @@ const PlanAsst: React.FC = () => {
           item.scheduleId === record.scheduleId ? { ...item, detailLoading: false } : item,
         ),
       );
+      throw error;
     }
   };
 
   // 定义 ProTable 的列
   const columns: ProColumns<ProcessedCourse>[] = [
     {
+      title: '序号',
+      dataIndex: 'index',
+      key: 'index',
+      width: '5%',
+      search: false,
+      className: 'column-index',
+      render: (_, __, index) => index + 1,
+    },
+    {
       title: '课程名称',
       dataIndex: 'courseName',
       key: 'courseName',
+      width: '24%',
       search: false,
       render: (_, record) => {
-        const { text: categoryText, color } = getCategoryInfo(record.courseCategory);
+        const { text: categoryText } = getCategoryInfo(record.courseCategory);
         return (
-          <div>
-            <div style={{ fontWeight: 'bold' }}>{record.courseName}</div>
-            <div style={{ fontSize: '12px', color: '#666' }}>{record.teachingClassName}</div>
-            <div>
-              <Tag style={{ marginLeft: '4px' }} color={color}>
-                {categoryText}
-              </Tag>
-            </div>
+          <div
+            className={`courseCell ${record.courseCategory === 'THEORY' ? 'theoryPracticeCourse' : record.courseCategory === 'INTEGRATED' ? 'integratedCourse' : 'otherCourse'}`}
+          >
+            <div className="course-name">{record.courseName}</div>
+            <div className="teaching-class">{record.teachingClassName}</div>
+            <div className="courseWatermark">{categoryText}</div>
           </div>
         );
       },
@@ -374,8 +365,9 @@ const PlanAsst: React.FC = () => {
       title: '学分',
       dataIndex: 'credits',
       key: 'credits',
-      width: '8%',
+      width: '6%',
       search: false,
+      className: 'column-credits',
     },
     {
       title: (
@@ -388,6 +380,7 @@ const PlanAsst: React.FC = () => {
       key: 'weeklyHours',
       width: '12%',
       search: false,
+      className: 'column-hours',
       render: (_, record) => {
         // 计算总学时 = 周学时 × 周数
         const totalHours = record.weeklyHours * record.weekCount;
@@ -400,19 +393,17 @@ const PlanAsst: React.FC = () => {
     },
     {
       title: '上课时间',
-      width: '18%',
+      width: '12%',
       key: 'timeSlots',
+      className: 'column-index',
       search: false,
       render: (_, record) => (
         <>
           {record.timeSlots.map((slot, index) => (
-            <div
-              key={index}
-              style={{ marginBottom: index < record.timeSlots.length - 1 ? '8px' : 0 }}
-            >
+            <div key={index} className="time-slot">
               {getDayOfWeekText(slot.dayOfWeek)} 第{slot.periodStart}-{slot.periodEnd}节
               {slot.weekType !== 'ALL' && (
-                <Tag style={{ marginLeft: '4px' }} color="blue">
+                <Tag className="time-slot-tag" color="blue">
                   {slot.weekType === 'ODD'
                     ? '单周'
                     : slot.weekType === 'EVEN'
@@ -431,17 +422,18 @@ const PlanAsst: React.FC = () => {
       key: 'weekNumberString',
       width: '12%',
       search: false,
+      className: 'column-weeks',
       render: (_, record) => (
         <Tooltip title={record.weekNumberString}>
           <span>{parseWeekNumberString(record.weekNumberString)}</span>
         </Tooltip>
       ),
     },
-    // 添加操作列，用于展示详情按钮
     {
       title: '操作',
       key: 'action',
-      width: '20%',
+      width: '15%',
+      className: 'column-index',
       search: false,
       render: (_, record) => {
         if (record.detailLoading) {
@@ -480,18 +472,88 @@ const PlanAsst: React.FC = () => {
             <Button
               type="primary"
               size="middle"
+              loading={record.excelLoading}
               onClick={() => {
-                // 这里添加生成模板的逻辑
-                console.log('生成模板', record);
-                // 如果需要先获取详细数据
+                // 如果没有详细数据且不在加载中，则获取详细数据
                 if (!record.detailData && !record.detailLoading) {
-                  fetchDetailData(record);
+                  // 设置加载状态
+                  setProcessedCourses((prev) =>
+                    prev.map((item) =>
+                      item.scheduleId === record.scheduleId
+                        ? { ...item, detailLoading: true, excelLoading: true }
+                        : item,
+                    ),
+                  );
+
+                  // 获取详细数据
+                  fetchDetailData(record)
+                    .then((detailData) => {
+                      // 直接使用返回的详细数据，而不是从processedCourses中查找
+                      if (detailData) {
+                        exportToExcel(
+                          record.courseName,
+                          record.teachingClassName,
+                          detailData.scheduleDetails,
+                        );
+                      }
+
+                      // 导出完成后，取消加载状态
+                      setProcessedCourses((prev) =>
+                        prev.map((item) =>
+                          item.scheduleId === record.scheduleId
+                            ? { ...item, excelLoading: false }
+                            : item,
+                        ),
+                      );
+                    })
+                    .catch(() => {
+                      // 出错时也需要取消加载状态
+                      setProcessedCourses((prev) =>
+                        prev.map((item) =>
+                          item.scheduleId === record.scheduleId
+                            ? { ...item, excelLoading: false }
+                            : item,
+                        ),
+                      );
+                    });
+
+                  // 如果是一体化课程，显示提示信息
+                  if (record.courseCategory === 'INTEGRATED') {
+                    message.warning(
+                      '一体化课程课程安排需要任课老师自行敲定，此处仅列出按理论课排课规则的上课时间。',
+                    );
+                  }
+                } else if (record.detailData) {
+                  // 如果已有详细数据，设置加载状态并导出Excel
+                  setProcessedCourses((prev) =>
+                    prev.map((item) =>
+                      item.scheduleId === record.scheduleId
+                        ? { ...item, excelLoading: true }
+                        : item,
+                    ),
+                  );
+
+                  // 导出Excel
+                  exportToExcel(
+                    record.courseName,
+                    record.teachingClassName,
+                    record.detailData.scheduleDetails,
+                  );
+
+                  // 导出完成后，取消加载状态
+                  setTimeout(() => {
+                    setProcessedCourses((prev) =>
+                      prev.map((item) =>
+                        item.scheduleId === record.scheduleId
+                          ? { ...item, excelLoading: false }
+                          : item,
+                      ),
+                    );
+                  }, 500); // 短暂延迟以确保用户能看到加载状态
                 }
-                // 然后可以调用生成模板的函数
-                // generateExcelTemplate(record);
               }}
             >
-              生成Excel模板
+              生成Excel
             </Button>
           </Space>
         );
@@ -500,7 +562,7 @@ const PlanAsst: React.FC = () => {
   ];
 
   return (
-    <>
+    <div className="container">
       <Card className="header-card">
         <div className="header-content">
           <Typography.Title level={4} className="page-title">
@@ -518,109 +580,72 @@ const PlanAsst: React.FC = () => {
           </div>
         </div>
       </Card>
-      {/* 使用 ProTable 替换原来的 Table */}
-      <Card style={{ marginTop: 16 }}>
-        <ProTable<ProcessedCourse>
-          rowKey="scheduleId"
-          columns={columns}
-          dataSource={processedCourses}
-          loading={loading}
-          search={false}
-          options={false}
-          pagination={false}
-          bordered
-          cardProps={{ bodyStyle: { padding: 0 } }}
-          toolBarRender={false}
-          expandable={{
-            // 恢复默认的展开图标和点击行为
-            expandRowByClick: false, // 禁用点击行展开，只通过图标或按钮展开
-            expandedRowKeys: processedCourses
-              .filter((course) => course.expanded)
-              .map((course) => course.scheduleId),
-            // 自定义展开图标（可选，如果想要自定义图标样式）
-            // expandIcon: ({ expanded, onExpand, record }) => {
-            //   return expanded ? (
-            //     <MinusOutlined onClick={e => onExpand(record, e)} />
-            //   ) : (
-            //     <PlusOutlined onClick={e => onExpand(record, e)} />
-            //   );
-            // },
-            onExpand: (expanded, record) => {
-              // 如果展开且没有详细数据，则获取详细数据
-              if (expanded && !record.detailData && !record.detailLoading) {
-                fetchDetailData(record);
-              }
+      <ProTable<ProcessedCourse>
+        rowKey="scheduleId"
+        columns={columns}
+        dataSource={processedCourses}
+        loading={loading}
+        search={false}
+        options={false}
+        pagination={false}
+        bordered
+        cardProps={{ bodyStyle: { padding: 0 } }}
+        toolBarRender={false}
+        expandable={{
+          expandedRowKeys: processedCourses
+            .filter((item) => item.expanded)
+            .map((item) => item.scheduleId),
+          expandedRowRender: (record) => {
+            if (!record.detailData) {
+              return <Spin tip="加载中..." />;
+            }
+            return (
+              <div className="detail-container">
+                <table className="detail-table">
+                  <thead>
+                    <tr>
+                      <th className="auxiliary">周次</th>
+                      <th className="auxiliary">周天</th>
+                      <th>授课时间</th>
+                      <th>学时数</th>
+                      <th>节次</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {record.detailData.scheduleDetails.map(
+                      (
+                        detail: { week: number; date: string; content: string; hours: number },
+                        index: number,
+                      ) => {
+                        // 从content中提取周几信息
+                        const weekdayMatch = detail.content.match(/^(周[一二三四五六日])/);
+                        const weekday = weekdayMatch ? weekdayMatch[1] : '';
+                        // 从content中移除周几信息，只保留节次信息
+                        const contentWithoutWeekday = detail.content.replace(
+                          /^周[一二三四五六日]\s/,
+                          '',
+                        );
 
-              // 更新展开状态
-              setProcessedCourses((prev) =>
-                prev.map((item) =>
-                  item.scheduleId === record.scheduleId ? { ...item, expanded } : item,
-                ),
-              );
-            },
-            // 展开行的内容
-            expandedRowRender: (record) => {
-              // 如果正在加载，显示加载状态
-              if (record.detailLoading) {
-                return (
-                  <div style={{ padding: '20px', textAlign: 'center' }}>
-                    <Spin tip="加载中..." />
-                  </div>
-                );
-              }
-
-              // 如果有详细数据，显示详细数据
-              if (record.detailData) {
-                // 判断是否为一体化课程
-                const isIntegratedCourse = record.courseCategory === 'INTEGRATED';
-
-                return (
-                  <div style={{ padding: '10px 20px' }}>
-                    {/* 为一体化课程添加警告信息 */}
-                    {isIntegratedCourse && (
-                      <Alert
-                        message="一体化课程课程安排需要任课老师自行敲定，无法根据课程表直接计算授课时间，此处仅列出按理论课排课规则的上课时间。"
-                        type="warning"
-                        showIcon
-                        className="warning-message"
-                      />
+                        return (
+                          <tr key={`${detail.date}-${index}`}>
+                            <td className="center auxiliary">第{detail.week}周</td>
+                            <td className="center auxiliary">{weekday}</td>
+                            <td>{detail.date}</td>
+                            <td className="center">{detail.hours}</td>
+                            <td>{contentWithoutWeekday}</td>
+                          </tr>
+                        );
+                      },
                     )}
-
-                    <table className="detail-table">
-                      <thead>
-                        <tr>
-                          <th>授课时间</th>
-                          <th>学时数</th>
-                          <th>节次</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {record.detailData.scheduleDetails.map(
-                          (detail: { date: string; content: string }, index: number) => (
-                            <tr key={`${detail.date}-${index}`}>
-                              <td>{detail.date}</td>
-                              <td>2</td>
-                              <td>{detail.content.replace(/周[一二三四五六日]\s/, '')}</td>
-                            </tr>
-                          ),
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              }
-
-              // 如果没有详细数据，显示提示信息
-              return (
-                <div style={{ padding: '20px', textAlign: 'center' }}>
-                  <p>暂无详细数据，请点击查看详情按钮获取。</p>
-                </div>
-              );
-            },
-          }}
-        />
-      </Card>
-    </>
+                  </tbody>
+                </table>
+              </div>
+            );
+          },
+          showExpandColumn: false, // 隐藏展开按钮列
+        }}
+      />
+    </div>
   );
 };
 

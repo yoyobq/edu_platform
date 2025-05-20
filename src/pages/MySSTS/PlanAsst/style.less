@@ -3,6 +3,24 @@
   padding: 16px;
   background-color: #f0f2f5;
   min-height: calc(100vh - 48px);
+  margin: 0 auto;
+
+  // 媒体查询：小屏幕铺满，大屏幕占80%
+  @media (max-width: 960px) {
+    width: 100%;
+  }
+
+  @media (min-width: 961px) {
+    width: 90%;
+    max-width: 1200px; // 设置最大宽度，避免在超大屏幕上过宽
+  }
+}
+
+// 头部卡片和表格也应用相同的宽度
+.header-card,
+.ant-pro-table {
+  width: 100%;
+  margin: 0 auto;
 }
 
 // 头部卡片样式
@@ -32,16 +50,64 @@
   margin-top: 16px;
 }
 
+// 辅助数据列样式
+.auxiliary-data {
+  background-color: #fafafa;
+  color: #999;
+  font-size: 0.9em;
+}
+
 // 详情表格样式
 .detail-table {
   width: 100%;
   border-collapse: collapse;
-}
+  table-layout: fixed;
 
-.detail-table th,
-.detail-table td {
-  border: 1px solid #f0f0f0;
-  padding: 8px;
+  th,
+  td {
+    border: 1px solid #f0f0f0;
+    padding: 8px;
+    word-break: break-word;
+  }
+
+  th {
+    background-color: #fafafa;
+    font-weight: bold;
+  }
+
+  td.center {
+    text-align: center;
+  }
+
+  // 辅助数据列样式
+  th.auxiliary,
+  td.auxiliary {
+    background-color: #fafafa;
+    color: #999;
+    font-size: 0.9em;
+  }
+
+  // 列宽设置
+  th:nth-child(1),
+  td:nth-child(1) {
+    width: 10%;
+  } // 周次
+  th:nth-child(2),
+  td:nth-child(2) {
+    width: 10%;
+  } // 周几
+  th:nth-child(3),
+  td:nth-child(3) {
+    width: 20%;
+  } // 授课时间
+  th:nth-child(4),
+  td:nth-child(4) {
+    width: 10%;
+  } // 学时数
+  th:nth-child(5),
+  td:nth-child(5) {
+    width: 50%;
+  } // 节次
 }
 
 // 警告信息样式
@@ -51,4 +117,400 @@
   padding: 8px 12px;
   border-radius: 4px;
   margin-bottom: 12px;
+}
+
+// 信息卡片样式
+.infoCard {
+  margin-bottom: 16px;
+}
+
+// 信息容器样式
+.infoContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+// 教师信息样式
+.teacherInfo {
+  display: flex;
+  align-items: center;
+}
+
+// 内容填充样式
+.contentPadding {
+  height: 20px;
+}
+
+// 工作量表格样式
+.workloadTable {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.workloadTable table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #f0f0f0;
+}
+
+.workloadTable th,
+.workloadTable td {
+  border: 1px solid #f0f0f0;
+  padding: 8px;
+  text-align: center;
+}
+
+.workloadTable th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.workloadNoteText {
+  font-size: 12px;
+  color: #999;
+  margin-left: 8px;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.oddRow {
+  background-color: #f9f9f9;
+}
+
+.noData {
+  text-align: center;
+  padding: 16px;
+  color: #999;
+}
+
+// 课程单元格样式
+.courseCell {
+  padding: 4px;
+  border-radius: 4px;
+  position: relative;
+  min-height: 60px;
+  overflow: hidden;
+}
+
+// 课程名称样式
+.course-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 1.2em;
+}
+
+// 教学班级样式
+.teaching-class {
+  font-size: 0.9em;
+  margin-bottom: 2px;
+  color: #666;
+}
+
+// 类别标签样式
+.category-tag {
+  margin-right: 4px;
+}
+
+// 时间段样式
+.time-slot {
+  margin-bottom: 4px;
+  display: block;
+}
+
+// 时间段标签样式
+.time-slot-tag {
+  margin-left: 4px;
+}
+
+.courseRoom {
+  font-size: 12px;
+  color: #666;
+}
+
+.courseWatermark {
+  position: absolute;
+  overflow: hidden;
+  bottom: 1.2vh;
+  right: 0.1vw;
+  font-size: 1.5rem;
+  font-weight: bold;
+  white-space: nowrap;
+  transform: rotate(-30deg);
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+  overflow: hidden;
+}
+
+/* 课程类型颜色定义 */
+.otherCourse {
+  .courseWatermark {
+    color: rgba(82, 196, 26, 0.1);
+  }
+}
+
+.theoryPracticeCourse {
+  .courseWatermark {
+    color: rgba(24, 144, 255, 0.1);
+  }
+}
+
+.integratedCourse {
+  .courseWatermark {
+    color: rgba(250, 140, 22, 0.1);
+  }
+}
+
+// 课程类型样式
+.integratedCourse {
+  background-color: rgba(250, 219, 216, 0.3);
+}
+
+.theoryPracticeCourse {
+  background-color: rgba(212, 230, 241, 0.3);
+}
+
+.otherCourse {
+  background-color: rgba(235, 237, 239, 0.3);
+}
+
+// 日历视图样式
+.calendarContainer {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendarHeader {
+  background-color: #1890ff;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+}
+
+.calendarBody {
+  display: flex;
+  padding: 16px;
+  background-color: white;
+}
+
+.dayNumber {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+}
+
+.dayValue {
+  font-size: 36px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.monthValue {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.weekInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.weekday {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.weekProgressContainer {
+  width: 100%;
+}
+
+.weekProgressBar {
+  margin-bottom: 0;
+}
+
+.calendarFooter {
+  background-color: #f5f5f5;
+  padding: 8px 16px;
+  text-align: center;
+  position: relative;
+}
+
+.seasonWatermark {
+  position: absolute;
+  right: 16px;
+  bottom: 8px;
+  font-size: 24px;
+  opacity: 0.5;
+}
+
+.year {
+  font-size: 16px;
+}
+
+// 日历视图卡片样式
+.basicInfoCard {
+  height: 100%;
+}
+
+// 日程列表卡片样式
+.scheduleListCard {
+  height: 100%;
+}
+
+// 返回导航样式
+.backNavigation {
+  margin-bottom: 16px;
+}
+
+// 浮动返回按钮样式
+.floatBackButton {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .floatBackButton {
+    display: block;
+  }
+  .backNavigation {
+    display: none;
+  }
+}
+
+// 周数选择器样式
+.week-range-card {
+  margin-bottom: 8px;
+}
+
+.week-range-card .ant-card-body {
+  padding: 12px 16px;
+}
+
+.week-range-text {
+  margin-left: 8px;
+  font-weight: normal;
+}
+
+.slider-container {
+  margin-top: 16px;
+}
+
+.slider-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.date-hint {
+  font-size: 12px;
+  color: #999;
+}
+
+// 扣课日期标签样式
+.cancelled-dates-container {
+  margin: 8px 0;
+}
+
+.date-tag {
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.date-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+// 数据表格样式
+.data-table-card .ant-card-body {
+  padding: 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+// 外聘教师兼课表格样式
+.adjunct-payment-table .ant-table-thead > tr > th {
+  background-color: #f0f2f5;
+  font-weight: 700;
+}
+
+.adjunct-payment-table .ant-table-sticky-header {
+  z-index: 2;
+}
+
+.adjunct-payment-table .ant-table-body {
+  max-height: 55vh;
+  overflow-y: auto !important;
+}
+
+// 不可选择的输入框样式
+.no-select-input-wrapper {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.no-select-input-wrapper .ant-input-number-input {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.no-select-input-wrapper * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+// 日期注释样式
+.date-note-text {
+  color: #ff4d4f;
+}
+
+// 表格表头居中样式
+.ant-table-thead > tr > th {
+  text-align: center !important;
+}
+
+// 序号列居中
+.column-index {
+  text-align: center;
+}
+
+// 学分列居中
+.column-credits {
+  text-align: center;
+}
+
+// 学时列居中
+.column-hours {
+  text-align: center;
+}
+
+// 周次列居中
+.column-weeks {
+  text-align: center;
 }

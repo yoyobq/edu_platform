@@ -59,7 +59,8 @@
     "react-markdown": "^9.0.1",
     "remark-gfm": "^4.0.0",
     "stylelint": "^16.10.0",
-    "swagger-ui-dist": "^5.18.2"
+    "swagger-ui-dist": "^5.18.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^3.3.0",

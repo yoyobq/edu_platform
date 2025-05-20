@@ -32,6 +32,7 @@ interface ProcessedCourse {
   expanded?: boolean;
   detailData?: any;
   detailLoading?: boolean;
+  excelLoading?: boolean; // 添加Excel导出加载状态
 }
 
 // 定义详细数据的接口
