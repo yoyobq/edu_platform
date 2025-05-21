@@ -120,10 +120,7 @@ const Login: React.FC = () => {
       <div className="welcome-content-container">
         <div>
           <div className="platform-logo">
-            <img
-              src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg"
-              alt="平台Logo"
-            />
+            <img src="/logo.svg" alt="平台Logo" />
             <span>Edu Platform</span>
           </div>
 
