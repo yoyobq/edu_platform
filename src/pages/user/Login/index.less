@@ -84,6 +84,7 @@
 .login-form-col {
   margin-bottom: 18px;
   min-width: 440px;
+  max-width: 460px !important; // 添加最大宽度限制
 
   .ant-pro-form-login-container {
     margin: 0 auto;
@@ -106,7 +107,7 @@
 .welcome-col {
   height: 100%;
 
-  @media screen and (min-width: 992px) and (max-width: 1200px) {
+  @media screen and (min-width: 992px) and (max-width: 1270px) {
     flex: 0 0 50% !important;
     max-width: 50% !important;
   }
@@ -540,6 +541,7 @@ footer {
   }
 }
 
+// 修改媒体查询断点，确保1150px到1270px之间保持左右布局
 @media screen and (max-width: 1150px) {
   .welcome-content {
     display: none;
@@ -578,9 +580,61 @@ footer {
   }
 }
 
+// 添加新的媒体查询，专门处理1150px到1270px之间的情况
+@media screen and (min-width: 1151px) and (max-width: 1270px) {
+  .welcome-col {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    display: block !important;
+  }
+
+  .login-form-col {
+    flex: 0 0 50% !important;
+    max-width: 460px !important;
+    min-width: 440px;
+  }
+
+  .login-row {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+}
+
 @media screen and (max-width: 1250px) {
   .info-cards-container {
     display: none !important; // 添加!important确保样式优先级
+  }
+
+  // 添加对welcome-col的宽度控制
+  .welcome-col {
+    max-width: 60% !important;
+  }
+
+  // 添加对login-form-col的宽度控制
+  .login-form-col {
+    flex: 0 0 40% !important; // 减少login部分的宽度
+    max-width: 460px !important; // 确保最大宽度不超过460px
+  }
+
+  // 确保welcome卡片内容适应较小空间
+  .welcome-card {
+    height: auto;
+  }
+
+  .welcome-content-container {
+    padding: 24px;
+  }
+
+  .platform-title {
+    font-size: 28px;
+    margin-bottom: 16px;
+    margin-top: 16px;
+  }
+
+  .platform-description {
+    font-size: 14px;
+    margin-bottom: 20px;
   }
 }
 
@@ -594,39 +648,32 @@ footer {
   }
 
   .login-form-col {
-    max-width: 460px !important;
+    max-width: 460px !important; // 确保最大宽度不超过460px
   }
 }
 
 @media screen and (min-width: 1251px) {
   .welcome-col {
-    flex: 0 0 65% !important;
-    max-width: 65% !important;
+    // flex: 0 0 60% !important; // 增加welcome部分的宽度
+    max-width: 60% !important;
   }
 
   .login-form-col {
-    flex: 0 0 35% !important;
-    max-width: 35% !important;
-  }
-}
-
-@media screen and (min-width: 769px) and (max-width: 1484px) {
-  .login-form-col {
+    flex: 0 0 40% !important; // 减少login部分的宽度
+    max-width: 460px !important; // 确保最大宽度不超过460px
     min-width: 440px;
   }
 
-  .welcome-col {
-    flex: 0 0 55% !important;
-    max-width: 55% !important;
+  .info-cards-container {
+    flex-wrap: wrap;
+    gap: 16px;
   }
 
-  .login-form-col {
-    flex: 0 0 45% !important;
-    max-width: 45% !important;
+  .info-card {
+    min-width: 200px;
   }
 }
 
-// 超小屏幕 - 允许登录表单自适应
 @media screen and (max-width: 500px) {
   .login-form-col {
     width: 100% !important;
