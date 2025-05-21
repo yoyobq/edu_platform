@@ -18,31 +18,41 @@ const Footer: React.FC = () => {
         position: 'fixed',
         bottom: 0,
         width: '100%',
-        margin: '0 to',
+        margin: 0,
         marginBlockStart: 0,
         marginBlockEnd: 0,
+        fontSize: '14px',
+        color: 'rgba(0, 0, 0, 0.65)',
+        fontWeight: 400,
+        textAlign: 'center',
+        padding: '12px 0',
+        // backdropFilter: 'blur(8px)',
+        // backgroundColor: 'rgba(255, 255, 255, 0.6)',
+        // boxShadow: '0 -1px 2px rgba(0, 0, 0, 0.03)',
       }}
-      copyright={`${currentYear} ${defaultMessage}`}
-      // links={[
-      //   {
-      //     key: 'Ant Design Pro',
-      //     title: 'Ant Design Pro',
-      //     href: 'https://pro.ant.design',
-      //     blankTarget: true,
-      //   },
-      //   {
-      //     key: 'github',
-      //     title: <GithubOutlined />,
-      //     href: 'https://github.com/ant-design/ant-design-pro',
-      //     blankTarget: true,
-      //   },
-      //   {
-      //     key: 'Ant Design',
-      //     title: 'Ant Design',
-      //     href: 'https://ant.design',
-      //     blankTarget: true,
-      //   },
-      // ]}
+      copyright={`${currentYear} ${defaultMessage} - 智能教辅平台`}
+      links={
+        [
+          // {
+          //   key: 'Ant Design Pro',
+          //   title: 'Ant Design Pro',
+          //   href: 'https://pro.ant.design',
+          //   blankTarget: true,
+          // },
+          // {
+          //   key: 'github',
+          //   title: <GithubOutlined />,
+          //   href: 'https://github.com/ant-design/ant-design-pro',
+          //   blankTarget: true,
+          // },
+          // {
+          //   key: 'Ant Design',
+          //   title: 'Ant Design',
+          //   href: 'https://ant.design',
+          //   blankTarget: true,
+          // },
+        ]
+      }
     />
   );
 };

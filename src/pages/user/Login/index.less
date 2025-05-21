@@ -19,3 +19,855 @@
 .rc-slider-captcha-control-button {
   border-radius: 8px; /* 仿 antd pro */
 }
+
+// 响应式布局样式
+@media screen and (max-width: 1150px) {
+  .welcome-content {
+    display: none;
+  }
+}
+
+// 登录页面布局
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10vh 2vw;
+}
+
+.login-row {
+  width: 90%;
+  max-width: 1200px;
+}
+
+.login-form-col {
+  margin-bottom: 18px;
+  min-width: 440px;
+}
+
+.welcome-col {
+  height: 100%;
+
+  @media screen and (min-width: 992px) and (max-width: 1200px) {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+  }
+}
+
+// 增强卡片悬浮效果
+.info-card {
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+}
+
+// 欢迎卡片样式
+.welcome-card {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0) 100%);
+    z-index: 0;
+  }
+}
+
+// 登录表单样式优化
+.login-form-col {
+  .ant-pro-form-login-container {
+    margin: 0 auto;
+  }
+
+  .ant-input-affix-wrapper {
+    border-radius: 8px;
+  }
+
+  .ant-btn {
+    transition: all 0.3s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+    }
+  }
+}
+
+// 响应式布局优化
+@media screen and (max-width: 1110px) {
+  .login-row {
+    width: 95%;
+  }
+
+  .login-form-col {
+    min-width: 100%;
+  }
+
+  .login-card {
+    min-width: 100%;
+  }
+}
+
+@media screen and (max-width: 1250px) {
+  .info-cards-container {
+    display: none !important; // 添加!important确保样式优先级
+  }
+}
+
+// 在中等屏幕尺寸下隐藏InfoCard
+@media screen and (min-width: 1110px) and (max-width: 1250px) {
+  .info-cards-container {
+    display: none !important; // 添加!important确保样式优先级
+  }
+
+  .welcome-content-container {
+    justify-content: flex-start;
+  }
+
+  .platform-description {
+    margin-bottom: 0;
+  }
+
+  .login-form-col {
+    // flex: 0 0 45% !important;
+    max-width: 440px !important;
+  }
+}
+
+@media screen and (min-width: 1251px) {
+  .welcome-col {
+    flex: 0 0 65% !important;
+    max-width: 65% !important;
+  }
+
+  .login-form-col {
+    flex: 0 0 35% !important;
+    max-width: 35% !important;
+  }
+}
+
+@media screen and (min-width: 769px) and (max-width: 1484px) {
+  .login-form-col {
+    min-width: 440px;
+  }
+
+  .welcome-col {
+    flex: 0 0 55% !important;
+    max-width: 55% !important;
+  }
+
+  .login-form-col {
+    flex: 0 0 45% !important;
+    max-width: 45% !important;
+  }
+}
+
+// 现代化登录页面样式
+:root {
+  --primary-color: #1976d2;
+  --primary-light: #42a5f5;
+  --primary-dark: #1a237e;
+  --secondary-color: #e91e63;
+  --text-primary: #1a237e;
+  --text-secondary: #455a64;
+  --background-light: #f5f7fa;
+  --background-dark: #c3cfe2;
+  --card-background: rgba(255, 255, 255, 0.95);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+// 滑块验证码样式优化
+.rc-slider-captcha [class^='rc-slider-captcha-control'],
+.rc-slider-captcha-control-button {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.slider-captcha {
+  .rc-slider-captcha-control-button {
+    background: linear-gradient(to right, var(--primary-light), var(--primary-color));
+    color: white;
+    font-weight: 500;
+    // transition: all 0.3s;
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    }
+  }
+
+  .rc-slider-captcha-control-bg {
+    background-color: #f5f7fa;
+  }
+}
+
+// 欢迎卡片装饰元素
+.welcome-card {
+  position: relative;
+
+  .welcome-decoration-top {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    z-index: 0;
+  }
+}
+
+// 平台Logo样式
+.platform-logo {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+  }
+
+  span {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--primary-dark);
+    letter-spacing: 1px;
+  }
+}
+
+// 信息卡片容器
+.info-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+// 信息卡片样式
+.info-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 22px;
+  padding: 24px;
+  min-width: 220px;
+  flex: 1;
+  transition: all 0.3s;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+
+    .card-decoration {
+      opacity: 0.2;
+    }
+  }
+
+  .card-decoration {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background-image: radial-gradient(
+      circle at top right,
+      rgba(33, 150, 243, 0.1),
+      transparent 70%
+    );
+    z-index: 0;
+  }
+
+  .info-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+
+    .info-card-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background-color: #1890ff;
+      margin-right: 16px;
+      box-shadow: 0 6px 16px rgba(24, 144, 255, 0.3);
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .info-card-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1a237e;
+    }
+  }
+
+  .info-card-content {
+    font-size: 16px;
+    color: #455a64;
+    text-align: justify;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// 信息卡片容器
+.info-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+// 注册按钮悬浮效果
+.register-button {
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 20px rgba(33, 150, 243, 0.4);
+  }
+}
+
+// 登录卡片样式
+.login-card {
+  position: relative;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: none;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  min-width: 440px; // 设置最小宽度，防止出现滚动条
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 100px;
+    height: 100px;
+    background-image: radial-gradient(
+      circle at top right,
+      rgba(33, 150, 243, 0.2),
+      transparent 70%
+    );
+    border-radius: 50%;
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -30px;
+    width: 150px;
+    height: 150px;
+    background-image: radial-gradient(
+      circle at bottom left,
+      rgba(233, 30, 99, 0.1),
+      transparent 70%
+    );
+    border-radius: 50%;
+    z-index: 0;
+  }
+}
+
+// 欢迎卡片样式
+.welcome-card {
+  border-radius: 16px;
+  overflow: hidden;
+  background-image: linear-gradient(120deg, #e0f7fa 0%, #f3e5f5 100%);
+  height: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  border: none;
+  position: relative;
+}
+
+// 欢迎卡片内容容器
+.welcome-content-container {
+  padding: 32px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+// 平台标题样式
+.platform-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #1a237e;
+  margin-bottom: 24px;
+  margin-top: 24px;
+  background: linear-gradient(to right, #1a237e, #7986cb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+// 平台描述样式
+.platform-description {
+  font-size: 16px;
+  color: #455a64;
+  line-height: 1.8;
+  margin-bottom: 40px;
+  width: 100%;
+  font-weight: 400;
+}
+
+// 平台Logo样式
+.platform-logo {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+  }
+
+  span {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--primary-dark);
+    letter-spacing: 1px;
+  }
+}
+
+// 信息卡片容器
+.info-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+// 信息卡片样式
+.info-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 22px;
+  padding: 24px;
+  min-width: 220px;
+  flex: 1;
+  transition: all 0.3s;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+
+    .card-decoration {
+      opacity: 0.2;
+    }
+  }
+
+  .card-decoration {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background-image: radial-gradient(
+      circle at top right,
+      rgba(33, 150, 243, 0.1),
+      transparent 70%
+    );
+    z-index: 0;
+  }
+
+  .info-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+
+    .info-card-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background-color: #1890ff;
+      margin-right: 16px;
+      box-shadow: 0 6px 16px rgba(24, 144, 255, 0.3);
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .info-card-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1a237e;
+    }
+  }
+
+  .info-card-content {
+    font-size: 16px;
+    color: #455a64;
+    text-align: justify;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// 登录表单样式优化
+.login-form-col {
+  .ant-pro-form-login-container {
+    margin: 0 auto;
+  }
+
+  .ant-input-affix-wrapper {
+    border-radius: 8px;
+  }
+
+  .ant-btn {
+    transition: all 0.3s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+    }
+  }
+}
+
+// 注册按钮样式
+.register-button-style {
+  height: 48px;
+  border-radius: 12px;
+  font-size: 16px;
+  background: linear-gradient(to right, #1976d2, #2196f3);
+  border: none;
+  box-shadow: 0 8px 16px rgba(33, 150, 243, 0.3);
+  margin-top: 16px;
+}
+
+// 注册按钮悬浮效果
+.register-button {
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 20px rgba(33, 150, 243, 0.4);
+  }
+}
+
+// 忘记密码按钮样式
+.forgot-password-button {
+  color: #1976d2;
+  font-size: 14px;
+  padding: 0;
+}
+
+// 登录表单标签页标题样式
+.login-tab-label {
+  font-size: 20px;
+  font-weight: 500;
+  color: #1a237e;
+}
+
+// 表单图标样式
+.form-icon {
+  color: #1976d2;
+}
+
+// 滑块验证码样式
+.slider-captcha-style {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  color: #1976d2;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+// 滑块验证码样式优化
+.rc-slider-captcha [class^='rc-slider-captcha-control'],
+.rc-slider-captcha-control-button {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.slider-captcha {
+  .rc-slider-captcha-control-button {
+    background: linear-gradient(to right, var(--primary-light), var(--primary-color));
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s;
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    }
+  }
+
+  .rc-slider-captcha-control-bg {
+    background-color: #f5f7fa;
+  }
+}
+
+// 表单控件样式优化
+.ant-input-affix-wrapper {
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s;
+
+  &:hover,
+  &:focus,
+  &-focused {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+  }
+}
+
+// 标签页样式优化
+.ant-tabs-nav {
+  margin-bottom: 24px !important;
+
+  &::before {
+    display: none !important;
+  }
+
+  .ant-tabs-tab {
+    padding: 8px 0 !important;
+    font-size: 16px;
+
+    &.ant-tabs-tab-active .ant-tabs-tab-btn {
+      color: #1a237e !important;
+    }
+  }
+
+  .ant-tabs-ink-bar {
+    background-color: #1976d2 !important;
+    height: 3px !important;
+  }
+}
+
+// 小屏幕 - 隐藏欢迎列，显示mobile-slogan
+@media screen and (max-width: 1150px) {
+  .welcome-col {
+    display: none !important;
+  }
+
+  .login-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 8vh 2vw 5vh !important;
+  }
+
+  .mobile-slogan {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+    margin-left: 30px;
+    font-weight: 500;
+    color: #1a237e;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    text-align: center;
+    width: 460px;
+    max-width: 100%;
+    font-size: 16px;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle, rgba(25, 118, 210, 0.2), transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      right: -10px;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle, rgba(233, 30, 99, 0.15), transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      background: rgba(255, 255, 255, 0.95);
+    }
+  }
+
+  .login-form-col {
+    width: 460px !important;
+    min-width: 460px !important;
+    max-width: 460px !important;
+    flex: 0 0 460px !important;
+    margin: 0 !important;
+  }
+
+  .login-card {
+    width: 460px;
+    min-width: 460px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+  }
+
+  .login-row {
+    width: 95%;
+    justify-content: center !important;
+    margin: 0 !important;
+  }
+}
+
+// 超小屏幕 - 允许登录表单自适应
+@media screen and (max-width: 500px) {
+  .login-form-col {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+
+  .login-card {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+// 中等屏幕 - 隐藏信息卡片
+@media screen and (max-width: 1110px) {
+  .info-cards-container {
+    display: none !important;
+  }
+
+  .welcome-content-container {
+    justify-content: flex-start;
+  }
+
+  .platform-description {
+    margin-bottom: 0;
+  }
+}
+
+// 大屏幕 - 隐藏移动端标语
+@media screen and (min-width: 1151px) {
+  .mobile-slogan {
+    display: none !important;
+  }
+}
+
+// 大屏幕 - 隐藏移动端标语
+@media screen and (min-width: 769px) {
+  .mobile-slogan {
+    display: none;
+  }
+}
+
+// 微妙的背景渐变动效
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+// 全屏背景样式
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+// 确保最外层容器占满整个视口
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// 应用渐变背景到最外层容器
+.ant-pro-layout {
+  background: none !important;
+}
+
+// 修改容器样式，使其成为全屏背景
+.login-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5vh 2vw;
+  position: relative;
+  z-index: 1;
+}
+
+// 将渐变背景应用到最外层容器
+div[class^='Login_container'] {
+  background-size: 200% 200% !important;
+  background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 50%, #f5f7fa 100%) !important;
+  animation: gradientBG 15s ease infinite !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+// 确保Footer透明
+footer {
+  background: transparent !important;
+  margin-top: auto;
+  z-index: 2;
+  position: relative;
+}
