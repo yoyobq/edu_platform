@@ -9,7 +9,6 @@ interface StaffInfo {
   id: number;
   jobId: number;
   name: string;
-  age: number;
   departmentId: number;
 }
 

@@ -38,7 +38,6 @@ declare namespace API {
       id: number;
       jobId: number;
       name: string;
-      age?: number;
       departmentId?: number;
       jobTitle?: string;
       remarks?: string;
@@ -49,7 +48,6 @@ declare namespace API {
       id: number;
       stuId: number;
       name: string;
-      age?: number;
       departmentId?: number;
       classId?: number;
       clubId?: number;

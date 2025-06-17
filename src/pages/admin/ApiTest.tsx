@@ -1,5 +1,5 @@
 import Footer from '@/components/Footer';
-import { updateAccount } from '@/services/ant-design-pro/login';
+import { login, updateAccount } from '@/services/ant-design-pro/login';
 
 // import {
 //   // AlipayCircleOutlined,
@@ -10,7 +10,7 @@ import { updateAccount } from '@/services/ant-design-pro/login';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { request } from '@umijs/max';
 // import { FormattedMessage, Helmet, history, SelectLang, useIntl, useModel } from '@umijs/max';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import React from 'react';
 // import { useState } from 'react';
 // import Settings from '../../../../config/defaultSettings';
@@ -124,6 +124,67 @@ const ApiTest: React.FC = () => {
     }
   };
 
+  // 新增：测试远程 /nest 的 GraphQL mutation
+  const testRemoteNestGraphQL = async () => {
+    console.log('🚀 测试远程 GraphQL /nest 被触发');
+
+    const query = `
+      mutation UpdateCat($updateCatInput: UpdateCatInput!) {
+        updateCat(updateCatInput: $updateCatInput) {
+          id
+          name
+          status
+        }
+      }
+    `;
+
+    const variables = {
+      updateCatInput: {
+        id: 29,
+        status: 'LOST',
+      },
+    };
+
+    try {
+      const res = await request<any>('/nest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-apollo-operation-name': 'test',
+        },
+        data: {
+          query,
+          variables,
+        },
+      });
+      console.log(res);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fakeLogin = async () => {
+    const values = {
+      loginName: 'yoyobq@hotmail.com',
+      loginPassword: '123456',
+      type: 'account',
+    };
+    try {
+      // 登录
+      const res: any = await login({ ...values, type: 'account' });
+      // res = {id: 2, status: 1} 旧数据， status 是数值常量
+      // res = {id: 2, status: 'ACTIVE'} 新数据，改动了数据库中存储的 status 为枚举类型
+      // TODO：根据不同的 status 做不同的处理
+      const { id, status } = res;
+      if (id !== null && status === 'ACTIVE') {
+        message.success('登录成功');
+        console.log(res);
+      }
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className={containerClassName}>
       <section>API test</section>
@@ -142,6 +203,12 @@ const ApiTest: React.FC = () => {
         <Button onClick={testLogin}>测试 /testLogin</Button>
         <Button onClick={pythonHi}>测试 /pythonHi</Button>
         <Button onClick={handleUpdateEmail}>测试 /handleUpdateEmail</Button>
+        <Button onClick={testRemoteNestGraphQL} type="dashed" style={{ marginTop: 16 }}>
+          测试远程 /nest GraphQL（UpdateCat）
+        </Button>
+        <Button onClick={fakeLogin} type="dashed" style={{ marginTop: 16 }}>
+          测试登录
+        </Button>
       </div>
       <Footer />
     </div>

@@ -95,14 +95,12 @@ export async function currentUser(options: { [key: string]: any }) {
           id
           jobId
           name
-          age
           departmentId
         }
         studentInfo {
           id
           stuId
           name
-          age
           departmentId
           classId
           clubId

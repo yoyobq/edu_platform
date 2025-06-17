@@ -26,12 +26,19 @@ export default {
     },
 
     '/graphql': {
-      // 所有访问 /server/api/ 代理到下面的服务器
+      // 所有访问 /graphql 代理到下面的服务器
       target: 'http://127.0.0.1:7001/',
       changeOrigin: true,
 
       // 接受无效的https 证书
       secure: false,
+    },
+
+    '/nest': {
+      // 代理 /nest 到远程 GraphQL 接口
+      target: 'https://api.ssts.host/graphql',
+      changeOrigin: true,
+      pathRewrite: { '^/nest': '' },
     },
   },
   /**
