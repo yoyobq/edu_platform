@@ -2,14 +2,41 @@ import { Question, SelectLang } from '@/components/RightContent';
 import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { PageLoading, SettingDrawer } from '@ant-design/pro-components';
+import { ApolloClient, ApolloProvider, createHttpLink, InMemoryCache } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
+import Cookies from 'js-cookie';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
 // 23-3-14 此处与官方文档不符，但都是去 api.ts 里拿当前用户数据
-import Cookies from 'js-cookie';
 import { AvatarDropdown, AvatarName } from './components/RightContent/AvatarDropdown';
 import { currentUser as queryCurrentUser } from './services/ant-design-pro/login';
+
+// 创建 Apollo Client
+const httpLink = createHttpLink({
+  uri: 'http://localhost:4000/graphql', // 替换为你的 GraphQL 端点
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = Cookies.get('token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache(),
+});
+
+// 导出 rootContainer 来包装整个应用
+export function rootContainer(container: any) {
+  return <ApolloProvider client={client}>{container}</ApolloProvider>;
+}
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
