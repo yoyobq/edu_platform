@@ -10,6 +10,7 @@ import { login, updateAccount } from '@/services/ant-design-pro/login';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { request } from '@umijs/max';
 // import { FormattedMessage, Helmet, history, SelectLang, useIntl, useModel } from '@umijs/max';
+import { gql, useMutation } from '@apollo/client';
 import { Button, message } from 'antd';
 import React from 'react';
 // import { useState } from 'react';
@@ -124,19 +125,24 @@ const ApiTest: React.FC = () => {
     }
   };
 
+  // 定义 mutation 结构
+  const UPDATE_CAT = gql`
+    mutation UpdateCat($updateCatInput: UpdateCatInput!) {
+      updateCat(updateCatInput: $updateCatInput) {
+        id
+        name
+        status
+      }
+    }
+  `;
+
+  // Apollo 提供的 mutation hook
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [updateCat, { data, loading, error }] = useMutation(UPDATE_CAT);
+
   // 新增：测试远程 /nest 的 GraphQL mutation
   const testRemoteNestGraphQL = async () => {
     console.log('🚀 测试远程 GraphQL /nest 被触发');
-
-    const query = `
-      mutation UpdateCat($updateCatInput: UpdateCatInput!) {
-        updateCat(updateCatInput: $updateCatInput) {
-          id
-          name
-          status
-        }
-      }
-    `;
 
     const variables = {
       updateCatInput: {
@@ -145,23 +151,15 @@ const ApiTest: React.FC = () => {
       },
     };
 
-    try {
-      const res = await request<any>('/nest', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-apollo-operation-name': 'test',
-        },
-        data: {
-          query,
-          variables,
-        },
-      });
-      console.log(res);
-    } catch (error) {
-      console.error(error);
-    }
+    updateCat({
+      variables,
+    });
   };
+
+  React.useEffect(() => {
+    if (data) console.log('最新 data:', data);
+    // if (error) console.log('最新 error:', error);
+  }, [data, error]);
 
   const fakeLogin = async () => {
     const values = {

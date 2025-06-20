@@ -15,7 +15,8 @@ import { currentUser as queryCurrentUser } from './services/ant-design-pro/login
 
 // 创建 Apollo Client
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql', // 替换为你的 GraphQL 端点
+  uri: '/nest',
+  // credentials: 'include', // 如需带 cookie，可保留
 });
 
 const authLink = setContext((_, { headers }) => {
