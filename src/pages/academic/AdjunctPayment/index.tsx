@@ -13,7 +13,27 @@ import './style.less';
 // 指定教师工号列表
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // const specificTeacherIds = ['3553'];
-const specificTeacherIds = ['3618', '3617', '3616', '3593', '3556', '3552', '3553', '3358'];
+const specificTeacherIds = [
+  '3592',
+  '3600',
+  '3648',
+  '3650',
+  '3497',
+  '3236',
+  '3322',
+  '3646',
+  '3647',
+  '3366',
+  '3552',
+  '3649',
+  '3616',
+  '3556',
+  '3645',
+  '3618',
+  '3641',
+  '3358',
+  '3553',
+];
 
 const AdjunctPaymentPage: React.FC = () => {
   // 学期列表数组

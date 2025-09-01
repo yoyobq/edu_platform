@@ -39,9 +39,29 @@ const WorkloadForecastPage: React.FC = () => {
     '2235',
     '2342',
   ];
-  const adminTeacherIds = ['2221', '2270', '2062', '2066'];
+  const adminTeacherIds = ['2218', '2221', '2270', '2062', '2066'];
   const publicWelfareTeacherIds = ['3322', '3600'];
-  const specificTeacherIds = ['3618', '3617', '3616', '3593', '3556', '3552', '3553', '3358'];
+  const specificTeacherIds = [
+    '3592',
+    '3600',
+    '3648',
+    '3650',
+    '3497',
+    '3236',
+    '3322',
+    '3646',
+    '3647',
+    '3366',
+    '3552',
+    '3649',
+    '3616',
+    '3556',
+    '3645',
+    '3618',
+    '3641',
+    '3358',
+    '3553',
+  ];
 
   // 根据当前标签页筛选出应显示的教师并排序
   const getSortedTeacherIds = useCallback((all: string[], tab: string): string[] => {
