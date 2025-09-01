@@ -144,13 +144,18 @@ interface WeekData {
 
 /**
  * 将学期全部日期分周:
- * 若开学日不是周一 => 先放"week0 (准备周)"
- * 从下个周一开始 => week1, week2...
+ * 根据 firstTeachingDate 所在的周确定第1周
+ * firstTeachingDate 之前的日期为准备周(week 0)
+ * firstTeachingDate 所在的周开始为第1周
  */
-function splitDaysIntoWeeks(allDays: SemesterDay[]): WeekData[] {
+function splitDaysIntoWeeks(allDays: SemesterDay[], firstTeachingDate: string): WeekData[] {
   const result: WeekData[] = [];
   let temp: SemesterDay[] = [];
   let currentWeekIndex = 0; // 0 => 准备周
+
+  // 计算 firstTeachingDate 所在周的周一
+  const firstTeaching = dayjs(firstTeachingDate);
+  const firstTeachingWeekStart = firstTeaching.startOf('isoWeek'); // 该周的周一
 
   for (let i = 0; i < allDays.length; i++) {
     const dayObj = allDays[i];
@@ -161,12 +166,16 @@ function splitDaysIntoWeeks(allDays: SemesterDay[]): WeekData[] {
       // 遇到周一 => 结束上一周, push 到result
       result.push({ weekIndex: currentWeekIndex, days: temp });
       temp = [];
-      // 如果上面是0, 现在改1,2,3...
-      if (currentWeekIndex === 0) {
-        currentWeekIndex = 1;
-      } else {
-        currentWeekIndex++;
+
+      // 判断当前周一是否是 firstTeachingDate 所在周的周一或之后
+      if (d.isSameOrAfter(firstTeachingWeekStart, 'day')) {
+        if (currentWeekIndex === 0) {
+          currentWeekIndex = 1; // 从准备周进入第1周
+        } else {
+          currentWeekIndex++; // 正常递增
+        }
       }
+      // 如果还在 firstTeachingDate 之前，保持为准备周(0)
     }
     temp.push(dayObj);
   }
@@ -254,7 +263,7 @@ const SemesterView: React.FC<SemesterViewProps> = ({ onDateSelect }) => {
       allDays.push({ date: dateStr, topic, type: eventType, rescheduleInfo });
     }
 
-    const splitted = splitDaysIntoWeeks(allDays);
+    const splitted = splitDaysIntoWeeks(allDays, semester.firstTeachingDate);
     setWeeks(splitted);
 
     // // 数据加载完成后，添加一个延时，确保DOM已经渲染
