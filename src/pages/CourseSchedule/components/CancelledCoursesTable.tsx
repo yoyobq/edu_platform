@@ -65,6 +65,15 @@ const CancelledCoursesTable: React.FC<CancelledCoursesTableProps> = ({ semesterI
     dates: DateInfo[];
     total: number;
   } => {
+    // 添加空值检查
+    if (!staffCancelledCourses || !staffCancelledCourses.cancelledDates) {
+      return {
+        items: [],
+        dates: [],
+        total: 0,
+      };
+    }
+
     // 提取所有日期
     const allDatesSet = new Set<string>();
     const dateInfoMap = new Map<string, { weekNumber: number | string; weekDay: number }>();
@@ -176,12 +185,26 @@ const CancelledCoursesTable: React.FC<CancelledCoursesTableProps> = ({ semesterI
       semesterId: semesterId,
     })
       .then((res) => {
-        const processedData = processDeductionData(res!);
-        setDeductionData(processedData.items);
-        setDates(processedData.dates);
-        setTotalDeduction(processedData.total);
+        // 添加空值检查
+        if (res) {
+          const processedData = processDeductionData(res);
+          setDeductionData(processedData.items);
+          setDates(processedData.dates);
+          setTotalDeduction(processedData.total);
+        } else {
+          // 如果返回null，设置空数据
+          setDeductionData([]);
+          setDates([]);
+          setTotalDeduction(0);
+        }
       })
-      .catch((error) => console.error('获取扣课时数据失败:', error))
+      .catch((error) => {
+        console.error('获取扣课时数据失败:', error);
+        // 出错时也设置空数据
+        setDeductionData([]);
+        setDates([]);
+        setTotalDeduction(0);
+      })
       .finally(() => setLoading(false));
   }, [semesterId, staffInfo]);
 

@@ -138,7 +138,7 @@
           height: 14px;
         }
 
-        @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+        @media all and (forced-colors: none), (forced-colors: active) {
           .ant-spin-blur {
             background: #fff;
             opacity: 0.5;
