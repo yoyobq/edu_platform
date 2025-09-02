@@ -7,6 +7,10 @@ interface ScheduleDetail {
   date: string;
   hours: number;
   content: string;
+  // 添加原始节次字段
+  periodStart?: number;
+  periodEnd?: number;
+  weekType?: string;
 }
 
 interface ExcelExporterProps {
@@ -47,10 +51,32 @@ export const exportToExcel = async (
       // 从content中提取节次信息，去掉"周X "前缀
       const content = detail.content.replace(/周[一二三四五六日]\s/, '');
 
+      // 如果有原始的节次数据，使用数字格式；否则保持原有逻辑
+      let periodText = content;
+      if (detail.periodStart && detail.periodEnd) {
+        // 生成数字格式的节次，如 "5,6" 或 "1-3"
+        if (detail.periodStart === detail.periodEnd) {
+          periodText = detail.periodStart.toString();
+        } else {
+          const periods = [];
+          for (let i = detail.periodStart; i <= detail.periodEnd; i++) {
+            periods.push(i.toString());
+          }
+          periodText = periods.join(',');
+        }
+
+        // 添加周次类型标识
+        if (detail.weekType === 'ODD') {
+          periodText += '(单周)';
+        } else if (detail.weekType === 'EVEN') {
+          periodText += '(双周)';
+        }
+      }
+
       return {
         A: detail.date, // 授课时间
-        B: detail.hours || NaN, // 使用传入的学时数
-        C: content, // 节次
+        B: detail.hours ? detail.hours.toString() : '', // 学时数改为字符串格式
+        C: periodText, // 节次（数字格式）
         D: '', // 授课方式 (留空)
         E: '', // 授课地点 (留空)
         F: '', // 授课章节与内容 (留空)
@@ -65,24 +91,29 @@ export const exportToExcel = async (
       // 写入每个单元格的数据
       Object.keys(row).forEach((col) => {
         const cellRef = col + rowIndex;
-        if (!worksheet[cellRef]) {
-          worksheet[cellRef] = { t: 's', v: '' };
-        }
-
-        // 确保值是字符串或数字类型
         const value = row[col as keyof typeof row];
-        if (value === null || value === undefined) {
-          worksheet[cellRef].v = '';
-          worksheet[cellRef].t = 's';
-        } else if (typeof value === 'number') {
-          worksheet[cellRef].v = value;
-          worksheet[cellRef].t = 'n';
-        } else {
-          worksheet[cellRef].v = String(value);
-          worksheet[cellRef].t = 's';
+
+        // 只为非空值创建单元格
+        if (value !== null && value !== undefined && value !== '') {
+          if (!worksheet[cellRef]) {
+            worksheet[cellRef] = { t: 's', v: '' };
+          }
+
+          if (typeof value === 'number') {
+            worksheet[cellRef].v = value;
+            worksheet[cellRef].t = 'n';
+          } else {
+            worksheet[cellRef].v = String(value);
+            worksheet[cellRef].t = 's';
+          }
         }
       });
     });
+
+    // 重新计算并设置工作表范围
+    const lastRow = Math.max(1, excelData.length + 1); // 至少包含表头行
+    const lastCol = 'G'; // 最后一列是G列
+    worksheet['!ref'] = `A1:${lastCol}${lastRow}`;
 
     // 生成Excel文件并下载
     const excelBuffer = XLSX.write(workbook, {

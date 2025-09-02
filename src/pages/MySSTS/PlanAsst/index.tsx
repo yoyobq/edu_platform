@@ -233,6 +233,7 @@ const PlanAsst: React.FC = () => {
         };
 
         const teachingDateData = await getActualTeachingDates(teachingDateInput);
+        // console.log('🔍 后台返回的原始教学日期数据:', teachingDateData);
         setTeachingDates(teachingDateData);
         currentTeachingDates = teachingDateData;
       }
@@ -259,6 +260,9 @@ const PlanAsst: React.FC = () => {
         }
       });
 
+      console.log('📅 当前课程的教学日期数据:', courseTeachingDates);
+      console.log('📋 当前处理的课程记录:', record);
+
       // 按周次排序
       courseTeachingDates.sort((a, b) => a.week - b.week);
 
@@ -283,7 +287,7 @@ const PlanAsst: React.FC = () => {
       // 构建详细数据
       const detailData = {
         scheduleDetails: courseTeachingDates.flatMap((date) => {
-          // 将每个时间段单独作为一条记录
+          //
           return date.courses.map(
             (course: { periodStart: number; periodEnd: number; weekType: string }) => {
               // 计算学时数 - 根据课程节次计算
@@ -303,6 +307,10 @@ const PlanAsst: React.FC = () => {
                     : ''
                 }`,
                 hours: hours,
+                // 添加原始的节次数据用于Excel导出
+                periodStart: course.periodStart,
+                periodEnd: course.periodEnd,
+                weekType: course.weekType,
               };
             },
           );
