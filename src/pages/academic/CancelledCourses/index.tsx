@@ -44,7 +44,7 @@ const CancelledCoursesPage: React.FC = () => {
     '2342',
   ];
   const adminTeacherIds = ['2218', '2221', '2270', '2062', '2066'];
-  const publicWelfareTeacherIds = ['3322', '3600'];
+  const publicWelfareTeacherIds = ['3322', '3600', '3366'];
   const specificTeacherIds = [
     '3592',
     '3600',
@@ -55,7 +55,6 @@ const CancelledCoursesPage: React.FC = () => {
     '3322',
     '3646',
     '3647',
-    '3366',
     '3552',
     '3649',
     '3616',

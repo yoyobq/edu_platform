@@ -210,6 +210,16 @@ const CancelledCoursesTable: React.FC<CancelledCoursesTableProps> = React.memo(
           key: 'subtotal',
           width: '4%',
           align: 'center' as const,
+          render: (v: any) => {
+            if (v === null) return '0';
+            const num = Number(v);
+            // 检查是否有超过一位的小数部分
+            const decimalPart = num.toString().split('.')[1] || '';
+            if (decimalPart.length > 1) {
+              return num.toFixed(1);
+            }
+            return num.toString();
+          },
         },
         {
           title: '合计',
