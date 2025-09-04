@@ -57,7 +57,7 @@ const CancelledDatesInfo: React.FC<CancelledDatesInfoProps> = ({ cancelledCourse
     <Col span={24} className="cancelled-dates-container">
       <div style={{ marginTop: 8, marginBottom: 8 }}>
         <Typography.Text strong style={{ marginRight: 8 }}>
-          扣课记录:
+          增（蓝）减（橙）课日期记录:
         </Typography.Text>
         <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '8px' }}>
           {sortedDates.map((dateInfo) => {
