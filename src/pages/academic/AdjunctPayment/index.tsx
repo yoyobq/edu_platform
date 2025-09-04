@@ -15,12 +15,9 @@ import './style.less';
 // const specificTeacherIds = ['3553'];
 const specificTeacherIds = [
   '3592',
-  '3600',
   '3648',
   '3650',
   '3497',
-  '3236',
-  '3322',
   '3646',
   '3647',
   '3552',
