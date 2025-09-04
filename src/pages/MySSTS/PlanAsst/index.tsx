@@ -276,7 +276,37 @@ const PlanAsst: React.FC = () => {
       };
 
       // 将节次范围转换为详细列表（如 "1-3" 转换为 "第一节，第二节，第三节"）
-      const periodRangeToDetailedList = (start: number, end: number): string => {
+      const periodRangeToDetailedList = (
+        start: number,
+        end: number,
+        courseCategory?: string,
+      ): string => {
+        const periodCount = end - start + 1;
+
+        // 如果是理论课且恰好是3节课，拆分为前两节和后一节
+        if (courseCategory === 'THEORY' && periodCount === 3) {
+          const firstTwoPeriods = [];
+          for (let i = start; i < start + 2; i++) {
+            firstTwoPeriods.push(`第${numberToChinese(i)}节`);
+          }
+          const lastPeriod = `第${numberToChinese(end)}节`;
+          return `${firstTwoPeriods.join('，')}，${lastPeriod}`;
+        }
+
+        // 如果是理论课且恰好是4节课，拆分为前两节和后两节
+        if (courseCategory === 'THEORY' && start === 1 && end === 4) {
+          const firstTwoPeriods = [];
+          for (let i = start; i < start + 2; i++) {
+            firstTwoPeriods.push(`第${numberToChinese(i)}节`);
+          }
+          const lastTwoPeriods = [];
+          for (let i = start + 2; i <= end; i++) {
+            lastTwoPeriods.push(`第${numberToChinese(i)}节`);
+          }
+          return `${firstTwoPeriods.join('，')}，${lastTwoPeriods.join('，')}`;
+        }
+
+        // 其他情况保持原有逻辑
         const periods = [];
         for (let i = start; i <= end; i++) {
           periods.push(`第${numberToChinese(i)}节`);
@@ -288,16 +318,108 @@ const PlanAsst: React.FC = () => {
       const detailData = {
         scheduleDetails: courseTeachingDates.flatMap((date) => {
           //
-          return date.courses.map(
+          return date.courses.flatMap(
             (course: { periodStart: number; periodEnd: number; weekType: string }) => {
               // 计算学时数 - 根据课程节次计算
               const periodCount = course.periodEnd - course.periodStart + 1;
-              const hours = periodCount > 0 ? periodCount : 2;
 
+              // 如果是理论课且恰好是4节课，拆分为两行数据
+              if (
+                record.courseCategory === 'THEORY' &&
+                course.periodStart === 1 &&
+                course.periodEnd === 4
+              ) {
+                return [
+                  {
+                    week: date.week,
+                    date: date.date,
+                    content: `${getDayOfWeekText(date.weekOfDay)} ${periodRangeToDetailedList(1, 2, record.courseCategory)}${
+                      course.weekType !== 'ALL'
+                        ? course.weekType === 'ODD'
+                          ? '(单周)'
+                          : course.weekType === 'EVEN'
+                            ? '(双周)'
+                            : ''
+                        : ''
+                    }`,
+                    hours: 2, // 前两节课
+                    periodStart: 1,
+                    periodEnd: 2,
+                    weekType: course.weekType,
+                  },
+                  {
+                    week: date.week,
+                    date: date.date,
+                    content: `${getDayOfWeekText(date.weekOfDay)} ${periodRangeToDetailedList(3, 4, record.courseCategory)}${
+                      course.weekType !== 'ALL'
+                        ? course.weekType === 'ODD'
+                          ? '(单周)'
+                          : course.weekType === 'EVEN'
+                            ? '(双周)'
+                            : ''
+                        : ''
+                    }`,
+                    hours: 2, // 后两节课
+                    periodStart: 3,
+                    periodEnd: 4,
+                    weekType: course.weekType,
+                  },
+                ];
+              }
+
+              // 如果是理论课且恰好是3节课，拆分为2+1模式
+              if (record.courseCategory === 'THEORY' && periodCount === 3) {
+                // 处理123、234、567三种情况
+                if (
+                  (course.periodStart === 1 && course.periodEnd === 3) ||
+                  (course.periodStart === 2 && course.periodEnd === 4) ||
+                  (course.periodStart === 5 && course.periodEnd === 7)
+                ) {
+                  return [
+                    {
+                      week: date.week,
+                      date: date.date,
+                      content: `${getDayOfWeekText(date.weekOfDay)} ${periodRangeToDetailedList(course.periodStart, course.periodStart + 1, record.courseCategory)}${
+                        course.weekType !== 'ALL'
+                          ? course.weekType === 'ODD'
+                            ? '(单周)'
+                            : course.weekType === 'EVEN'
+                              ? '(双周)'
+                              : ''
+                          : ''
+                      }`,
+                      hours: 2, // 前两节课
+                      periodStart: course.periodStart,
+                      periodEnd: course.periodStart + 1,
+                      weekType: course.weekType,
+                    },
+                    {
+                      week: date.week,
+                      date: date.date,
+                      content: `${getDayOfWeekText(date.weekOfDay)} ${periodRangeToDetailedList(course.periodEnd, course.periodEnd, record.courseCategory)}${
+                        course.weekType !== 'ALL'
+                          ? course.weekType === 'ODD'
+                            ? '(单周)'
+                            : course.weekType === 'EVEN'
+                              ? '(双周)'
+                              : ''
+                          : ''
+                      }`,
+                      hours: 1, // 最后一节课
+                      periodStart: course.periodEnd,
+                      periodEnd: course.periodEnd,
+                      weekType: course.weekType,
+                    },
+                  ];
+                }
+              }
+
+              // 其他情况保持原有逻辑
+              const hours = periodCount > 0 ? periodCount : 2;
               return {
                 week: date.week,
                 date: date.date,
-                content: `${getDayOfWeekText(date.weekOfDay)} ${periodRangeToDetailedList(course.periodStart, course.periodEnd)}${
+                content: `${getDayOfWeekText(date.weekOfDay)} ${periodRangeToDetailedList(course.periodStart, course.periodEnd, record.courseCategory)}${
                   course.weekType !== 'ALL'
                     ? course.weekType === 'ODD'
                       ? '(单周)'
@@ -420,20 +542,93 @@ const PlanAsst: React.FC = () => {
       search: false,
       render: (_, record) => (
         <>
-          {record.timeSlots.map((slot, index) => (
-            <div key={index} className="time-slot">
-              {getDayOfWeekText(slot.dayOfWeek)} 第{slot.periodStart}-{slot.periodEnd}节
-              {slot.weekType !== 'ALL' && (
-                <Tag className="time-slot-tag" color="blue">
-                  {slot.weekType === 'ODD'
-                    ? '单周'
-                    : slot.weekType === 'EVEN'
-                      ? '双周'
-                      : slot.weekType}
-                </Tag>
-              )}
-            </div>
-          ))}
+          {record.timeSlots.map((slot, index) => {
+            // 处理理论课的特殊分割情况
+            if (record.courseCategory === 'THEORY') {
+              const periodCount = slot.periodEnd - slot.periodStart + 1;
+
+              // 处理3节理论课的情况（123, 234, 567等）
+              if (periodCount === 3) {
+                return (
+                  <div key={index}>
+                    <div className="time-slot">
+                      {getDayOfWeekText(slot.dayOfWeek)} 第{slot.periodStart}-{slot.periodStart + 1}
+                      节
+                      {slot.weekType !== 'ALL' && (
+                        <Tag className="time-slot-tag" color="blue">
+                          {slot.weekType === 'ODD'
+                            ? '单周'
+                            : slot.weekType === 'EVEN'
+                              ? '双周'
+                              : slot.weekType}
+                        </Tag>
+                      )}
+                    </div>
+                    <div className="time-slot">
+                      {getDayOfWeekText(slot.dayOfWeek)} 第{slot.periodEnd}节
+                      {slot.weekType !== 'ALL' && (
+                        <Tag className="time-slot-tag" color="blue">
+                          {slot.weekType === 'ODD'
+                            ? '单周'
+                            : slot.weekType === 'EVEN'
+                              ? '双周'
+                              : slot.weekType}
+                        </Tag>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
+              // 处理4节理论课的情况（1-4节）
+              if (slot.periodStart === 1 && slot.periodEnd === 4) {
+                return (
+                  <div key={index}>
+                    <div className="time-slot">
+                      {getDayOfWeekText(slot.dayOfWeek)} 第1-2节
+                      {slot.weekType !== 'ALL' && (
+                        <Tag className="time-slot-tag" color="blue">
+                          {slot.weekType === 'ODD'
+                            ? '单周'
+                            : slot.weekType === 'EVEN'
+                              ? '双周'
+                              : slot.weekType}
+                        </Tag>
+                      )}
+                    </div>
+                    <div className="time-slot">
+                      {getDayOfWeekText(slot.dayOfWeek)} 第3-4节
+                      {slot.weekType !== 'ALL' && (
+                        <Tag className="time-slot-tag" color="blue">
+                          {slot.weekType === 'ODD'
+                            ? '单周'
+                            : slot.weekType === 'EVEN'
+                              ? '双周'
+                              : slot.weekType}
+                        </Tag>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+            }
+
+            // 其他情况保持原有显示格式
+            return (
+              <div key={index} className="time-slot">
+                {getDayOfWeekText(slot.dayOfWeek)} 第{slot.periodStart}-{slot.periodEnd}节
+                {slot.weekType !== 'ALL' && (
+                  <Tag className="time-slot-tag" color="blue">
+                    {slot.weekType === 'ODD'
+                      ? '单周'
+                      : slot.weekType === 'EVEN'
+                        ? '双周'
+                        : slot.weekType}
+                  </Tag>
+                )}
+              </div>
+            );
+          })}
         </>
       ),
     },
